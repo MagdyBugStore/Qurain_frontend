@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function Topbar({ currentPath, navLinks, onNavigate }) {
   const { t, i18n } = useTranslation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const changeLanguage = (lang) => {
     if (i18n.language === lang) return;
@@ -27,47 +29,29 @@ export function Topbar({ currentPath, navLinks, onNavigate }) {
           <button
             key={n.id}
             className={`tnav-btn${currentPath === n.path ? " active" : ""}`}
-            onClick={() => onNavigate(n.path)}
+            onClick={() => {
+              onNavigate(n.path);
+              setMobileMenuOpen(false);
+            }}
           >
             {t(`nav.${n.id}`)}
           </button>
         ))}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            marginInline: 8
-          }}
-        >
+      </nav>
+      <div className="topbar-right">
+        <div className="topbar-lang-switcher">
           <button
             type="button"
             onClick={() => changeLanguage("ar")}
-            style={{
-              border: "none",
-              background: i18n.language === "ar" ? "var(--forest)" : "transparent",
-              color: i18n.language === "ar" ? "#fff" : "var(--text-m)",
-              padding: "4px 8px",
-              borderRadius: 999,
-              fontSize: 11,
-              cursor: "pointer"
-            }}
+            className={`lang-btn${i18n.language === "ar" ? " active" : ""}`}
           >
             ع
           </button>
-          <span style={{ fontSize: 11, color: "var(--text-l)" }}>/</span>
+          <span className="lang-separator">/</span>
           <button
             type="button"
             onClick={() => changeLanguage("en")}
-            style={{
-              border: "none",
-              background: i18n.language === "en" ? "var(--forest)" : "transparent",
-              color: i18n.language === "en" ? "#fff" : "var(--text-m)",
-              padding: "4px 8px",
-              borderRadius: 999,
-              fontSize: 11,
-              cursor: "pointer"
-            }}
+            className={`lang-btn${i18n.language === "en" ? " active" : ""}`}
           >
             EN
           </button>
@@ -75,7 +59,60 @@ export function Topbar({ currentPath, navLinks, onNavigate }) {
         <button className="topbar-cta" onClick={() => onNavigate("/eval")}>
           {t("auth.login")}
         </button>
-      </nav>
+        <button 
+          className="topbar-mobile-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className={`hamburger${mobileMenuOpen ? " open" : ""}`}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+      </div>
+      {mobileMenuOpen && (
+        <div className="topbar-mobile-menu">
+          {navLinks.map((n) => (
+            <button
+              key={n.id}
+              className={`mobile-nav-btn${currentPath === n.path ? " active" : ""}`}
+              onClick={() => {
+                onNavigate(n.path);
+                setMobileMenuOpen(false);
+              }}
+            >
+              {t(`nav.${n.id}`)}
+            </button>
+          ))}
+          <div className="mobile-lang-switcher">
+            <button
+              type="button"
+              onClick={() => changeLanguage("ar")}
+              className={`mobile-lang-btn${i18n.language === "ar" ? " active" : ""}`}
+            >
+              ع
+            </button>
+            <span className="lang-separator">/</span>
+            <button
+              type="button"
+              onClick={() => changeLanguage("en")}
+              className={`mobile-lang-btn${i18n.language === "en" ? " active" : ""}`}
+            >
+              EN
+            </button>
+          </div>
+          <button 
+            className="mobile-nav-btn mobile-cta"
+            onClick={() => {
+              onNavigate("/eval");
+              setMobileMenuOpen(false);
+            }}
+          >
+            {t("auth.login")}
+          </button>
+        </div>
+      )}
     </header>
   );
 }

@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { PROGRAMS } from "../../jannat-alquran-data";
 
 export function Footer({ onNavigate }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
   const publicLinks = t("footer.platformLinks", { returnObjects: true });
   const supportLinks = t("footer.supportLinks", { returnObjects: true });
 
@@ -26,7 +27,7 @@ export function Footer({ onNavigate }) {
           <ul className="footer-links">
             {PROGRAMS.map((p) => (
               <li key={p.id} onClick={() => onNavigate("programs")}>
-                {p.nameAr}
+                {isArabic ? p.nameAr : p.nameEn}
               </li>
             ))}
           </ul>

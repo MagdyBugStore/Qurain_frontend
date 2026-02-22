@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TEACHERS, SLOTS } from "../jannat-alquran-data";
+import { TEACHERS, SLOTS, SLOTS_AR } from "../jannat-alquran-data";
 import { Stars } from "../components/common/Stars";
 
 export function TeachersPage({ addToast }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
   const [filter, setFilter] = useState("All");
   const [bookModal, setBookModal] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -59,8 +60,8 @@ export function TeachersPage({ addToast }) {
                 {teacher.emoji}
                 {teacher.online && <div className="teacher-badge-online" />}
               </div>
-              <div className="teacher-name">{teacher.name}</div>
-              <div className="teacher-specialty">{teacher.specialty}</div>
+              <div className="teacher-name">{isArabic ? teacher.nameAr : teacher.name}</div>
+              <div className="teacher-specialty">{isArabic ? teacher.specialtyAr : teacher.specialty}</div>
               <Stars rating={teacher.rating} />
               <div style={{ fontSize: 12, color: "var(--text-l)", marginBottom: 8 }}>
                 {t("teachersPage.reviewsCount", { count: teacher.reviews })}
@@ -141,10 +142,10 @@ export function TeachersPage({ addToast }) {
               </div>
               <div>
                 <div className="modal-title" style={{ marginBottom: 2 }}>
-                  {bookModal.name}
+                  {isArabic ? bookModal.nameAr : bookModal.name}
                 </div>
                 <div className="modal-sub" style={{ marginBottom: 0 }}>
-                  {bookModal.specialty} · ${bookModal.price}/session
+                  {isArabic ? bookModal.specialtyAr : bookModal.specialty} · ${bookModal.price}/session
                 </div>
               </div>
             </div>
@@ -161,7 +162,7 @@ export function TeachersPage({ addToast }) {
               SELECT AVAILABLE SLOT
             </p>
             <div className="slots-grid">
-              {SLOTS.map((s, i) => (
+              {(isArabic ? SLOTS_AR : SLOTS).map((s, i) => (
                 <button
                   key={i}
                   className={`slot-btn${selectedSlot === s ? " selected" : ""}${

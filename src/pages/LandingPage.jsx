@@ -4,8 +4,9 @@ import { PROGRAMS, TEACHERS, PLANS, TESTIMONIALS } from "../jannat-alquran-data"
 import { Stars } from "../components/common/Stars";
 
 export function LandingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const isArabic = i18n.language === "ar";
   return (
     <div className="page">
       <section className="hero">
@@ -61,10 +62,10 @@ export function LandingPage() {
               <div className="program-icon">{p.icon}</div>
               <div className="program-title-ar">{p.nameAr}</div>
               <div className="program-title-en">{p.nameEn}</div>
-              <p className="program-desc">{p.desc}</p>
+              <p className="program-desc">{isArabic ? p.descAr : p.desc}</p>
               <div className="program-features">
-                {p.features.map((f) => (
-                  <div key={f} className="prog-feat">
+                {(isArabic ? p.featuresAr : p.features).map((f, idx) => (
+                  <div key={idx} className="prog-feat">
                     <span className="prog-feat-dot" />
                     {f}
                   </div>
@@ -111,8 +112,8 @@ export function LandingPage() {
                 {teacher.emoji}
                 {teacher.online && <div className="teacher-badge-online" />}
               </div>
-              <div className="teacher-name">{teacher.name}</div>
-              <div className="teacher-specialty">{teacher.specialty}</div>
+              <div className="teacher-name">{isArabic ? teacher.nameAr : teacher.name}</div>
+              <div className="teacher-specialty">{isArabic ? teacher.specialtyAr : teacher.specialty}</div>
               <Stars rating={teacher.rating} />
               <div className="teacher-info mb8">
                 <span className="teacher-price">
@@ -150,8 +151,8 @@ export function LandingPage() {
                 {t("pricingSection.sessionsSummary", { perWeek: plan.sessionsPerWeek })}
               </div>
               <ul className="pricing-features">
-                {plan.features.map((feature) => (
-                  <li key={feature}>
+                {(isArabic ? plan.featuresAr : plan.features).map((feature, idx) => (
+                  <li key={idx}>
                     <span className="check-icon">✓</span>
                     {feature}
                   </li>
@@ -183,10 +184,10 @@ export function LandingPage() {
           </h2>
         </div>
         <div className="testimonials-grid">
-          {TESTIMONIALS.map((t, i) => (
+          {TESTIMONIALS.map((testimonial, i) => (
             <div key={i} className="testimonial-card">
               <div className="testimonial-stars">
-                {Array(t.stars)
+                {Array(testimonial.stars)
                   .fill(0)
                   .map((_, j) => (
                     <span key={j} className="t-star">
@@ -194,12 +195,12 @@ export function LandingPage() {
                     </span>
                   ))}
               </div>
-              <p className="testimonial-text">"{t.text}"</p>
+              <p className="testimonial-text">"{isArabic ? testimonial.textAr : testimonial.text}"</p>
               <div className="testimonial-author">
                 <div className="t-avatar">😊</div>
                 <div>
-                  <div className="t-name">{t.name}</div>
-                  <div className="t-location">{t.location}</div>
+                  <div className="t-name">{isArabic ? testimonial.nameAr : testimonial.name}</div>
+                  <div className="t-location">{isArabic ? testimonial.locationAr : testimonial.location}</div>
                 </div>
               </div>
             </div>

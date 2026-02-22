@@ -1,9 +1,60 @@
+const QuranProgramIcon = (
+  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <rect x="6" y="8" width="12" height="24" rx="2" fill="#F9F5EC" stroke="#1C3A2E" />
+    <rect x="22" y="8" width="12" height="24" rx="2" fill="#F9F5EC" stroke="#1C3A2E" />
+    <path d="M12 14h4" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M24 14h4" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M14 18c1.2 0.8 1.8 1.3 2 2-0.2 0.7-0.8 1.2-2 2" fill="none" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M26 18c1.2 0.8 1.8 1.3 2 2-0.2 0.7-0.8 1.2-2 2" fill="none" stroke="#C8922A" strokeWidth="1.5" />
+  </svg>
+);
+
+const ChildrenProgramIcon = (
+  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <circle cx="20" cy="14" r="6" fill="#F9F5EC" stroke="#1C3A2E" />
+    <circle cx="18" cy="13.5" r="0.8" fill="#1C3A2E" />
+    <circle cx="22" cy="13.5" r="0.8" fill="#1C3A2E" />
+    <path d="M18 16c0.8 0.8 1.2 1 2 1s1.2-0.2 2-1" fill="none" stroke="#C8922A" strokeWidth="1.2" />
+    <rect x="11" y="21" width="18" height="11" rx="5.5" fill="#C8922A" opacity="0.16" />
+    <path d="M12 32c2-3 4.8-4.5 8-4.5S26 29 28 32" fill="none" stroke="#1C3A2E" strokeWidth="1.5" />
+  </svg>
+);
+
+const HifzProgramIcon = (
+  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <rect x="10" y="8" width="18" height="24" rx="3" fill="#F9F5EC" stroke="#1C3A2E" />
+    <path d="M14 12h10" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M14 16h10" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M14 20h7" stroke="#C8922A" strokeWidth="1.5" />
+    <path d="M20 24l-3 3 3 3" fill="none" stroke="#1C3A2E" strokeWidth="1.5" />
+  </svg>
+);
+
+const ArabicProgramIcon = (
+  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <rect x="7" y="9" width="26" height="22" rx="5" fill="#F9F5EC" stroke="#1C3A2E" />
+    <path d="M14 24c1.5 1.5 3.2 2.2 5.5 2.2 3.3 0 5.8-1.9 5.8-4.7 0-2.4-1.6-4-4-4-1.6 0-2.8 0.7-3.6 1.9" fill="none" stroke="#C8922A" strokeWidth="1.6" />
+    <path d="M18 17.2c0.5-1.5 1.3-2.6 2.5-3.4" fill="none" stroke="#1C3A2E" strokeWidth="1.4" />
+    <circle cx="24.5" cy="14.5" r="1.1" fill="#1C3A2E" />
+  </svg>
+);
+
+const NewMuslimsProgramIcon = (
+  <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+    <path d="M10 24c2.2-3 4.4-4.5 6.6-4.5 2.3 0 3.6 1.3 4.6 2.6 1.1-1.6 2.6-2.6 4.6-2.6 2.1 0 4.1 1.4 6.2 4.5" fill="#F9F5EC" stroke="#1C3A2E" strokeWidth="1.5" />
+    <path d="M15 26l3 3.2c0.5 0.5 1.2 0.5 1.7 0L22 26" fill="none" stroke="#C8922A" strokeWidth="1.5" />
+    <circle cx="16" cy="15" r="3" fill="#F9F5EC" stroke="#1C3A2E" />
+    <circle cx="24" cy="15" r="3" fill="#F9F5EC" stroke="#1C3A2E" />
+    <path d="M8 30h24" stroke="#E0CFA8" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
 export const PROGRAMS = [
-  { id:1, icon:"📖", nameAr:"القرآن الكريم للكبار", nameEn:"Quran for Adults", desc:"Comprehensive Quran learning for adults including recitation, tajweed rules, and memorization at your own pace.", descAr:"برنامج شامل لتعلم القرآن الكريم للكبار يشمل التلاوة وأحكام التجويد والحفظ بحسب مستواك.", features:["Tajweed & proper recitation","Flexible scheduling","Beginner to advanced"], featuresAr:["تجويد وتلاوة صحيحة","مواعيد مرنة","من المبتدئ إلى المتقدم"] },
-  { id:2, icon:"🌟", nameAr:"برنامج الأطفال", nameEn:"Children's Program", desc:"Fun, engaging Quran education tailored for children aged 5–16, with interactive learning methods.", descAr:"برنامج ممتع ومشوق لتعليم القرآن للأطفال من ٥ إلى ١٦ سنة بأساليب تفاعلية.", features:["Age-appropriate curriculum","Interactive sessions","Progress reports for parents"], featuresAr:["منهج مناسب للأعمار","حصص تفاعلية","تقارير تقدم للوالدين"] },
-  { id:3, icon:"📚", nameAr:"تحفيظ القرآن", nameEn:"Quran Memorization", desc:"Structured hifz program with regular revision, tracking, and personalized memorization plans.", descAr:"برنامج تحفيظ منظم مع مراجعة مستمرة ومتابعة وخطط حفظ شخصية.", features:["Personalized hifz plan","Weekly revision tracking","Ijazah preparation"], featuresAr:["خطة حفظ مخصصة","متابعة مراجعة أسبوعية","إعداد للإجازة"] },
-  { id:4, icon:"🕌", nameAr:"اللغة العربية", nameEn:"Arabic Language", desc:"Learn Modern Standard Arabic and Quranic Arabic from beginner to advanced levels.", descAr:"تعلم العربية الفصحى والعربية القرآنية من المستوى المبتدئ حتى المتقدم.", features:["Grammar & vocabulary","Reading comprehension","Speaking & writing"], featuresAr:["قواعد ومفردات","فهم المقروء","محادثة وكتابة"] },
-  { id:5, icon:"🤝", nameAr:"المسلمون الجدد", nameEn:"New Muslims", desc:"Specially designed for new Muslims to learn the basics of Islam, prayer, and Quran recitation.", descAr:"برنامج مخصص للمسلمين الجدد لتعلم أساسيات الإسلام والصلاة وتلاوة القرآن.", features:["Fundamentals of Islam","Prayer guide","Patient, supportive teachers"], featuresAr:["أساسيات العقيدة والعبادة","دليل عملي للصلاة","معلمون صبورون وداعمون"] },
+  { id:1, icon:QuranProgramIcon, nameAr:"القرآن الكريم للكبار", nameEn:"Quran for Adults", desc:"Comprehensive Quran learning for adults including recitation, tajweed rules, and memorization at your own pace.", descAr:"برنامج شامل لتعلم القرآن الكريم للكبار يشمل التلاوة وأحكام التجويد والحفظ بحسب مستواك.", features:["Tajweed & proper recitation","Flexible scheduling","Beginner to advanced"], featuresAr:["تجويد وتلاوة صحيحة","مواعيد مرنة","من المبتدئ إلى المتقدم"] },
+  { id:2, icon:ChildrenProgramIcon, nameAr:"برنامج الأطفال", nameEn:"Children's Program", desc:"Fun, engaging Quran education tailored for children aged 5–16, with interactive learning methods.", descAr:"برنامج ممتع ومشوق لتعليم القرآن للأطفال من ٥ إلى ١٦ سنة بأساليب تفاعلية.", features:["Age-appropriate curriculum","Interactive sessions","Progress reports for parents"], featuresAr:["منهج مناسب للأعمار","حصص تفاعلية","تقارير تقدم للوالدين"] },
+  { id:3, icon:HifzProgramIcon, nameAr:"تحفيظ القرآن", nameEn:"Quran Memorization", desc:"Structured hifz program with regular revision, tracking, and personalized memorization plans.", descAr:"برنامج تحفيظ منظم مع مراجعة مستمرة ومتابعة وخطط حفظ شخصية.", features:["Personalized hifz plan","Weekly revision tracking","Ijazah preparation"], featuresAr:["خطة حفظ مخصصة","متابعة مراجعة أسبوعية","إعداد للإجازة"] },
+  { id:4, icon:ArabicProgramIcon, nameAr:"اللغة العربية", nameEn:"Arabic Language", desc:"Learn Modern Standard Arabic and Quranic Arabic from beginner to advanced levels.", descAr:"تعلم العربية الفصحى والعربية القرآنية من المستوى المبتدئ حتى المتقدم.", features:["Grammar & vocabulary","Reading comprehension","Speaking & writing"], featuresAr:["قواعد ومفردات","فهم المقروء","محادثة وكتابة"] },
+  { id:5, icon:NewMuslimsProgramIcon, nameAr:"المسلمون الجدد", nameEn:"New Muslims", desc:"Specially designed for new Muslims to learn the basics of Islam, prayer, and Quran recitation.", descAr:"برنامج مخصص للمسلمين الجدد لتعلم أساسيات الإسلام والصلاة وتلاوة القرآن.", features:["Fundamentals of Islam","Prayer guide","Patient, supportive teachers"], featuresAr:["أساسيات العقيدة والعبادة","دليل عملي للصلاة","معلمون صبورون وداعمون"] },
 ];
 
 export const TEACHERS = [

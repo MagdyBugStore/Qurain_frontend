@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TEACHERS, SESSIONS, NOTIFICATIONS, PROGRAMS } from "../jannat-alquran-data";
 import { Stars } from "../components/common/Stars";
 import { StatusBadge } from "../components/common/StatusBadge";
 import { ProgressBar } from "../components/common/ProgressBar";
 
 export function DashboardPage({ addToast }) {
+  const { i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
   const [activeTab, setActiveTab] = useState("overview");
 
   const navItems = [
@@ -56,12 +59,12 @@ export function DashboardPage({ addToast }) {
         </aside>
 
         <main className="dash-content">
-          {activeTab === "overview" && <OverviewTab addToast={addToast} />}
-          {activeTab === "sessions" && <SessionsTab addToast={addToast} />}
-          {activeTab === "teachers" && <TeachersTabDash />}
+          {activeTab === "overview" && <OverviewTab addToast={addToast} isArabic={isArabic} />}
+          {activeTab === "sessions" && <SessionsTab addToast={addToast} isArabic={isArabic} />}
+          {activeTab === "teachers" && <TeachersTabDash isArabic={isArabic} />}
           {activeTab === "progress" && <ProgressTab />}
           {activeTab === "subscription" && <SubscriptionTab addToast={addToast} />}
-          {activeTab === "notifications" && <NotificationsTab />}
+          {activeTab === "notifications" && <NotificationsTab isArabic={isArabic} />}
           {activeTab === "settings" && <SettingsTab addToast={addToast} />}
         </main>
       </div>
@@ -69,7 +72,7 @@ export function DashboardPage({ addToast }) {
   );
 }
 
-function OverviewTab({ addToast }) {
+function OverviewTab({ addToast, isArabic }) {
   return (
     <div>
       <div className="dash-welcome">
@@ -153,14 +156,14 @@ function OverviewTab({ addToast }) {
           <tbody>
             {SESSIONS.slice(0, 4).map((s) => (
               <tr key={s.id}>
-                <td style={{ fontWeight: 600, color: "var(--forest)" }}>{s.teacher}</td>
-                <td>{s.program}</td>
+                <td style={{ fontWeight: 600, color: "var(--forest)" }}>{isArabic ? s.teacherAr : s.teacher}</td>
+                <td>{isArabic ? s.programAr : s.program}</td>
                 <td>
                   {s.date} · {s.time}
                 </td>
-                <td>{s.duration}</td>
+                <td>{isArabic ? s.durationAr : s.duration}</td>
                 <td>
-                  <StatusBadge status={s.status} />
+                  <StatusBadge status={isArabic ? s.statusAr : s.status} />
                 </td>
               </tr>
             ))}
@@ -171,7 +174,7 @@ function OverviewTab({ addToast }) {
   );
 }
 
-function SessionsTab({ addToast }) {
+function SessionsTab({ addToast, isArabic }) {
   return (
     <div>
       <div className="dash-welcome mb24">
@@ -202,14 +205,14 @@ function SessionsTab({ addToast }) {
           <tbody>
             {SESSIONS.map((s) => (
               <tr key={s.id}>
-                <td style={{ fontWeight: 600, color: "var(--forest)" }}>{s.teacher}</td>
-                <td>{s.program}</td>
+                <td style={{ fontWeight: 600, color: "var(--forest)" }}>{isArabic ? s.teacherAr : s.teacher}</td>
+                <td>{isArabic ? s.programAr : s.program}</td>
                 <td>
                   {s.date} · {s.time}
                 </td>
-                <td>{s.duration}</td>
+                <td>{isArabic ? s.durationAr : s.duration}</td>
                 <td>
-                  <StatusBadge status={s.status} />
+                  <StatusBadge status={isArabic ? s.statusAr : s.status} />
                 </td>
                 <td>
                   {s.status === "scheduled" && (
@@ -249,7 +252,7 @@ function SessionsTab({ addToast }) {
   );
 }
 
-function TeachersTabDash() {
+function TeachersTabDash({ isArabic }) {
   return (
     <div>
       <div className="dash-welcome mb24">
@@ -263,8 +266,8 @@ function TeachersTabDash() {
               {t.emoji}
               {t.online && <div className="teacher-badge-online" />}
             </div>
-            <div className="teacher-name">{t.name}</div>
-            <div className="teacher-specialty">{t.specialty}</div>
+            <div className="teacher-name">{isArabic ? t.nameAr : t.name}</div>
+            <div className="teacher-specialty">{isArabic ? t.specialtyAr : t.specialty}</div>
             <Stars rating={t.rating} />
             <div style={{ fontSize: 12, color: "var(--text-l)", marginBottom: 8 }}>
               {t.reviews} reviews
@@ -440,7 +443,7 @@ function SubscriptionTab({ addToast }) {
   );
 }
 
-function NotificationsTab() {
+function NotificationsTab({ isArabic }) {
   const [notifs, setNotifs] = useState(NOTIFICATIONS);
   const markRead = (id) => {
     setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, unread: false } : n)));
@@ -462,15 +465,15 @@ function NotificationsTab() {
             <div className={`notif-icon ${n.type}`}>{n.icon}</div>
             <div style={{ flex: 1 }}>
               <div className="notif-title">
-                {n.title}{" "}
+                {isArabic ? n.titleAr : n.title}{" "}
                 {n.unread && (
                   <span className="tag tag-amber" style={{ fontSize: 10, marginLeft: 6 }}>
                     New
                   </span>
                 )}
               </div>
-              <div className="notif-body">{n.body}</div>
-              <div className="notif-time">{n.time}</div>
+              <div className="notif-body">{isArabic ? n.bodyAr : n.body}</div>
+              <div className="notif-time">{isArabic ? n.timeAr : n.time}</div>
             </div>
           </div>
         ))}

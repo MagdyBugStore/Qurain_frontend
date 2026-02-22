@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PROGRAMS, SESSIONS } from "../jannat-alquran-data";
 import { StatusBadge } from "../components/common/StatusBadge";
 import { ProgressBar } from "../components/common/ProgressBar";
 
 export function AdminPage({ addToast }) {
+  const { i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
   const [tab, setTab] = useState("overview");
 
   const navItems = [
@@ -60,11 +63,11 @@ export function AdminPage({ addToast }) {
         </aside>
 
         <main className="dash-content">
-          {tab === "overview" && <AdminOverview />}
+          {tab === "overview" && <AdminOverview isArabic={isArabic} />}
           {tab === "teachers-pending" && (
             <PendingTeachersTab pendingTeachers={pendingTeachers} addToast={addToast} />
           )}
-          {tab === "sessions" && <AdminSessionsTab />}
+          {tab === "sessions" && <AdminSessionsTab isArabic={isArabic} />}
           {tab === "payments" && <PaymentsTab />}
           {tab === "users" && <UsersTab addToast={addToast} />}
           {tab === "reports" && <ReportsTab />}
@@ -74,7 +77,7 @@ export function AdminPage({ addToast }) {
   );
 }
 
-function AdminOverview() {
+function AdminOverview({ isArabic }) {
   const stats = [
     { icon: "👥", v: 512, l: "Total Students", c: "+18 this month" },
     { icon: "👳", v: 52, l: "Active Teachers", c: "+3 this month" },
@@ -140,7 +143,7 @@ function AdminOverview() {
                   marginBottom: 4,
                 }}
               >
-                <span style={{ color: "var(--text-m)" }}>{p.nameEn}</span>
+                <span style={{ color: "var(--text-m)" }}>{isArabic ? p.nameAr : p.nameEn}</span>
                 <span style={{ fontWeight: 600, color: "var(--forest)" }}>
                   {Math.floor(Math.random() * 100 + 50)}
                 </span>
@@ -222,7 +225,7 @@ function PendingTeachersTab({ pendingTeachers, addToast }) {
   );
 }
 
-function AdminSessionsTab() {
+function AdminSessionsTab({ isArabic }) {
   return (
     <div>
       <div className="dash-welcome mb24">
@@ -243,11 +246,11 @@ function AdminSessionsTab() {
             {SESSIONS.map((s) => (
               <tr key={s.id}>
                 <td style={{ fontWeight: 600 }}>Ahmed Al-Rashid</td>
-                <td>{s.teacher}</td>
-                <td>{s.program}</td>
+                <td>{isArabic ? s.teacherAr : s.teacher}</td>
+                <td>{isArabic ? s.programAr : s.program}</td>
                 <td>{s.date}</td>
                 <td>
-                  <StatusBadge status={s.status} />
+                  <StatusBadge status={isArabic ? s.statusAr : s.status} />
                 </td>
               </tr>
             ))}

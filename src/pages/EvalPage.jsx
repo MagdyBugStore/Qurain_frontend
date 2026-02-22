@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { PROGRAMS } from "../jannat-alquran-data";
 
 export function EvalPage({ addToast }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === "ar";
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
@@ -126,8 +127,8 @@ export function EvalPage({ addToast }) {
                 >
                   <option value="">{t("evalPage.programPlaceholder")}</option>
                   {PROGRAMS.map((p) => (
-                    <option key={p.id} value={p.nameEn}>
-                      {p.nameEn}
+                    <option key={p.id} value={isArabic ? p.nameAr : p.nameEn}>
+                      {isArabic ? p.nameAr : p.nameEn}
                     </option>
                   ))}
                 </select>
