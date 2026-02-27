@@ -16,8 +16,8 @@ export function Footer({ onNavigate }) {
               🕌
             </div>
             <div className="topbar-logo-text">
-              <span className="topbar-logo-ar">جنة القرآن</span>
-              <span className="topbar-logo-en">Jannat Al-Quran</span>
+              <span className="topbar-logo-ar">منصة القرآن</span>
+              <span className="topbar-logo-en">Quran Platform</span>
             </div>
           </div>
           <p className="footer-brand-desc">{t("footer.brandDesc")}</p>

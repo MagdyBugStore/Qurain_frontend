@@ -44,8 +44,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
   backdrop-filter:blur(14px);
   border-bottom:1px solid var(--border-l);
   height:68px;
-  display:grid;grid-template-columns:auto 1fr auto;
-  align-items:center;
+  display:flex;align-items:center;justify-content:center;
   padding:0 32px;
   gap:32px;
   direction:rtl;
@@ -53,6 +52,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 .topbar-logo{
   display:flex;align-items:center;gap:10px;
   cursor:pointer;flex-shrink:0;
+  order:1;
 }
 .topbar-logo-icon{
   width:42px;height:42px;border-radius:12px;
@@ -67,6 +67,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 .topbar-nav{
   display:flex;align-items:center;justify-content:center;
   gap:12px;flex-wrap:wrap;
+  order:2;
 }
 .tnav-btn{
   background:transparent;border:none;
@@ -78,6 +79,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 
 .topbar-right{
   display:flex;align-items:center;gap:12px;flex-shrink:0;
+  order:3;
 }
 .topbar-lang-switcher{
   display:flex;align-items:center;gap:4px;
@@ -593,7 +595,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 @keyframes slideInRight{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 @media(max-width:768px){
   .topbar{
-    grid-template-columns:auto 1fr auto;
+    justify-content:space-between;
     padding:0 16px;gap:16px;
   }
   .topbar-nav{display:none;}

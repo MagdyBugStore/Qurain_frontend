@@ -103,4 +103,3 @@ export const TESTIMONIALS = [
   { text:"As a new Muslim I was nervous, but Ustadha Mariam made me feel so welcome. My recitation has improved massively in just 3 months.", textAr:"كمسلم جديد كنت متوتّرًا، لكن الأستاذة مريم جعلتني أشعر بترحيب كبير. تحسنت تلاوتي بشكل كبير خلال ٣ أشهر فقط.", name:"James O.", nameAr:"جايمس أ.", location:"Manchester, UK", locationAr:"مانشستر، المملكة المتحدة", stars:5 },
   { text:"The scheduling is so flexible for my busy work life. I can book sessions at any time and the quality is consistently excellent.", textAr:"مواعيد الحصص مرنة جدًا مع انشغالي في العمل. أستطيع حجز الجلسات في أي وقت والجودة متميزة دائمًا.", name:"Khalid R.", nameAr:"خالد ر.", location:"Toronto, Canada", locationAr:"تورونتو، كندا", stars:5 },
 ];
-

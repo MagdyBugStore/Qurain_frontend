@@ -20,8 +20,8 @@ export function Topbar({ currentPath, navLinks, onNavigate }) {
       <div className="topbar-logo" onClick={() => onNavigate("/")}>
         <div className="topbar-logo-icon">🕌</div>
         <div className="topbar-logo-text">
-          <span className="topbar-logo-ar">جنة القرآن</span>
-          <span className="topbar-logo-en">Jannat Al-Quran</span>
+          <span className="topbar-logo-ar">منصة القرآن</span>
+          <span className="topbar-logo-en">Quran Platform</span>
         </div>
       </div>
       <nav className="topbar-nav">
@@ -56,7 +56,7 @@ export function Topbar({ currentPath, navLinks, onNavigate }) {
             EN
           </button>
         </div>
-        <button className="topbar-cta" onClick={() => onNavigate("/eval")}>
+        <button className="topbar-cta" onClick={() => onNavigate("/login")}>
           {t("auth.login")}
         </button>
         <button 
@@ -105,7 +105,7 @@ export function Topbar({ currentPath, navLinks, onNavigate }) {
           <button 
             className="mobile-nav-btn mobile-cta"
             onClick={() => {
-              onNavigate("/eval");
+              onNavigate("/login");
               setMobileMenuOpen(false);
             }}
           >
