@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quran Online - Tutors Listing</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        display: ["Manrope", "Noto Sans Arabic", "sans-serif"],
+                        arabic: ["Noto Sans Arabic", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px",
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#181611] font-display min-h-screen flex flex-col overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e6e2de] dark:border-b-[#3a3528] px-10 py-3 bg-white dark:bg-[#1a170d]">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-[#181611] dark:text-white">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">قرآن أونلاين</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64 hidden md:flex">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#8a8060] flex border-none bg-[#f5f3f0] dark:bg-[#2d2a24] items-center justify-center pl-4 rounded-r-lg" data-weight="regular">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#181611] dark:text-white focus:outline-0 focus:ring-0 border-none bg-[#f5f3f0] dark:bg-[#2d2a24] focus:border-none h-full placeholder:text-[#8a8060] px-4 rounded-r-none border-r-0 pl-2 text-base font-normal leading-normal font-arabic" placeholder="ابحث عن معلم..."/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden lg:flex items-center gap-9 font-arabic">
+<a class="text-[#181611] dark:text-[#dadada] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">الرئيسية</a>
+<a class="text-[#181611] dark:text-[#dadada] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">المعلمون</a>
+<a class="text-[#181611] dark:text-[#dadada] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">الدورات</a>
+<a class="text-[#181611] dark:text-[#dadada] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">عن المنصة</a>
+</div>
+<div class="flex gap-2 font-arabic">
+<button class="hidden md:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#181611] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">تسجيل الدخول</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f5f3f0] dark:bg-[#3a3528] text-[#181611] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#e6e2de] dark:hover:bg-[#4d4738] transition-colors">
+<span class="truncate">ابدأ مجاناً</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow layout-container px-4 sm:px-10 py-6 max-w-[1400px] mx-auto w-full">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 mb-6 font-arabic">
+<a class="text-[#8a8060] text-sm font-medium leading-normal hover:text-primary" href="#">الرئيسية</a>
+<span class="text-[#8a8060] text-sm font-medium leading-normal">/</span>
+<span class="text-[#181611] dark:text-white text-sm font-medium leading-normal">المعلمون</span>
+</div>
+<!-- Hero: Top 3 Recommendations -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h1 class="text-[#181611] dark:text-white text-2xl md:text-3xl font-bold leading-tight font-arabic">أفضل 3 معلمين لك</h1>
+<p class="text-[#8a8060] text-sm md:text-base mt-2 font-arabic">تم اختيارهم بناءً على تفضيلاتك واهتماماتك التعليمية</p>
+</div>
+<div class="hidden sm:flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full text-primary font-bold text-xs md:text-sm font-arabic border border-primary/20">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+<span>توصيات الذكاء الاصطناعي</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Top Card 1 -->
+<div class="relative flex flex-col items-center bg-white dark:bg-[#1a170d] rounded-xl border-2 border-primary shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+<div class="absolute top-0 right-0 bg-primary text-[#181611] text-xs font-bold px-3 py-1 rounded-bl-lg z-10 font-arabic flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">stars</span>
+                        خيار ممتاز
+                    </div>
+<div class="w-full h-32 bg-gradient-to-b from-[#fffbeb] to-white dark:from-[#2d2a24] dark:to-[#1a170d] relative">
+<div class="absolute -bottom-12 right-1/2 translate-x-1/2">
+<div class="w-24 h-24 rounded-full border-4 border-white dark:border-[#1a170d] bg-gray-200 overflow-hidden" data-alt="Portrait of Sheikh Ahmed Mohamed" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCM-NJ4zjvTYCvRtQZ-M6Msw5F_jOn88MOuLaZPRACOrzjXlOGVxU4HNlTH72Dr2W5bce8J6porosanTS3dOpyhjCFTD582e6wbPqEKoOi3Fd3FuiDTHLuR_ad9WBk5saNbCP0pIIJI2MYbqhrbQXn1tR5t2fhwngQHLyhy9s1LqtQcdpGwaf0WSBDrXrRBGKVYVZmfrZqpO3nldPE2LwvCEQYO1GcCkSNF3T7EgdPVmJL0_WLkhmRYThWhb6gCjMpx2AaV-nsZa1EU'); background-size: cover; background-position: center;"></div>
+</div>
+</div>
+<div class="pt-14 pb-6 px-4 text-center w-full">
+<h3 class="text-lg font-bold text-[#181611] dark:text-white font-arabic">الشيخ أحمد محمد</h3>
+<p class="text-[#8a8060] text-sm mb-3 font-arabic">متخصص في تعليم الأطفال والقاعدة النورانية</p>
+<div class="flex items-center justify-center gap-1 text-primary mb-4">
+<span class="material-symbols-outlined text-lg filled">star</span>
+<span class="font-bold text-[#181611] dark:text-white">5.0</span>
+<span class="text-[#8a8060] text-xs">(200 تقييم)</span>
+</div>
+<div class="flex flex-wrap justify-center gap-2 mb-4">
+<span class="bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#181611] dark:text-white px-2 py-1 rounded text-xs font-arabic">مجاز في حفص</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-[#f5f3f0] dark:border-[#2d2a24] w-full">
+<div class="text-right">
+<p class="text-xs text-[#8a8060] font-arabic">السعر للساعة</p>
+<p class="text-lg font-bold text-primary">15$</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-[#181611] text-sm font-bold py-2 px-4 rounded-lg font-arabic transition-colors">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+</div>
+<!-- Top Card 2 -->
+<div class="relative flex flex-col items-center bg-white dark:bg-[#1a170d] rounded-xl border-2 border-primary shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform md:-translate-y-2">
+<div class="absolute top-0 inset-x-0 h-1 bg-primary"></div>
+<div class="absolute top-4 right-0 bg-primary text-[#181611] text-xs font-bold px-3 py-1 rounded-l-lg z-10 font-arabic flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                        الأكثر تطابقاً
+                    </div>
+<div class="w-full h-32 bg-gradient-to-b from-[#fffbeb] to-white dark:from-[#2d2a24] dark:to-[#1a170d] relative">
+<div class="absolute -bottom-12 right-1/2 translate-x-1/2">
+<div class="w-24 h-24 rounded-full border-4 border-white dark:border-[#1a170d] bg-gray-200 overflow-hidden" data-alt="Portrait of Sheikh Fatima Al-Zahra" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtgAxqsa7sRA5bJJ2FYLprmo1lmlUyTeRobfh4ZIwr0fESH-A07yLAmTd51MW3_lldJ48FuRj1Slba75Mlfu2OwtYVoeHdNEhgeTzegE-QY9AAI_Ge1sZZDpZClpqrgIRsUkvqoIFcTLt8r99Gcbsj_WZ3G3hsGP-5L2LTcoulSLDKNUjDjctbyQHlaaxuv9FkRy3M54aI4sl0-7brrxA5JPaEpAEtLVjg00OwATiFzQ0HZlirJNtBxwLabbQ9MUDg9lPo9mLiV9iM'); background-size: cover; background-position: center;"></div>
+</div>
+</div>
+<div class="pt-14 pb-6 px-4 text-center w-full">
+<h3 class="text-lg font-bold text-[#181611] dark:text-white font-arabic">الشيخة فاطمة الزهراء</h3>
+<p class="text-[#8a8060] text-sm mb-3 font-arabic">معلمة تجويد وقراءات</p>
+<div class="flex items-center justify-center gap-1 text-primary mb-4">
+<span class="material-symbols-outlined text-lg filled">star</span>
+<span class="font-bold text-[#181611] dark:text-white">4.9</span>
+<span class="text-[#8a8060] text-xs">(350 تقييم)</span>
+</div>
+<div class="flex flex-wrap justify-center gap-2 mb-4">
+<span class="bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#181611] dark:text-white px-2 py-1 rounded text-xs font-arabic">إجازة بالعشر الصغرى</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-[#f5f3f0] dark:border-[#2d2a24] w-full">
+<div class="text-right">
+<p class="text-xs text-[#8a8060] font-arabic">السعر للساعة</p>
+<p class="text-lg font-bold text-primary">15$</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-[#181611] text-sm font-bold py-2 px-4 rounded-lg font-arabic transition-colors shadow-md shadow-primary/20">
+                                احجز تجربة مجانية
+                            </button>
+</div>
+</div>
+</div>
+<!-- Top Card 3 -->
+<div class="relative flex flex-col items-center bg-white dark:bg-[#1a170d] rounded-xl border-2 border-primary shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+<div class="absolute top-0 right-0 bg-primary text-[#181611] text-xs font-bold px-3 py-1 rounded-bl-lg z-10 font-arabic flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        صاعد
+                    </div>
+<div class="w-full h-32 bg-gradient-to-b from-[#fffbeb] to-white dark:from-[#2d2a24] dark:to-[#1a170d] relative">
+<div class="absolute -bottom-12 right-1/2 translate-x-1/2">
+<div class="w-24 h-24 rounded-full border-4 border-white dark:border-[#1a170d] bg-gray-200 overflow-hidden" data-alt="Portrait of a young male tutor with glasses" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuChzbGDK5C0XekIy4BG7nM9oJnk11EUPcEj98iMX9gjyW6pwPy8foXvdkzwmz8RGt5UrX4S4nOoNSe6QwKuo-zmLfQ-QwXUt_uwX7FmzT2OIvjnnNtxilSFWR0OdSKv6edy10fSBZcY7iGZq13494stPaD0P5JL3dfiCC8id-7WXKvEtnYI3R7KRf30yyElhCyCbOCNVzTP5Pa-MayrYzQBKgvdqOcF8E4W_2wuQZzbRZ-yGtqHSd-k31JjzUK4BxXpPUbDvAbIvaLh'); background-size: cover; background-position: center;"></div>
+</div>
+</div>
+<div class="pt-14 pb-6 px-4 text-center w-full">
+<h3 class="text-lg font-bold text-[#181611] dark:text-white font-arabic">الأستاذ عمر فاروق</h3>
+<p class="text-[#8a8060] text-sm mb-3 font-arabic">مدرس لغة عربية وقرآن</p>
+<div class="flex items-center justify-center gap-1 text-primary mb-4">
+<span class="material-symbols-outlined text-lg filled">star</span>
+<span class="font-bold text-[#181611] dark:text-white">4.8</span>
+<span class="text-[#8a8060] text-xs">(85 تقييم)</span>
+</div>
+<div class="flex flex-wrap justify-center gap-2 mb-4">
+<span class="bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#181611] dark:text-white px-2 py-1 rounded text-xs font-arabic">لغة عربية</span>
+<span class="bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#181611] dark:text-white px-2 py-1 rounded text-xs font-arabic">تفسير</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-[#f5f3f0] dark:border-[#2d2a24] w-full">
+<div class="text-right">
+<p class="text-xs text-[#8a8060] font-arabic">السعر للساعة</p>
+<p class="text-lg font-bold text-primary">10$</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-[#181611] text-sm font-bold py-2 px-4 rounded-lg font-arabic transition-colors">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+<!-- Filters Sidebar -->
+<aside class="w-full lg:w-72 flex-shrink-0 space-y-6">
+<!-- Search & Chips Filter Mobile Only View could go here -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl p-5 shadow-sm border border-[#e6e2de] dark:border-[#3a3528]">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-lg font-arabic text-[#181611] dark:text-white">تصفية النتائج</h3>
+<button class="text-primary text-sm font-medium hover:underline font-arabic">مسح الكل</button>
+</div>
+<!-- Subjects Filter -->
+<div class="mb-6">
+<h4 class="font-medium mb-3 text-sm text-[#8a8060] font-arabic">المادة التعليمية</h4>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-full bg-primary text-[#181611] text-sm font-medium font-arabic border border-primary">الكل</button>
+<button class="px-3 py-1.5 rounded-full bg-white dark:bg-[#2d2a24] text-[#181611] dark:text-[#dadada] text-sm font-medium border border-[#e6e2de] dark:border-[#4d4738] hover:border-primary font-arabic transition-colors">تجويد</button>
+<button class="px-3 py-1.5 rounded-full bg-white dark:bg-[#2d2a24] text-[#181611] dark:text-[#dadada] text-sm font-medium border border-[#e6e2de] dark:border-[#4d4738] hover:border-primary font-arabic transition-colors">حفظ</button>
+<button class="px-3 py-1.5 rounded-full bg-white dark:bg-[#2d2a24] text-[#181611] dark:text-[#dadada] text-sm font-medium border border-[#e6e2de] dark:border-[#4d4738] hover:border-primary font-arabic transition-colors">لغة عربية</button>
+<button class="px-3 py-1.5 rounded-full bg-white dark:bg-[#2d2a24] text-[#181611] dark:text-[#dadada] text-sm font-medium border border-[#e6e2de] dark:border-[#4d4738] hover:border-primary font-arabic transition-colors">قراءات</button>
+</div>
+</div>
+<!-- Price Slider -->
+<div class="mb-6">
+<h4 class="font-medium mb-3 text-sm text-[#8a8060] font-arabic">نطاق السعر (للساعة)</h4>
+<input class="w-full h-2 bg-[#f5f3f0] dark:bg-[#2d2a24] rounded-lg appearance-none cursor-pointer accent-primary" max="50" min="5" type="range" value="25"/>
+<div class="flex justify-between mt-2 text-sm text-[#181611] dark:text-white font-arabic">
+<span>5$</span>
+<span class="font-bold text-primary">25$</span>
+<span>50$+</span>
+</div>
+</div>
+<!-- Gender Filter -->
+<div class="mb-6">
+<h4 class="font-medium mb-3 text-sm text-[#8a8060] font-arabic">جنس المعلم</h4>
+<div class="space-y-2 font-arabic">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-[#8a8060] checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+<span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+<svg class="h-3.5 w-3.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</span>
+</div>
+<span class="text-[#181611] dark:text-[#dadada] group-hover:text-primary transition-colors">معلم</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-[#8a8060] checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+<span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+<svg class="h-3.5 w-3.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</span>
+</div>
+<span class="text-[#181611] dark:text-[#dadada] group-hover:text-primary transition-colors">معلمة</span>
+</label>
+</div>
+</div>
+<!-- Rating Filter -->
+<div class="mb-2">
+<h4 class="font-medium mb-3 text-sm text-[#8a8060] font-arabic">التقييم</h4>
+<div class="space-y-2 font-arabic">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="peer sr-only" name="rating" type="radio"/>
+<div class="w-4 h-4 rounded-full border border-[#8a8060] peer-checked:bg-primary peer-checked:border-primary"></div>
+<span class="flex items-center gap-1 text-[#181611] dark:text-[#dadada]">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span>4.5 فما فوق</span>
+</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="peer sr-only" name="rating" type="radio"/>
+<div class="w-4 h-4 rounded-full border border-[#8a8060] peer-checked:bg-primary peer-checked:border-primary"></div>
+<span class="flex items-center gap-1 text-[#181611] dark:text-[#dadada]">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span>4.0 فما فوق</span>
+</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Promo Banner Sidebar -->
+<div class="bg-primary/10 rounded-xl p-5 border border-primary/20 text-center">
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3 text-white">
+<span class="material-symbols-outlined">card_giftcard</span>
+</div>
+<h4 class="font-bold text-[#181611] dark:text-white mb-1 font-arabic">جرب مجاناً!</h4>
+<p class="text-xs text-[#8a8060] mb-3 font-arabic">احصل على حصة تجريبية مجانية مع أي معلم تختاره.</p>
+</div>
+</aside>
+<!-- Grid Content -->
+<div class="flex-grow">
+<!-- Sorting Bar -->
+<div class="flex flex-wrap items-center justify-between mb-6 pb-4 border-b border-[#e6e2de] dark:border-[#3a3528]">
+<p class="text-[#8a8060] font-arabic text-sm"><span class="font-bold text-[#181611] dark:text-white">142</span> معلم متاح</p>
+<div class="flex items-center gap-2">
+<span class="text-sm text-[#8a8060] font-arabic">ترتيب حسب:</span>
+<select class="bg-transparent border-none text-[#181611] dark:text-white font-medium text-sm focus:ring-0 cursor-pointer font-arabic pr-0 pl-8">
+<option>الأعلى تقييماً</option>
+<option>السعر: الأقل للأعلى</option>
+<option>السعر: الأعلى للأقل</option>
+<option>الأكثر خبرة</option>
+</select>
+</div>
+</div>
+<!-- Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Teacher Card 1 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a male tutor looking professional" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMEDj3ailf1q4hJq6EvwK_I3PFVfl2jFqrRt_MO2cRj9mVN30de853drECLd_evV-OZy55JXkqajiaLE4CdrMJJs2fRzGztPHdEY0fKs1-3hDZfrAI-eqDPh5xxMnwpc0qJ5lzIK8i0dCJseTBR2sf85QFFom8QMiiy-1M_kOXbWGfF6_fnQuqizIZI_diaHr4WASsutieve9M82CCGr0W2HubzsYGS_tVf1UiukXUZjHfi00b68H5Cd1v4JaPLmN5CiyJQWUiUukC'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">أحمد علي</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">4.8</span>
+<span class="text-xs text-[#8a8060]">(150)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">10$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>خريج الأزهر الشريف</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية، الإنجليزية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>2500+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">تجويد</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">تصحيح تلاوة</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+<!-- Teacher Card 2 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a female tutor smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB_4_z3deePswUFh1BlADJ7Q2TESJcAwk8decpvkyB3Afyp_yvuCoPJfjosRpLQyC6P4AdNOAjrSSgrDSoH7TFbF66BMY67yv_LQYGHaKorvqwLQ0ivqPQTMo3JZbUE8cPbHr2eFkzKasm4feH5iJFKiSQSbRjBR0NoM3ZsQRnMY68pcc3EuLEeFhEhCkH0fK4Q_Bnif-871posIvvqOzD6MMPeRaRVP2pVIoq8bU95kHsn2O8xnbl0yYfUSnCfCgS7Eexx7haHRytn'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">سارة محمد</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">4.9</span>
+<span class="text-xs text-[#8a8060]">(98)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">14$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>إجازة برواية حفص</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية، الفرنسية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>1200+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">أطفال</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">نساء فقط</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+<!-- Teacher Card 3 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a male tutor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAj-RkjvS7-NECst0NgmWU2i6m_ZGxmQQg9qZwKHNXRwyJnmfEmIlcH5hFGto8ciymu_WOGScLlxilHaS7LzoyoEZ3-GAR3bkbA4jPh2Ycy6ynz0KE2mf4kElEZmUJMspz6Jg8AV0bHHgTuDbUVZdgpi-WA8ZBROkwTnQVzi1v2KS2Ni6TXuQFEAG_NGKigaMip2pa2yyfLy1cIiKEpLqZpNZ2Sgg21WpgCms5UN7AlKAvjd-g5Ow82J3RC3xQRiLFl2Xhzifdu0gDc'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">يوسف إبراهيم</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">5.0</span>
+<span class="text-xs text-[#8a8060]">(312)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">18$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>دكتوراه في الدراسات الإسلامية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية، الأردية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>5000+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">تفسير</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">حديث</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+<!-- Teacher Card 4 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a female tutor looking confident" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC17s4k_CeEkNp3Bk5pXnRQd6Cwt9CytG5qDXtpqKsReh7f58RYg1-9aB8U2CiT-O7rjZ8Tipz9l5a_ycVN_ckEGwPieL5505A-3UgEYWYJhPNqUbDuY-HVkWbFTgbJt_JraiVj8bM2eKVxnLimG9RruGNrn-zDKb60DrqqcBzqolR2SusfvUoJCN0CQiCMlk0j7OgVP2uX5eqzYry5U7eiXAcw3qXkdhRfjX2-GAJMcCEMU11kvhF7wzD11xJkDMXpcRJ-_NhsnRI8'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">نور الهدى</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">4.7</span>
+<span class="text-xs text-[#8a8060]">(45)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">8$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>حافظة للقرآن الكريم</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>300+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">تأسيس</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">أطفال</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+<!-- Teacher Card 5 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a young male tutor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAp5ka81Cesb_-ZabHcpG2cviXxsRHXNIqcUcCcxikDtI_h3m85mRzFaVo52JQwXWYojlFFmvdoyVROSfIw77nrq6EKeay6CsXOg1Akfu6dqjWs__VDk0VW3uwNzyt8P678q1C3eJJ3w6CN3_A94oNx_I8mYeY4HHTxQY0TFMqd10PDTqqVEQN7GIgi1vxMYwdbPjw1XCufccUSMBuFWDMletgdModTxVlp9ewi1AjPlE68gXwLdMAamVfZNGUFv-FG54KA4XqoqMYZ'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">خالد عمر</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">4.6</span>
+<span class="text-xs text-[#8a8060]">(22)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">9$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>طالب بكلية القرآن</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية، الإنجليزية</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>150+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">شباب</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">مراجعة</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+<!-- Teacher Card 6 -->
+<div class="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+<div class="p-5 flex flex-col h-full">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0" data-alt="Portrait of a female tutor with glasses" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAlCqazZcM7NMx0az3D0t3yM7BwzEwzg5ss1rlum9jZZtPIkVvSi1QSUEzs8XwDb9tVpcCq9Nvd7hlWv-xrGVcdEAF74gQSCMHkbHDajuCTmPwLm8CWBw8vkEHpB4y8R7dWfR3IqCxDKLjIp77yMh9AfNlJt6k2e7OM9uF5N-fWEFigV6Q4Etc4nwkVRD41tm2fodgh9Xqikl_4VS_iYsMGA3nFAijiyW4pHABNmu3o-c7kLUhb2LPBJsA-2z8fMksY2eorgg84Ymte'); background-size: cover; background-position: center;"></div>
+<div>
+<h3 class="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">آمنة الصادق</h3>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm filled">star</span>
+<span class="text-sm font-bold text-[#181611] dark:text-white">5.0</span>
+<span class="text-xs text-[#8a8060]">(105)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-lg font-bold text-primary font-arabic">13$</span>
+<span class="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
+</div>
+</div>
+<div class="space-y-2 mb-4 flex-grow">
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">school</span>
+<span>تخصص قراءات وعلوم قرآن</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">translate</span>
+<span>يتحدث: العربية، الملايو</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>1800+ حصة مكتملة</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">متقدم</span>
+<span class="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic">نساء فقط</span>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto">
+                                احجز تجربة
+                            </button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex justify-center mt-12 mb-6">
+<div class="flex items-center gap-2 font-arabic">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#8a8060] hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24]">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-[#181611] font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#181611] dark:text-white hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24]">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#181611] dark:text-white hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24]">3</button>
+<span class="text-[#8a8060]">...</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#181611] dark:text-white hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24]">8</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#8a8060] hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24]">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer for Context -->
+<footer class="bg-white dark:bg-[#1a170d] border-t border-[#e6e2de] dark:border-[#3a3528] py-8 mt-auto">
+<div class="layout-container px-10 text-center">
+<p class="text-[#8a8060] text-sm font-arabic">© 2024 قرآن أونلاين. جميع الحقوق محفوظة.</p>
+</div>
+</footer>
+</body></html>

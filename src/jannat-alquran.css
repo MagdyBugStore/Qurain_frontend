@@ -215,7 +215,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
   padding:15px 34px;border-radius:var(--radius);cursor:pointer;
   box-shadow:0 6px 20px rgba(200,146,42,.4);transition:all .25s;
 }
-.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(200,146,42,.5);}
+.btn-hero-"primary": "#e3a582", // light-bronze-300
 .btn-hero-secondary{
   background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
   color:#fff;font-family:'Tajawal',sans-serif;font-weight:600;font-size:16px;
@@ -350,7 +350,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 .pricing-btn-outline{background:transparent;border:2px solid var(--border);color:var(--forest);}
 .pricing-btn-outline:hover{border-color:var(--forest);background:var(--warm);}
 .pricing-btn-primary{background:linear-gradient(135deg,var(--forest),var(--forest-l));border:none;color:#fff;box-shadow:0 4px 14px rgba(28,58,46,.25);}
-.pricing-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(28,58,46,.32);}
+.pricing-btn-"primary": "#e3a582", // light-bronze-300
 
 /* ──── TESTIMONIALS ──── */
 .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1000px;margin:0 auto;}

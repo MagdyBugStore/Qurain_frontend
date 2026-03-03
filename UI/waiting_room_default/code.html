@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Waiting Room - Quran Online</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "primary-dark": "#b38b1d",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#181611", 
+                        "surface-dark": "#231f18",
+                        "surface-highlight": "#2d2920",
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#A19D95",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans Arabic", "Manrope", "sans-serif"],
+                        "body": ["Noto Sans Arabic", "Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-text-main min-h-screen flex flex-col font-body selection:bg-primary selection:text-background-dark">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-surface-highlight px-6 py-4 lg:px-10 bg-surface-dark/50 backdrop-blur-sm sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-tight">قرآن أونلاين</h2>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark transition-colors text-surface-dark text-sm font-bold shadow-[0_0_15px_rgba(244,192,37,0.3)]">
+<span class="material-symbols-outlined mr-2 text-[20px]">help</span>
+<span class="truncate">المساعدة</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-surface-highlight text-white hover:bg-surface-highlight/80 transition-colors relative">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-surface-highlight"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+<!-- Decorative Background Glow -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="max-w-4xl w-full flex flex-col items-center gap-10 z-10">
+<!-- Tutor Profile Section -->
+<div class="flex flex-col items-center gap-6">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/50 to-primary/20 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative size-40 rounded-full border-4 border-surface-highlight overflow-hidden bg-surface-dark shadow-2xl">
+<img alt="Portrait of Sheikh Abdul Rahman" class="w-full h-full object-cover" data-alt="Dignified man with beard in traditional clothing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyud-i-9P0U_oGbR-ZmSMYLEpJHEK8KhjDjUogY1bqtpYaOrARXn5eDCyVEdUitMJ_2VqE-v0SFsPY2g-4-mWhgr99ZMgfQES3RkreEK90eDRCCZBVngTMcrf8ls8PxK-GVHXxBhCldwFsK2bNMRt7oo9mW_XPC4iAKkDalJn8Qf17gCq0YWSe-TLidqwO-hE2byRYlJyZ-VFq1oJTbxBi_mkHHlR3ekUh5Searctsd4OV3-rEX7Ed55maQJAJ2dV0ga_QMmnmnj50"/>
+</div>
+<div class="absolute bottom-2 right-2 bg-green-500 border-4 border-background-dark size-6 rounded-full"></div>
+</div>
+<div class="text-center space-y-2">
+<h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">الشيخ عبد الرحمن</h1>
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-highlight border border-white/5">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+<p class="text-text-muted text-sm font-medium">سيبدأ الدرس قريباً</p>
+</div>
+</div>
+</div>
+<!-- Countdown Timer -->
+<div class="grid grid-cols-4 gap-4 md:gap-8 w-full max-w-2xl">
+<!-- Seconds -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-full aspect-square md:aspect-[4/3] flex flex-col items-center justify-center bg-surface-dark border border-surface-highlight rounded-2xl shadow-inner relative overflow-hidden group">
+<div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+<span class="text-3xl md:text-5xl font-bold text-primary tabular-nums tracking-wider">45</span>
+<span class="text-xs text-text-muted mt-1 font-medium">ثانية</span>
+</div>
+</div>
+<!-- Minutes -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-full aspect-square md:aspect-[4/3] flex flex-col items-center justify-center bg-surface-dark border border-surface-highlight rounded-2xl shadow-inner relative overflow-hidden">
+<div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+<span class="text-3xl md:text-5xl font-bold text-white tabular-nums tracking-wider">12</span>
+<span class="text-xs text-text-muted mt-1 font-medium">دقيقة</span>
+</div>
+</div>
+<!-- Hours -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-full aspect-square md:aspect-[4/3] flex flex-col items-center justify-center bg-surface-dark border border-surface-highlight rounded-2xl shadow-inner relative overflow-hidden">
+<div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+<span class="text-3xl md:text-5xl font-bold text-white tabular-nums tracking-wider">00</span>
+<span class="text-xs text-text-muted mt-1 font-medium">ساعة</span>
+</div>
+</div>
+<!-- Days -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-full aspect-square md:aspect-[4/3] flex flex-col items-center justify-center bg-surface-dark border border-surface-highlight rounded-2xl shadow-inner relative overflow-hidden">
+<div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+<span class="text-3xl md:text-5xl font-bold text-white tabular-nums tracking-wider">00</span>
+<span class="text-xs text-text-muted mt-1 font-medium">يوم</span>
+</div>
+</div>
+</div>
+<!-- Controls & Actions -->
+<div class="flex flex-wrap items-center justify-center gap-4 mt-4 w-full">
+<!-- Mic Toggle -->
+<button class="group flex flex-col items-center gap-2">
+<div class="size-14 rounded-full bg-surface-highlight border border-white/5 flex items-center justify-center text-white hover:bg-primary hover:text-surface-dark transition-all duration-300 shadow-lg">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">mic_off</span>
+</div>
+<span class="text-xs text-text-muted group-hover:text-primary transition-colors">الصوت</span>
+</button>
+<!-- Camera Toggle -->
+<button class="group flex flex-col items-center gap-2">
+<div class="size-14 rounded-full bg-surface-highlight border border-white/5 flex items-center justify-center text-white hover:bg-primary hover:text-surface-dark transition-all duration-300 shadow-lg">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">videocam_off</span>
+</div>
+<span class="text-xs text-text-muted group-hover:text-primary transition-colors">الكاميرا</span>
+</button>
+<!-- Settings -->
+<button class="group flex flex-col items-center gap-2">
+<div class="size-14 rounded-full bg-surface-highlight border border-white/5 flex items-center justify-center text-white hover:bg-white hover:text-surface-dark transition-all duration-300 shadow-lg">
+<span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">settings</span>
+</div>
+<span class="text-xs text-text-muted group-hover:text-white transition-colors">الإعدادات</span>
+</button>
+<div class="w-px h-12 bg-surface-highlight mx-4 hidden sm:block"></div>
+<!-- Leave Button -->
+<button class="flex items-center gap-2 px-6 h-14 rounded-full border border-red-500/30 text-red-500 hover:bg-red-500/10 hover:border-red-500 transition-all">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-bold">مغادرة</span>
+</button>
+</div>
+</div>
+<!-- Self Video Preview (Bottom Corner) -->
+<div class="absolute bottom-6 left-6 z-20 w-48 aspect-video bg-surface-dark rounded-xl border border-surface-highlight overflow-hidden shadow-2xl hidden md:block group">
+<img alt="User self video preview" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" data-alt="Young man smiling in video preview" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7p6c8pmT6Sv7TOfB5tI4HlpG3eR1rNgt4cEWL9VqYfhkvsjJPyWU1qt5ezoUhtElwLv0gcoP3dxUyukKyryXNfmGK2lnMX2THuwoVsF6X3s62gX1n4JCoogV4-Um2shaWPnXum2q-bUHKNyxuaQiKHuBUAelNi_e38-CkW3Id2Y5i-CZGZuC-MLFWSfi3EosRYpkyJ6LzIi6J2kGLNLQOB8pVbRYhre2rYGHFPcQRkEowjLEM8AvI7Bie_udPKIs1iZvTWhtO7wCU"/>
+<div class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] group-hover:backdrop-blur-none group-hover:bg-transparent transition-all">
+<span class="material-symbols-outlined text-white/50 text-3xl group-hover:hidden">videocam_off</span>
+</div>
+<div class="absolute bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[10px] text-white font-medium">أنت</div>
+</div>
+</main>
+<!-- Tips Strip -->
+<div class="bg-surface-dark border-t border-surface-highlight py-4 px-6 relative z-30">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+<div class="flex items-center gap-2 text-primary font-bold whitespace-nowrap">
+<span class="material-symbols-outlined">lightbulb</span>
+<span>نصائح سريعة:</span>
+</div>
+<div class="flex flex-1 justify-around w-full gap-4 text-text-muted text-center md:text-right">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
+<span>تأكد من جودة اتصال الإنترنت لديك</span>
+</div>
+<div class="hidden sm:flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
+<span>استخدم سماعات الرأس لجودة صوت أفضل</span>
+</div>
+<div class="hidden lg:flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
+<span>حضر المصحف الخاص بك للمتابعة</span>
+</div>
+</div>
+</div>
+</div>
+</body></html>

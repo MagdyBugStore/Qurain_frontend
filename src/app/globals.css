@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-noto-sans-arabic: 'Noto Sans Arabic', sans-serif;
+  --font-lexend: 'Lexend', sans-serif;
+}
+
+body {
+  font-family: var(--font-noto-sans-arabic), var(--font-lexend), sans-serif;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f2f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e3a582;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a75525;
+}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Qurain Online - Session Summary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "primary-content": "#181611",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2a261a",
+                        "border-light": "#e6e3db",
+                        "border-dark": "#4a4433",
+                        "text-main": "#181611",
+                        "text-sub": "#8a8060",
+                        "text-success": "#078812",
+                    },
+                    fontFamily: {
+                        "display": ['Lexend', '"Noto Sans"', 'sans-serif'],
+                        "body": ['"Noto Sans"', 'sans-serif'],
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-gray-100 font-body min-h-screen flex flex-col">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Header -->
+<header class="flex items-center justify-between border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-10 py-4 shadow-sm z-10 sticky top-0">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M7.24189 26.4066C7.31369 26.4411 7.64204 26.5637 8.52504 26.3738C9.59462 26.1438 11.0343 25.5311 12.7183 24.4963C14.7583 23.2426 17.0256 21.4503 19.238 19.238C21.4503 17.0256 23.2426 14.7583 24.4963 12.7183C25.5311 11.0343 26.1438 9.59463 26.3738 8.52504C26.5637 7.64204 26.4411 7.31369 26.4066 7.24189C26.345 7.21246 26.143 7.14535 25.6664 7.1918C24.9745 7.25925 23.9954 7.5498 22.7699 8.14278C20.3369 9.32007 17.3369 11.4915 14.4142 14.4142C11.4915 17.3369 9.32007 20.3369 8.14278 22.7699C7.5498 23.9954 7.25925 24.9745 7.1918 25.6664C7.14534 26.143 7.21246 26.345 7.24189 26.4066ZM29.9001 10.7285C29.4519 12.0322 28.7617 13.4172 27.9042 14.8126C26.465 17.1544 24.4686 19.6641 22.0664 22.0664C19.6641 24.4686 17.1544 26.465 14.8126 27.9042C13.4172 28.7617 12.0322 29.4519 10.7285 29.9001L21.5754 40.747C21.6001 40.7606 21.8995 40.931 22.8729 40.7217C23.9424 40.4916 25.3821 39.879 27.0661 38.8441C29.1062 37.5904 31.3734 35.7982 33.5858 33.5858C35.7982 31.3734 37.5904 29.1062 38.8441 27.0661C39.879 25.3821 40.4916 23.9425 40.7216 22.8729C40.931 21.8995 40.7606 21.6001 40.747 21.5754L29.9001 10.7285ZM29.2403 4.41187L43.5881 18.7597C44.9757 20.1473 44.9743 22.1235 44.6322 23.7139C44.2714 25.3919 43.4158 27.2666 42.252 29.1604C40.8128 31.5022 38.8165 34.012 36.4142 36.4142C34.012 38.8165 31.5022 40.8128 29.1604 42.252C27.2666 43.4158 25.3919 44.2714 23.7139 44.6322C22.1235 44.9743 20.1473 44.9757 18.7597 43.5881L4.41187 29.2403C3.29027 28.1187 3.08209 26.5973 3.21067 25.2783C3.34099 23.9415 3.8369 22.4852 4.54214 21.0277C5.96129 18.0948 8.43335 14.7382 11.5858 11.5858C14.7382 8.43335 18.0948 5.9613 21.0277 4.54214C22.4852 3.8369 23.9415 3.34099 25.2783 3.21067C26.5973 3.08209 28.1187 3.29028 29.2403 4.41187Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold font-display tracking-tight text-text-main dark:text-white">Qurain Online</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors text-text-main dark:text-gray-200" href="#">Dashboard</a>
+<a class="text-sm font-medium hover:text-primary transition-colors text-text-main dark:text-gray-200" href="#">Classes</a>
+<a class="text-sm font-medium hover:text-primary transition-colors text-text-main dark:text-gray-200" href="#">Progress</a>
+<a class="text-sm font-medium hover:text-primary transition-colors text-text-main dark:text-gray-200" href="#">Profile</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="hidden sm:flex items-center justify-center rounded-xl h-10 px-6 bg-primary hover:bg-yellow-400 transition-colors text-primary-content text-sm font-bold shadow-sm">
+                    Book Next Class
+                </button>
+<div class="size-10 rounded-full bg-cover bg-center border-2 border-border-light dark:border-border-dark" data-alt="User profile picture showing a smiling man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCJrg9vdDxWt0pZ2gdLpaAoXERLUuXrSwzomPMH25ArfiPgQZuLWXaKP5ypYgRyqsG6cI7HWBdIxEEqRLYe0ikpEk-PwNsD8rUqRXaTl0ojzmG2Rn1uy02qRa_AulqcxQDbw3gdl-sNMpmZ2ujNRBNm7wQ6S9TdhjXXLGkR6EP5ESVn_opJYzTzCehq2o211um80o89BMksOlTI8Nip3mFKU878Ye-alM50waYymmewHZSTM9qFs53waP_mDLO-APLyDriBtDoHVgby");'></div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-8">
+<!-- Hero Section: Summary -->
+<div class="mb-10">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div class="space-y-2">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-base">check_circle</span>
+                            Session Completed
+                        </div>
+<h1 class="text-3xl md:text-4xl font-black font-display text-text-main dark:text-white">Session Summary</h1>
+<p class="text-text-sub dark:text-gray-400 text-lg max-w-2xl">MashaAllah! Great effort today, Ahmed. You've made excellent progress on Surah Al-Baqarah.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium shadow-sm">
+<span class="material-symbols-outlined text-lg">share</span>
+                             Share Progress
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium shadow-sm">
+<span class="material-symbols-outlined text-lg">download</span>
+                            Download Report
+                       </button>
+</div>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<!-- Stat 1 -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<p class="text-text-sub dark:text-gray-400 font-medium text-sm">Session Duration</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded-md">schedule</span>
+</div>
+<p class="text-3xl font-bold font-display text-text-main dark:text-white">45 <span class="text-lg font-normal text-text-sub dark:text-gray-500">mins</span></p>
+</div>
+<!-- Stat 2 -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<p class="text-text-sub dark:text-gray-400 font-medium text-sm">Ayahs Recited</p>
+<span class="material-symbols-outlined text-blue-500 bg-blue-500/10 p-1 rounded-md">menu_book</span>
+</div>
+<p class="text-3xl font-bold font-display text-text-main dark:text-white">12</p>
+</div>
+<!-- Stat 3 -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<p class="text-text-sub dark:text-gray-400 font-medium text-sm">Correction Rate</p>
+<span class="material-symbols-outlined text-green-500 bg-green-500/10 p-1 rounded-md">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-bold font-display text-text-main dark:text-white">92%</p>
+<span class="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/40 px-1.5 py-0.5 rounded">+4%</span>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<p class="text-text-sub dark:text-gray-400 font-medium text-sm">Mistakes</p>
+<span class="material-symbols-outlined text-orange-500 bg-orange-500/10 p-1 rounded-md">error</span>
+</div>
+<p class="text-3xl font-bold font-display text-text-main dark:text-white">2 <span class="text-lg font-normal text-text-sub dark:text-gray-500">minor</span></p>
+</div>
+</div>
+<!-- Content Grid: Chart & Feedback -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<!-- Chart Section (Spans 2 columns) -->
+<div class="lg:col-span-2 bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden flex flex-col">
+<div class="p-6 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<div>
+<h3 class="font-bold text-lg text-text-main dark:text-white">Memorization Progress</h3>
+<p class="text-sm text-text-sub dark:text-gray-400">Ayahs memorized over the last 30 days</p>
+</div>
+<div class="text-right">
+<p class="text-2xl font-bold text-primary">+15 Ayahs</p>
+<p class="text-xs text-text-sub dark:text-gray-400">This Month</p>
+</div>
+</div>
+<div class="p-6 flex-1 flex flex-col justify-end min-h-[300px] relative">
+<!-- Custom CSS Chart Implementation -->
+<div class="w-full h-full flex items-end justify-between gap-2 md:gap-4 px-2">
+<!-- Bar 1 -->
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-full bg-primary/10 dark:bg-primary/5 rounded-t-lg relative h-[200px] flex items-end">
+<div class="w-full bg-primary/40 group-hover:bg-primary/60 transition-all rounded-t-lg relative" style="height: 40%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">4</div>
+</div>
+</div>
+<span class="text-xs font-medium text-text-sub dark:text-gray-500">Week 1</span>
+</div>
+<!-- Bar 2 -->
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-full bg-primary/10 dark:bg-primary/5 rounded-t-lg relative h-[200px] flex items-end">
+<div class="w-full bg-primary/60 group-hover:bg-primary/80 transition-all rounded-t-lg relative" style="height: 65%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">7</div>
+</div>
+</div>
+<span class="text-xs font-medium text-text-sub dark:text-gray-500">Week 2</span>
+</div>
+<!-- Bar 3 -->
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-full bg-primary/10 dark:bg-primary/5 rounded-t-lg relative h-[200px] flex items-end">
+<div class="w-full bg-primary/50 group-hover:bg-primary/70 transition-all rounded-t-lg relative" style="height: 55%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">5</div>
+</div>
+</div>
+<span class="text-xs font-medium text-text-sub dark:text-gray-500">Week 3</span>
+</div>
+<!-- Bar 4 (Current) -->
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-full bg-primary/10 dark:bg-primary/5 rounded-t-lg relative h-[200px] flex items-end">
+<div class="w-full bg-primary group-hover:bg-yellow-400 transition-all rounded-t-lg relative" style="height: 85%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">15</div>
+</div>
+</div>
+<span class="text-xs font-bold text-text-main dark:text-white">This Week</span>
+</div>
+</div>
+<!-- Graph background lines for visual reference -->
+<div class="absolute inset-x-6 top-6 bottom-12 pointer-events-none flex flex-col justify-between z-0 opacity-20">
+<div class="w-full h-px bg-text-sub dashed"></div>
+<div class="w-full h-px bg-text-sub dashed"></div>
+<div class="w-full h-px bg-text-sub dashed"></div>
+<div class="w-full h-px bg-text-sub dashed"></div>
+</div>
+</div>
+</div>
+<!-- Session Feedback (Spans 1 column) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm flex flex-col">
+<div class="p-6 border-b border-border-light dark:border-border-dark">
+<h3 class="font-bold text-lg text-text-main dark:text-white">Detailed Feedback</h3>
+</div>
+<div class="p-6 flex-1 space-y-6">
+<!-- Item 1 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="rounded-full bg-green-100 dark:bg-green-900/40 p-1.5 text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+<div class="w-0.5 h-full bg-border-light dark:bg-border-dark my-1"></div>
+</div>
+<div>
+<h4 class="font-bold text-sm text-text-main dark:text-white">Recited Surah Al-Fatiha</h4>
+<p class="text-sm text-text-sub dark:text-gray-400">Perfect recitation, Makharij were accurate.</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="rounded-full bg-orange-100 dark:bg-orange-900/40 p-1.5 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined text-lg">priority_high</span>
+</div>
+<div class="w-0.5 h-full bg-border-light dark:bg-border-dark my-1"></div>
+</div>
+<div>
+<h4 class="font-bold text-sm text-text-main dark:text-white">Revised Surah Al-Baqarah (1-5)</h4>
+<p class="text-sm text-text-sub dark:text-gray-400">Need to practice Ghunna rules in verse 3.</p>
+<button class="mt-2 text-xs font-bold text-primary hover:underline">Practice Now</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="rounded-full bg-blue-100 dark:bg-blue-900/40 p-1.5 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-lg">star</span>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-sm text-text-main dark:text-white">New Memorization (Ayah 6)</h4>
+<p class="text-sm text-text-sub dark:text-gray-400">Completed successfully. Keep repeating to retain.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Next Steps & Promo -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Next Class Card -->
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-6 border border-border-light dark:border-border-dark flex flex-col justify-between shadow-sm">
+<div>
+<h3 class="font-bold text-xl mb-4 text-text-main dark:text-white">Next Scheduled Class</h3>
+<div class="flex items-center gap-4 mb-6">
+<div class="size-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-center flex-col border border-border-light dark:border-border-dark">
+<span class="text-xs font-bold text-text-sub uppercase">Wed</span>
+<span class="text-xl font-bold text-text-main dark:text-white">24</span>
+</div>
+<div>
+<p class="font-bold text-lg text-text-main dark:text-white">Tajweed Advanced</p>
+<p class="text-text-sub dark:text-gray-400 text-sm">with Sheikh Abdullah • 5:00 PM</p>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-primary hover:bg-yellow-400 text-primary-content font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-sm">
+                            Join Class
+                        </button>
+<button class="flex-1 bg-transparent border border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800 text-text-main dark:text-white font-bold py-3 px-4 rounded-xl transition-colors text-sm">
+                            Reschedule
+                        </button>
+</div>
+</div>
+<!-- Special Offer Card (Prominent Recommendation) -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 dark:from-black dark:to-gray-900 text-white shadow-lg group">
+<!-- Background Decoration -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+<div class="relative z-10 p-8 flex flex-col justify-between h-full">
+<div class="flex justify-between items-start">
+<div>
+<div class="inline-block bg-primary text-primary-content text-xs font-black uppercase tracking-wider py-1 px-3 rounded-full mb-3">
+                                    Special Offer
+                                </div>
+<h3 class="font-bold text-2xl mb-2">Upgrade to Premium Plan</h3>
+<p class="text-gray-300 text-sm mb-4 max-w-sm">Get unlimited access to revision tools, detailed progress analytics, and 1-on-1 bonus sessions.</p>
+</div>
+<div class="bg-white/10 p-3 rounded-full backdrop-blur-sm hidden sm:block">
+<span class="material-symbols-outlined text-3xl text-primary">diamond</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<div>
+<span class="text-3xl font-bold text-primary">$19<span class="text-sm font-normal text-gray-400">/mo</span></span>
+<span class="text-sm text-gray-500 line-through ml-2">$29</span>
+</div>
+<button class="bg-white text-gray-900 hover:bg-gray-100 font-bold py-2.5 px-6 rounded-xl transition-colors shadow-lg text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+                                Upgrade Now
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
