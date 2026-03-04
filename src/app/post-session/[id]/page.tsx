@@ -2,9 +2,10 @@
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import Link from 'next/link'
+import { Link, useParams } from 'react-router-dom'
 
-export default function PostSessionSummaryPage({ params }: { params: { id: string } }) {
+export default function PostSessionSummaryPage() {
+  const { id } = useParams<{ id: string }>()
   return (
     <>
       <Header />
@@ -12,11 +13,11 @@ export default function PostSessionSummaryPage({ params }: { params: { id: strin
         <div className="flex flex-col max-w-[960px] w-full gap-8">
           {/* Breadcrumbs */}
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <Link href="/" className="text-text-secondary hover:text-primary transition-colors">
+            <Link to="/" className="text-text-secondary hover:text-primary transition-colors">
               الرئيسية
             </Link>
             <span className="material-symbols-outlined text-text-secondary text-sm rotate-180">chevron_right</span>
-            <Link href="/dashboard" className="text-text-secondary hover:text-primary transition-colors">
+            <Link to="/dashboard" className="text-text-secondary hover:text-primary transition-colors">
               جلساتي
             </Link>
             <span className="material-symbols-outlined text-text-secondary text-sm rotate-180">chevron_right</span>

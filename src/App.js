@@ -1,19 +1,35 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./jannat-alquran.css";
+
 import { AuthProvider } from "./contexts/AuthContext";
 import { Topbar } from "./components/layout/Topbar";
-import { Footer } from "./components/layout/Footer";
+import { Footer } from "./components/layout/Footer.jsx";
 import { ToastContainer } from "./components/layout/ToastContainer";
 import { SEOHead } from "./components/seo/SEOHead";
-import { LandingPage } from "./pages/LandingPage";
-import { EvalPage } from "./pages/EvalPage";
-import { TeachersPage } from "./pages/TeachersPage";
-import { ProgramsPage } from "./pages/ProgramsPage";
-import { DashboardPage } from "./pages/DashboardPage";
-import { AdminPage } from "./pages/AdminPage";
-import { LoginPage } from "./pages/LoginPage";
-import { PersonalInfoPage } from "./pages/PersonalInfoPage";
+import { LandingPage } from "./legacy-pages/LandingPage";
+import { EvalPage } from "./legacy-pages/EvalPage";
+import { TeachersPage } from "./legacy-pages/TeachersPage";
+import { ProgramsPage } from "./legacy-pages/ProgramsPage";
+import { DashboardPage } from "./legacy-pages/DashboardPage";
+import { AdminPage } from "./legacy-pages/AdminPage";
+import { LoginPage } from "./legacy-pages/LoginPage";
+import { PersonalInfoPage } from "./legacy-pages/PersonalInfoPage";
+// Import new app pages
+import Home from "./app/page";
+import AdultPage from "./app/adult/page";
+import ProgramsPageNew from "./app/programs/page";
+import TeachersPageNew from "./app/teachers/page";
+import TeacherDetailPage from "./app/teachers/[id]/page";
+import BookingPage from "./app/booking/[id]/page";
+import BookingConfirmPage from "./app/booking/[id]/confirm/page";
+import TechnicalCheckPage from "./app/technical-check/[id]/page";
+import WaitingRoomPage from "./app/waiting-room/[id]/page";
+import LiveSessionPage from "./app/live-session/[id]/page";
+import PostSessionPage from "./app/post-session/[id]/page";
+import StartFreePage from "./app/start-free/page";
+import RoadmapPage from "./app/roadmap/page";
+import SectionsPage from "./app/sections/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState([]);
@@ -133,15 +149,32 @@ function AppShell() {
       <SEOHead {...seoConfig} />
       <Topbar currentPath={location.pathname} navLinks={navLinks} onNavigate={handleNavigate} />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/programs" element={<ProgramsPage />} />
-        <Route path="/teachers" element={<TeachersPage addToast={addToast} />} />
+        {/* Legacy routes */}
+        <Route path="/legacy" element={<LandingPage />} />
         <Route path="/eval" element={<EvalPage addToast={addToast} />} />
         <Route path="/login" element={<LoginPage addToast={addToast} />} />
         <Route path="/personal-info" element={<PersonalInfoPage addToast={addToast} />} />
         <Route path="/dashboard" element={<DashboardPage addToast={addToast} />} />
         <Route path="/admin" element={<AdminPage addToast={addToast} />} />
-        <Route path="*" element={<LandingPage />} />
+        
+        {/* New app routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/adult" element={<AdultPage />} />
+        <Route path="/programs" element={<ProgramsPageNew />} />
+        <Route path="/teachers" element={<TeachersPageNew />} />
+        <Route path="/teachers/:id" element={<TeacherDetailPage />} />
+        <Route path="/booking/:id" element={<BookingPage />} />
+        <Route path="/booking/:id/confirm" element={<BookingConfirmPage />} />
+        <Route path="/technical-check/:id" element={<TechnicalCheckPage />} />
+        <Route path="/waiting-room/:id" element={<WaitingRoomPage />} />
+        <Route path="/live-session/:id" element={<LiveSessionPage />} />
+        <Route path="/post-session/:id" element={<PostSessionPage />} />
+        <Route path="/start-free" element={<StartFreePage />} />
+        <Route path="/roadmap" element={<RoadmapPage />} />
+        <Route path="/sections" element={<SectionsPage />} />
+        
+        {/* Fallback */}
+        <Route path="*" element={<Home />} />
       </Routes>
       {isPublicPage && <Footer onNavigate={handleNavigate} />}
       <ToastContainer toasts={toasts} />

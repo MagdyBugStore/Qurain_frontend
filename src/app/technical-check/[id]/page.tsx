@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/components/layout/Header'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 type CheckStatus = 'checking' | 'passed' | 'failed'
 
-export default function TechnicalCheckPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
+export default function TechnicalCheckPage() {
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [cameraStatus, setCameraStatus] = useState<CheckStatus>('checking')
   const [micStatus, setMicStatus] = useState<CheckStatus>('checking')
   const [internetStatus, setInternetStatus] = useState<CheckStatus>('checking')
@@ -36,7 +36,7 @@ export default function TechnicalCheckPage({ params }: { params: { id: string } 
 
   const handleEnter = () => {
     if (allPassed) {
-      router.push(`/waiting-room/${params.id}`)
+      navigate(`/waiting-room/${id}`)
     }
   }
 

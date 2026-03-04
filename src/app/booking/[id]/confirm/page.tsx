@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import Link from 'next/link'
 
-export default function BookingConfirmPage({ params }: { params: { id: string } }) {
+export default function BookingConfirmPage() {
+  const { id } = useParams<{ id: string }>()
   const [techCheckConfirmed, setTechCheckConfirmed] = useState(false)
   const [bookingConfirmed, setBookingConfirmed] = useState(false)
 
@@ -59,7 +60,7 @@ export default function BookingConfirmPage({ params }: { params: { id: string } 
                   إضافة للتقويم
                 </button>
                 <Link
-                  href="/"
+                  to="/"
                   className="text-primary hover:text-primary/80 text-sm font-bold py-2 transition-colors"
                 >
                   العودة للرئيسية
@@ -166,7 +167,7 @@ export default function BookingConfirmPage({ params }: { params: { id: string } 
               تأكيد الحجز
             </button>
             <Link
-              href={`/teachers/${params.id}`}
+              to={`/teachers/${id}`}
               className="bg-transparent border border-slate-300 dark:border-[#544e3b] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2c281e] font-medium py-3 px-6 rounded-lg transition-colors"
             >
               العودة

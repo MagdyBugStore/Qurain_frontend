@@ -1,8 +1,8 @@
+import { Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
-import Link from 'next/link'
 
 export default function SectionsPage() {
   return (
@@ -31,7 +31,7 @@ export default function SectionsPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <Link
-                    href="/start-free"
+                    to="/start-free"
                     className="h-14 px-8 rounded-xl bg-primary text-text-main text-lg font-bold hover:bg-primary/90 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                   >
                     <span>ابدأ مجاناً</span>

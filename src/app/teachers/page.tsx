@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
 import { useAuthGuard } from '@/hooks/useRequireAuth'
-import Link from 'next/link'
 
 export default function TeachersPage() {
   const { requireAuth } = useAuthGuard()
@@ -235,7 +235,7 @@ export default function TeachersPage() {
       <main className="flex-grow layout-container px-4 sm:px-10 py-6 max-w-[1400px] mx-auto w-full">
         {/* Breadcrumbs */}
         <div className="flex flex-wrap gap-2 mb-6 font-arabic">
-          <Link href="/" className="text-[#8a8060] text-sm font-medium leading-normal hover:text-primary">
+          <Link to="/" className="text-[#8a8060] text-sm font-medium leading-normal hover:text-primary">
             الرئيسية
           </Link>
           <span className="text-[#8a8060] text-sm font-medium leading-normal">/</span>
@@ -262,7 +262,7 @@ export default function TeachersPage() {
             {topTeachers.map((teacher, index) => (
               <Link
                 key={teacher.id}
-                href={`/teachers/${teacher.id}`}
+                to={`/teachers/${teacher.id}`}
                 className={`relative flex flex-col items-center bg-white dark:bg-[#1a170d] rounded-xl border-2 border-primary shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer ${
                   index === 1 ? 'transform md:-translate-y-2' : ''
                 }`}
@@ -506,7 +506,7 @@ export default function TeachersPage() {
               {regularTeachers.map((teacher, index) => (
                 <Link
                   key={teacher.id}
-                  href={`/teachers/${teacher.id}`}
+                  to={`/teachers/${teacher.id}`}
                   className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
                 >
                   <div className="p-5 flex flex-col h-full">

@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { useAppStore } from '@/store/useAppStore'
 
 export default function Header() {
@@ -11,7 +11,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <div className="w-8 h-8 text-primary">
               <svg
                 className="w-full h-full"
@@ -35,19 +35,19 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
-              href="/programs"
+              to="/programs"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               البرامج
             </Link>
             <Link
-              href="/roadmap"
+              to="/roadmap"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               الخارطة
             </Link>
             <Link
-              href="/teachers"
+              to="/teachers"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               المعلمين
@@ -63,7 +63,7 @@ export default function Header() {
               تسجيل الدخول
             </button>
             <Link
-              href="/start-free"
+              to="/start-free"
               className="bg-primary hover:bg-primary-dark text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors shadow-sm"
             >
               ابدأ تجربة مجانية

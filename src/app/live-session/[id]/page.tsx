@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Header from '@/components/layout/Header'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
+
 
 type ViewMode = 'mushaf' | 'whiteboard'
 
-export default function LiveSessionPage({ params }: { params: { id: string } }) {
+export default function LiveSessionPage() {
+  const { id } = useParams<{ id: string }>()
   const [viewMode, setViewMode] = useState<ViewMode>('whiteboard')
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
@@ -271,7 +273,7 @@ export default function LiveSessionPage({ params }: { params: { id: string } }) 
             <span className="material-symbols-outlined">{isVideoOff ? 'videocam_off' : 'videocam'}</span>
           </button>
           <Link
-            href={`/post-session/${params.id}`}
+            to={`/post-session/${id}`}
             className="flex items-center justify-center px-4 h-10 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold text-sm gap-2 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">call_end</span>
