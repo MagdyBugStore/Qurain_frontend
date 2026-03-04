@@ -1,14 +1,15 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-const SITE_URL = process.env.REACT_APP_SITE_URL || "https://quran-platform.com";
+// Note: Vite uses import.meta.env instead of process.env, and variables must be prefixed with VITE_
+const SITE_URL = import.meta.env.VITE_SITE_URL || "https://quran-platform.com";
 const SITE_NAME = "منصة القرآن | Quran Platform";
 
 export function SEOHead({ 
   title, 
   description, 
-  keywords,
-  image,
+  keywords = "",
+  image = "",
   type = "website",
   noindex = false,
   geoLocation

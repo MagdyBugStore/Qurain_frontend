@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
 import { useAppStore } from '@/store/useAppStore'
+
 
 interface EmailSignupProps {
   onEmailSubmitted: () => void
@@ -165,7 +165,6 @@ export default function EmailSignup({ onEmailSubmitted }: EmailSignupProps) {
           </div>
         </div>
       </main>
-      <Footer />
       <LoginModal />
       <Popup />
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/layout/Header'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 
 type ViewMode = 'mushaf' | 'whiteboard'
@@ -12,7 +12,7 @@ export default function LiveSessionPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('whiteboard')
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
-  const [sessionTime, setSessionTime] = useState({ hours: 0, minutes: 42, seconds: 15 })
+  const [sessionTime] = useState({ hours: 0, minutes: 42, seconds: 15 })
 
   return (
     <>

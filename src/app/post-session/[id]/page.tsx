@@ -1,11 +1,9 @@
 'use client'
 
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 export default function PostSessionSummaryPage() {
-  const { id } = useParams<{ id: string }>()
   return (
     <>
       <Header />
@@ -219,7 +217,6 @@ export default function PostSessionSummaryPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </>
   )
 }

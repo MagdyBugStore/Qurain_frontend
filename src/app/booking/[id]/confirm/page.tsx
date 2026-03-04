@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 
 export default function BookingConfirmPage() {
   const { id } = useParams<{ id: string }>()
@@ -69,7 +68,6 @@ export default function BookingConfirmPage() {
             </div>
           </div>
         </main>
-        <Footer />
       </>
     )
   }
@@ -179,7 +177,6 @@ export default function BookingConfirmPage() {
           <span className="material-symbols-outlined text-4xl rotate-180">arrow_right_alt</span>
         </div>
       </main>
-      <Footer />
     </>
   )
 }

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 
 
 export default function TeacherDetailPageClient() {
@@ -177,18 +176,13 @@ export default function TeacherDetailPageClient() {
                   <span>رد سريع (خلال ساعة)</span>
                 </div>
                 <button className="w-full bg-primary hover:bg-primary/90 text-[#181611] font-bold text-lg py-3 rounded-lg shadow-lg transition-all mb-3">
-                  احجز حصة تجريبية
-                </button>
-                <button className="w-full bg-transparent hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24] text-[#181611] dark:text-white border border-[#e6e2de] dark:border-[#3a3528] font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[20px]">chat</span>
-                  أرسل رسالة
+                  احجز الان ( اول حصه مجانية )
                 </button>
               </div>
             </div>
           </div>
         </div>
       </main>
-      <Footer />
     </>
   )
 }

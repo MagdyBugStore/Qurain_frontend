@@ -1,12 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
 import Header from '@/components/layout/Header'
-import { Link } from 'react-router-dom'
 
 export default function WaitingRoomPage() {
-  const { id } = useParams<{ id: string }>()
   const [isTutorLate, setIsTutorLate] = useState(false)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 12, seconds: 45 })
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/components/layout/Header'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 type CheckStatus = 'checking' | 'passed' | 'failed'
 
@@ -21,7 +21,6 @@ export default function TechnicalCheckPage() {
   }, [])
 
   const allPassed = cameraStatus === 'passed' && micStatus === 'passed' && internetStatus === 'passed'
-  const hasError = micStatus === 'failed' || cameraStatus === 'failed' || internetStatus === 'failed'
 
   const handleRetry = () => {
     setCameraStatus('checking')

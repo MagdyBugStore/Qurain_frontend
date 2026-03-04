@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
 
@@ -183,7 +183,6 @@ export default function SectionsPage() {
           </div>
         </section>
       </main>
-      <Footer />
       <LoginModal />
       <Popup />
     </>

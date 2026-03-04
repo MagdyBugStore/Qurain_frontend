@@ -7,8 +7,9 @@ interface Step2AgeGroupProps {
   onBack?: () => void
 }
 
-export default function Step2AgeGroup({ onNext, onBack }: Step2AgeGroupProps) {
+export default function Step2AgeGroup({ onNext, onBack: _onBack }: Step2AgeGroupProps) {
   const { formData, updateFormData } = useAppStore()
+  void _onBack
 
   const ageGroups = [
     { id: 'child', label: 'طفل', ageRange: '5-12 سنة' },

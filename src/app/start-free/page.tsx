@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
 import EmailSignup from '@/components/forms/EmailSignup'
@@ -14,8 +13,8 @@ import { useAppStore } from '@/store/useAppStore'
 
 export default function StartFreePage() {
   const [currentStep, setCurrentStep] = useState(1)
-  const [showEmailForm, setShowEmailForm] = useState(true)
   const emailSubmitted = useAppStore((state) => state.emailSubmitted)
+  const showEmailForm = !emailSubmitted
 
   const steps = [
     { number: 1, component: Step1Goals, title: 'ما هو هدفك من تعلم القرآن؟' },
@@ -24,16 +23,7 @@ export default function StartFreePage() {
     { number: 4, component: Step4Budget, title: 'الميزانية والهدف' },
   ]
 
-  // Check if email was already submitted (from store)
-  useEffect(() => {
-    if (emailSubmitted) {
-      setShowEmailForm(false)
-    }
-  }, [emailSubmitted])
-
-  const handleEmailSubmitted = () => {
-    setShowEmailForm(false)
-  }
+  const handleEmailSubmitted = () => {}
 
   const CurrentStepComponent = steps[currentStep - 1]?.component || Step1Goals
 
@@ -105,7 +95,6 @@ export default function StartFreePage() {
           </div>
         </div>
       </main>
-      <Footer />
       <LoginModal />
       <Popup />
     </>

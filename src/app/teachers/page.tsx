@@ -1,9 +1,6 @@
 'use client'
-
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import LoginModal from '@/components/modals/LoginModal'
 import Popup from '@/components/modals/Popup'
 import { useAuthGuard } from '@/hooks/useRequireAuth'
@@ -503,7 +500,7 @@ export default function TeachersPage() {
             </div>
             {/* Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {regularTeachers.map((teacher, index) => (
+              {regularTeachers.map((teacher) => (
                 <Link
                   key={teacher.id}
                   to={`/teachers/${teacher.id}`}
@@ -603,7 +600,6 @@ export default function TeachersPage() {
           </div>
         </div>
       </main>
-      <Footer />
       <LoginModal />
       <Popup />
     </>

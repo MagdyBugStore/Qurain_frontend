@@ -1,13 +1,14 @@
 {
-  "name": "quran-online",
-  "version": "0.1.0",
+  "name": "react-v",
   "private": true,
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "dev": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "vite"
   },
   "dependencies": {
     "firebase": "^12.10.0",
@@ -16,30 +17,25 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^16.5.4",
     "react-router-dom": "^7.13.1",
-    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.0",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^5.1.1",
     "ajv": "^8.18.0",
     "autoprefixer": "^10.4.16",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
-    "typescript": "4.9.5"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vite": "^7.3.1"
   }
 }
