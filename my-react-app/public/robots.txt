@@ -1,0 +1,12 @@
+# robots.txt for Quran Platform
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://quran-platform.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-noto-sans-arabic: 'Noto Sans Arabic', sans-serif;
+  --font-lexend: 'Lexend', sans-serif;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  direction: rtl;
+  font-family: var(--font-noto-sans-arabic), var(--font-lexend), sans-serif;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* RTL Utilities */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* Ensure proper text alignment for RTL */
+[dir="rtl"] * {
+  text-align: inherit;
+}
+
+/* Flip icons that need to be reversed in RTL */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Custom scrollbar removed for production build compatibility */
