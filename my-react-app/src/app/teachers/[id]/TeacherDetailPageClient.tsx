@@ -101,10 +101,10 @@ export default function TeacherDetailPageClient() {
         const querySnapshot = await getDocs(applicationsQuery)
         
         if (!querySnapshot.empty) {
-          const doc = querySnapshot.docs[0]
+          const docSnapshot = querySnapshot.docs[0]
           const appData = {
-            id: doc.id,
-            ...doc.data()
+            id: docSnapshot.id,
+            ...docSnapshot.data()
           } as TeacherApplication
           setTeacherApplication(appData)
 
@@ -114,7 +114,7 @@ export default function TeacherDetailPageClient() {
               const userDoc = await getDoc(doc(db, 'users', appData.userId))
               if (userDoc.exists()) {
                 setTeacherProfile({
-                  ...userDoc.data()
+                  ...(userDoc.data() as UserProfile)
                 } as UserProfile)
               }
             } catch (error) {
