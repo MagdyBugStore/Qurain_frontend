@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html class="dark" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&amp;family=Manrope:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Cairo", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #f4c025;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-0 sm:p-4">
+<div class="flex flex-col lg:flex-row w-full max-w-6xl min-h-[85vh] bg-white dark:bg-background-dark/50 rounded-xl overflow-hidden shadow-2xl border border-primary/10">
+<!-- Right Side: Visual & Progress -->
+<div class="relative w-full lg:w-5/12 bg-primary/10 dark:bg-primary/5 flex flex-col items-center justify-center p-12 text-center overflow-hidden">
+<!-- Background Illustration Placeholder -->
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="absolute top-[-10%] right-[-10%] w-64 h-64 rounded-full bg-primary blur-3xl"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-64 h-64 rounded-full bg-primary blur-3xl"></div>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- Circular Progress Bar -->
+<div class="relative size-48 flex items-center justify-center mb-8">
+<svg class="size-full -rotate-90">
+<circle class="text-primary/20" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="0" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-4xl font-extrabold text-primary">3/3</span>
+<span class="text-xs font-semibold opacity-60">الخطوات</span>
+</div>
+</div>
+<h1 class="text-3xl font-bold mb-4">الخطوة الثالثة</h1>
+<p class="text-xl text-slate-600 dark:text-slate-400 mb-2">الميزانية والهدف</p>
+<div class="w-16 h-1 bg-primary rounded-full mt-4"></div>
+</div>
+<div class="mt-auto pt-10">
+<img alt="Spiritual pattern" class="w-full h-48 object-cover rounded-xl opacity-40 mix-blend-overlay" data-alt="Intricate geometric spiritual pattern with golden lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQLrK10Ij8YZaBS7CIV4yP2KIsQKvSVlCt0BTRYYJUdzx_zLPV3KXlUFjXRCck8zCBZYL5tGaeBG1pha1R8iN_pnEufW6VGQ06C5p1veZvL6RN43O7yoRXhYx5J2dnpa_p5ikEE_fsocCJSsczaSmne2_nj8XHF4DuXksHOjKznPkzFRmjLncR9bzDpGA2VIbkPUrU0LKmPyOyeOScE_lJOdun1JTOatGvbhRrrqfdEF4N1rxAmA5avMRn0N7BdUWZUASL6qBs_64j"/>
+</div>
+</div>
+<!-- Left Side: Content & Selection -->
+<div class="w-full lg:w-7/12 p-8 lg:p-16 flex flex-col">
+<header class="flex items-center justify-between mb-12">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">payments</span>
+<h2 class="text-2xl font-bold">إعداد الحساب</h2>
+</div>
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<!-- Section 1: Monthly Budget -->
+<section class="mb-12">
+<div class="flex items-center gap-3 mb-6">
+<div class="size-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">savings</span>
+</div>
+<h3 class="text-xl font-bold">الميزانية الشهرية</h3>
+</div>
+<div class="bg-slate-50 dark:bg-white/5 p-8 rounded-xl border border-slate-200 dark:border-white/10">
+<div class="flex justify-center mb-8">
+<div class="text-center">
+<span class="text-5xl font-black text-primary">250</span>
+<span class="text-lg font-bold mr-2">ريال</span>
+</div>
+</div>
+<div class="relative px-2">
+<input class="range-slider w-full h-2 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" max="1000" min="50" type="range" value="250"/>
+<div class="flex justify-between mt-4 text-sm font-semibold opacity-60">
+<span>50 ريال</span>
+<span>1000+ ريال</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Learning Goal -->
+<section class="mb-12">
+<div class="flex items-center gap-3 mb-6">
+<div class="size-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<h3 class="text-xl font-bold">الهدف التعليمي</h3>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<label class="cursor-pointer group">
+<input checked="" class="hidden peer" name="goal" type="radio"/>
+<div class="flex flex-col items-center p-4 rounded-xl border-2 border-slate-200 dark:border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full text-center">
+<span class="material-symbols-outlined text-3xl mb-3 text-slate-400 peer-checked:text-primary">menu_book</span>
+<span class="text-sm font-bold">حفظ</span>
+</div>
+</label>
+<!-- Card 2 -->
+<label class="cursor-pointer group">
+<input class="hidden peer" name="goal" type="radio"/>
+<div class="flex flex-col items-center p-4 rounded-xl border-2 border-slate-200 dark:border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full text-center">
+<span class="material-symbols-outlined text-3xl mb-3 text-slate-400 peer-checked:text-primary">verified</span>
+<span class="text-sm font-bold">إجازة</span>
+</div>
+</label>
+<!-- Card 3 -->
+<label class="cursor-pointer group">
+<input class="hidden peer" name="goal" type="radio"/>
+<div class="flex flex-col items-center p-4 rounded-xl border-2 border-slate-200 dark:border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full text-center">
+<span class="material-symbols-outlined text-3xl mb-3 text-slate-400 peer-checked:text-primary">record_voice_over</span>
+<span class="text-sm font-bold">تصحيح التلاوة</span>
+</div>
+</label>
+<!-- Card 4 -->
+<label class="cursor-pointer group">
+<input class="hidden peer" name="goal" type="radio"/>
+<div class="flex flex-col items-center p-4 rounded-xl border-2 border-slate-200 dark:border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full text-center">
+<span class="material-symbols-outlined text-3xl mb-3 text-slate-400 peer-checked:text-primary">psychology</span>
+<span class="text-sm font-bold">فهم المعاني</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Bottom Navigation -->
+<div class="mt-auto pt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center gap-6">
+<button class="w-full sm:w-auto px-12 py-4 bg-primary text-background-dark font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all">
+                    إكمال الملف
+                </button>
+<a class="text-slate-500 hover:text-primary font-bold transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined">arrow_forward</span>
+                    رجوع
+                </a>
+</div>
+</div>
+</div>
+</body></html>

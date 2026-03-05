@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Noto+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d5aa2a",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201c12",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans Arabic", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-primary/10 bg-white/50 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">auto_stories</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight text-slate-900">بوابة المعلمين</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-8 px-4">
+<div class="layout-content-container flex flex-col max-w-[800px] flex-1 gap-8">
+<!-- Progress Section -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-primary/5">
+<div class="flex gap-6 justify-between items-center mb-3">
+<p class="text-slate-900 text-lg font-bold">تقديم الطلب</p>
+<p class="text-primary text-sm font-bold bg-primary/10 px-3 py-1 rounded-full">75% مكتمل</p>
+</div>
+<div class="rounded-full bg-primary/10 h-3 overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 75%;"></div>
+</div>
+<p class="text-slate-500 text-sm mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">info</span>
+                        أنت الآن في المرحلة الأخيرة من تقديم طلبك
+                    </p>
+</div>
+<!-- Form Section: Personal Info -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-r-4 border-primary pr-4">
+<h2 class="text-xl font-bold">المعلومات الشخصية</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<label class="flex flex-col gap-2">
+<span class="text-slate-700 font-medium px-1">الاسم الكامل باللغة العربية</span>
+<input class="form-input rounded-lg border-primary/20 bg-white h-12 focus:border-primary focus:ring-primary/20 text-slate-900" placeholder="مثال: محمد أحمد علي" type="text"/>
+</label>
+<label class="flex flex-col gap-2">
+<span class="text-slate-700 font-medium px-1">البريد الإلكتروني</span>
+<input class="form-input rounded-lg border-primary/20 bg-white h-12 focus:border-primary focus:ring-primary/20 text-slate-900 text-left" dir="ltr" placeholder="name@example.com" type="email"/>
+</label>
+</div>
+</section>
+<!-- Form Section: Qualifications -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-r-4 border-primary pr-4">
+<h2 class="text-xl font-bold">المؤهلات والإجازات</h2>
+</div>
+<div class="bg-white border-2 border-dashed border-primary/30 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-4">
+<div class="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-4xl">upload_file</span>
+</div>
+<div>
+<p class="text-lg font-bold">رفع شهادة الإجازة</p>
+<p class="text-slate-500 text-sm">يرجى رفع نسخة ضوئية واضحة من شهادة الإجازة في القرآن الكريم</p>
+</div>
+<div class="mt-2 flex gap-4 w-full max-w-md">
+<div class="flex-1 bg-background-light p-3 rounded-lg border border-primary/10 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">description</span>
+<div class="text-right">
+<p class="text-xs font-bold text-slate-900">ijazah_recitation.pdf</p>
+<p class="text-[10px] text-slate-500">2.4 MB</p>
+</div>
+<button class="mr-auto text-slate-400 hover:text-red-500">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<button class="text-primary font-bold text-sm underline">رفع ملف آخر</button>
+</div>
+</section>
+<!-- Form Section: Bio & Subjects -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 border-r-4 border-primary pr-4">
+<h2 class="text-xl font-bold">النبذة التعريفية والمواد</h2>
+</div>
+<label class="flex flex-col gap-2">
+<span class="text-slate-700 font-medium px-1">نبذة قصيرة عن خبرتك في التدريس</span>
+<textarea class="form-input rounded-lg border-primary/20 bg-white focus:border-primary focus:ring-primary/20 text-slate-900" placeholder="اكتب نبذة مختصرة عن مسيرتك في تحفيظ القرآن وعلوم التجويد..." rows="4"></textarea>
+</label>
+<div class="flex flex-col gap-4">
+<span class="text-slate-700 font-medium px-1">المواد المفضلة لتدريسها</span>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-2 rounded-full border border-primary bg-primary text-white text-sm font-bold">التجويد العملي</button>
+<button class="px-5 py-2 rounded-full border border-primary bg-primary text-white text-sm font-bold">حفظ المتون</button>
+<button class="px-5 py-2 rounded-full border border-primary/20 bg-white text-slate-600 text-sm font-medium hover:border-primary/50">القراءات العشر</button>
+<button class="px-5 py-2 rounded-full border border-primary/20 bg-white text-slate-600 text-sm font-medium hover:border-primary/50">تفسير القرآن</button>
+</div>
+</div>
+</section>
+<!-- Final Action -->
+<div class="pt-10 pb-20">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl text-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">send</span>
+                        إرسال طلب الانضمام
+                    </button>
+<p class="text-center text-slate-400 text-sm mt-6">
+                        بالنقر على إرسال، فإنك توافق على شروط الخدمة وسياسة الخصوصية الخاصة بالمنصة
+                    </p>
+</div>
+</div>
+</main>
+<!-- Footer Decor -->
+<footer class="mt-auto py-10 flex justify-center">
+<div class="opacity-10">
+<img class="h-20 grayscale" data-alt="Geometric Islamic arabesque pattern decoration" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIsXN154RAymUWqw7FlpHTrDpZFSlbLTuJOn4cHridgCF5tr9W7zTuzz-8lQmPDuQk0x69-5UHKv0GkuK209huzxNexlbZsOSTI5pJwPDS_R1qO6zwSGxS9-PtqFKqrv2croJhVcNefJmm9CutC66excM0L6fvWpno6XET5pTdqqdvxT16tlcsqdPjIlK43B4lG_AoFPw__v6-9PNBMmtO_CLcsq0W7TA9ymSEhVK4d0FY_2jM3QMwLmsK7W1lIFVUOQPMfOsP1AW2"/>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

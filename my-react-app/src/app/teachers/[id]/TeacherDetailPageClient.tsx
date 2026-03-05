@@ -172,11 +172,8 @@ export default function TeacherDetailPageClient() {
                     <span className="text-sm text-[#8a8060] dark:text-text-secondary">/ ساعة</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-green-400 text-sm mb-6">
-                  <span className="material-symbols-outlined text-[18px]">bolt</span>
-                  <span>رد سريع (خلال ساعة)</span>
-                </div>
-                <button className="w-full bg-primary hover:bg-primary/90 text-[#181611] font-bold text-lg py-3 rounded-lg shadow-lg transition-all mb-3">
+                
+                <button className="w-full bg-primary hover:bg-primary/90 text-[#181611] font-bold text-lg py-3 rounded-lg shadow-lg transition-all mb-3 text-center">
                   احجز الان ( اول حصه مجانية )
                 </button>
               </div>

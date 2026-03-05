@@ -27,7 +27,7 @@ export default function Footer() {
               <span className="text-xl font-bold">القرآن أونلاين</span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              منصتك الأولى لتعليم القرآن الكريم واللغة العربية للأطفال عن بعد،
+              منصتك الأولى لتعليم القرآن الكريم واللغة العربية لجميع الأعمار عن بعد،
               بأيدي معلمين متخصصين ومنهجية مبتكرة.
             </p>
           </div>

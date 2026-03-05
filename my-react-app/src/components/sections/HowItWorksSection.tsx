@@ -5,7 +5,7 @@ export default function HowItWorksSection() {
     {
       number: 1,
       title: 'اختر المعلم المناسب',
-      description: 'تصفح ملفات المعلمين، استمع لتلاوتهم، واختر الأنسب لطفلك.',
+      description: 'تصفح ملفات المعلمين، استمع لتلاوتهم، واختر الأنسب لمستواك وأهدافك.',
     },
     {
       number: 2,
@@ -28,7 +28,7 @@ export default function HowItWorksSection() {
               كيف يعمل قرآن أونلاين؟
             </h2>
             <p className="text-lg text-text-muted mb-8">
-              ابدأ رحلة تعلم القرآن في 3 خطوات بسيطة وميسرة لك ولطفلك.
+              ابدأ رحلة تعلم القرآن في 3 خطوات بسيطة وميسرة تناسب جميع الأعمار.
             </p>
             <div className="space-y-6">
               {steps.map((step) => (

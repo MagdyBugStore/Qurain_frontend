@@ -4,11 +4,11 @@ import React from "react";
 import { useAppStore } from '../../store/useAppStore'
 
 interface Step4BudgetProps {
-  onNext: () => void
+  onComplete: () => void
   onBack?: () => void
 }
 
-export default function Step4Budget({ onNext, onBack }: Step4BudgetProps) {
+export default function Step4Budget({ onComplete, onBack }: Step4BudgetProps) {
   const { formData, updateFormData } = useAppStore()
 
   const learningGoals = [
@@ -32,21 +32,22 @@ export default function Step4Budget({ onNext, onBack }: Step4BudgetProps) {
           <div className="flex justify-center mb-8">
             <div className="text-center">
               <span className="text-5xl font-black text-primary">{formData.budget}</span>
-              <span className="text-lg font-bold mr-2">دولار</span>
+              <span className="text-lg font-bold mr-2">ريال</span>
             </div>
           </div>
           <div className="relative px-2">
             <input
               type="range"
-              min="10"
+              min="50"
               max="1000"
+              step="50"
               value={formData.budget}
               onChange={(e) => updateFormData({ budget: Number(e.target.value) })}
               className="range-slider w-full h-2 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
             />
             <div className="flex justify-between mt-4 text-sm font-semibold opacity-60">
-              <span>10 دولار</span>
-              <span>1000+ دولار</span>
+              <span>50 ريال</span>
+              <span>1000+ ريال</span>
             </div>
           </div>
         </div>
@@ -97,7 +98,7 @@ export default function Step4Budget({ onNext, onBack }: Step4BudgetProps) {
       {/* Bottom Navigation */}
       <div className="mt-auto pt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center gap-6">
         <button
-          onClick={onNext}
+          onClick={onComplete}
           className="w-full sm:w-auto px-12 py-4 bg-primary text-background-dark font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all"
         >
           إكمال الملف

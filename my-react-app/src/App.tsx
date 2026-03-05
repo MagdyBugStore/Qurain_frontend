@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Footer from "./components/layout/Footer";
 import { ToastContainer } from "./components/layout/ToastContainer";
 import { SEOHead } from "./components/seo/SEOHead";
+import { useAppStore } from "./store/useAppStore";
 import { LandingPage } from "./legacy-pages/LandingPage";
 import { EvalPage } from "./legacy-pages/EvalPage";
 import { DashboardPage } from "./legacy-pages/DashboardPage";
@@ -28,9 +29,14 @@ import PostSessionPage from "./app/post-session/[id]/page";
 import StartFreePage from "./app/start-free/page";
 import RoadmapPage from "./app/roadmap/page";
 import SectionsPage from "./app/sections/page";
+import StudentProfilePage from "./app/student-profile/page";
+import PersonalInfoPageNew from "./app/personal-info/page";
+import TeacherApplicationPage from "./app/teacher-application/page";
+import TeacherApplicationReviewPage from "./app/teacher-application/review/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
+  const storeToasts = useAppStore((state) => state.toasts);
   const location = useLocation();
 
   const addToast = (msg: string, type: string = "success") => {
@@ -40,6 +46,9 @@ function AppShell() {
       setToasts((current) => current.filter((t) => t.id !== id));
     }, 3500);
   };
+  
+  // Combine both toast systems (legacy and store-based)
+  const allToasts = [...toasts, ...storeToasts];
 
   const publicPaths = ["/", "/programs", "/teachers", "/eval", "/login"];
   const isPublicPage = publicPaths.includes(location.pathname);
@@ -118,6 +127,14 @@ function AppShell() {
           noindex: true,
           geoLocation
         };
+      case "/student-profile":
+        return {
+          title: "الملف الشخصي للطالب - منصة القرآن | Student Profile",
+          description: "تابع تقدمك في تعلم القرآن الكريم، إنجازاتك، وجدول حصصك.",
+          type: "website",
+          noindex: true,
+          geoLocation
+        };
       default:
         return {
           title: "منصة القرآن - تعلم القرآن الكريم عبر الإنترنت",
@@ -138,7 +155,8 @@ function AppShell() {
         <Route path="/legacy" element={<LandingPage />} />
         <Route path="/eval" element={<EvalPage addToast={addToast} />} />
         <Route path="/login" element={<LoginPage addToast={addToast} />} />
-        <Route path="/personal-info" element={<PersonalInfoPage addToast={addToast} />} />
+        <Route path="/personal-info" element={<PersonalInfoPageNew />} />
+        <Route path="/personal-info-legacy" element={<PersonalInfoPage addToast={addToast} />} />
         <Route path="/dashboard" element={<DashboardPage addToast={addToast} />} />
         <Route path="/admin" element={<AdminPage addToast={addToast} />} />
         
@@ -157,12 +175,15 @@ function AppShell() {
         <Route path="/start-free" element={<StartFreePage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/sections" element={<SectionsPage />} />
+        <Route path="/student-profile" element={<StudentProfilePage />} />
+        <Route path="/teacher-application" element={<TeacherApplicationPage />} />
+        <Route path="/teacher-application/review" element={<TeacherApplicationReviewPage />} />
         
         {/* Fallback */}
         <Route path="*" element={<Home />} />
       </Routes>
       {isPublicPage && <Footer />}
-      <ToastContainer toasts={toasts} />
+      <ToastContainer toasts={allToasts} />
     </div>
   );
 }

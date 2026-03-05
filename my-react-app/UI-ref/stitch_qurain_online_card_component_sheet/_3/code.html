@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html class="light" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&amp;family=Manrope:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Cairo", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .circular-progress {
+            background: conic-gradient(var(--tw-primary) 240deg, #e5e7eb 0deg);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-0 m-0">
+<div class="flex h-screen w-full flex-col lg:flex-row overflow-hidden">
+<div class="hidden lg:flex lg:w-1/2 relative bg-primary/10 items-center justify-center p-12 overflow-hidden">
+<div class="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-primary)_0%,_transparent_70%)]"></div>
+<div class="relative z-10 flex flex-col items-center text-center space-y-8">
+<div class="w-64 h-64 rounded-full bg-white/50 dark:bg-background-dark/30 backdrop-blur-sm flex items-center justify-center relative border-8 border-primary/20">
+<div class="absolute inset-0 rounded-full border-8 border-primary border-t-transparent border-l-transparent rotate-[45deg]"></div>
+<div class="flex flex-col items-center">
+<span class="text-5xl font-black text-slate-900 dark:text-slate-100">2/3</span>
+<span class="text-sm font-bold text-slate-600 dark:text-slate-400 mt-2">المرحلة الحالية</span>
+</div>
+</div>
+<div class="space-y-4">
+<h2 class="text-3xl font-black text-slate-900 dark:text-slate-100">الخطوة الثانية: المستوى الحالي</h2>
+<p class="text-lg text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
+                        نحن هنا لنساعدك على اختيار المسار الأنسب لرحلتك مع كتاب الله.
+                    </p>
+</div>
+<div class="w-full max-w-sm aspect-video rounded-xl bg-primary/20 overflow-hidden relative" data-alt="Spiritual Islamic pattern illustration with crescent moon">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-8xl opacity-40">auto_stories</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 bg-white dark:bg-background-dark flex flex-col justify-between p-8 lg:p-16 overflow-y-auto">
+<div class="max-w-xl mx-auto w-full">
+<header class="flex items-center justify-between mb-12">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-background-dark font-bold">menu_book</span>
+</div>
+<h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">تطبيق تلاوة</h1>
+</div>
+<div class="lg:hidden flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+<span class="text-sm font-bold text-primary">خطوة 2 من 3</span>
+</div>
+</header>
+<div class="mb-10">
+<h2 class="text-4xl font-black text-slate-900 dark:text-slate-100 mb-4 tracking-tight">المستوى الحالي</h2>
+<p class="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">
+                        ما هو مستوى الطالب في تلاوة القرآن حالياً؟ يساعدنا هذا في تخصيص الدروس المناسبة.
+                    </p>
+</div>
+<form class="space-y-4">
+<label class="group relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-primary/50 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input checked="" class="mt-1.5 h-5 w-5 text-primary focus:ring-primary border-slate-300 dark:border-slate-700" name="level" type="radio" value="beginner"/>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">child_care</span>
+<span class="font-bold text-slate-900 dark:text-slate-100 text-lg">مبتدئ</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">لا يجيد قراءة الحروف العربية أو يحتاج لتعلم الأساسيات من الصفر.</p>
+</div>
+</label>
+<label class="group relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-primary/50 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="mt-1.5 h-5 w-5 text-primary focus:ring-primary border-slate-300 dark:border-slate-700" name="level" type="radio" value="intermediate"/>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">menu_book</span>
+<span class="font-bold text-slate-900 dark:text-slate-100 text-lg">متوسط</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">يقرأ الكلمات ولكن بتهجئة بطيئة، ويحتاج للتدريب على الوصل والطلاقة.</p>
+</div>
+</label>
+<label class="group relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-primary/50 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+<input class="mt-1.5 h-5 w-5 text-primary focus:ring-primary border-slate-300 dark:border-slate-700" name="level" type="radio" value="advanced"/>
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-xl">verified</span>
+<span class="font-bold text-slate-900 dark:text-slate-100 text-lg">متقدم</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">يقرأ بطلاقة ويحتاج لتحسين التجويد وإتقان مخارج الحروف والصفات.</p>
+</div>
+</label>
+</form>
+</div>
+<div class="max-w-xl mx-auto w-full mt-12 flex flex-col items-center gap-4">
+<button class="w-full bg-primary hover:bg-primary/90 text-slate-900 font-black py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary/20">
+                    المتابعة للخطوة التالية
+                    <span class="material-symbols-outlined">arrow_back</span>
+</button>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors font-bold py-2 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    رجوع للخطوة السابقة
+                </a>
+</div>
+</div>
+</div>
+</body></html>

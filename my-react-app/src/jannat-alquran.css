@@ -3,9 +3,9 @@
   --cream:#faf7f2;
   --warm:#f5ede0;
   --sand:#e8d5b7;
-  --amber:#c8922a;
-  --amber-d:#a0711a;
-  --amber-l:#f0c060;
+  --amber:#DD9D77;
+  --amber-d:#C0855F;
+  --amber-l:#F0B595;
   --forest:#1c3a2e;
   --forest-m:#254d3d;
   --forest-l:#2d6048;
@@ -588,6 +588,7 @@ body{background:var(--cream);color:var(--text);font-family:'Tajawal',sans-serif;
 }
 .toast.success{border-left:4px solid #3fb950;}
 .toast.info{border-left:4px solid var(--amber);}
+.toast.error{border-left:4px solid #f85149;}
 @keyframes slideInRight{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 @media(max-width:768px){
   .topbar{

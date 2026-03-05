@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Noto+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#d5aa2a",
+              "background-light": "#f8f7f6",
+              "background-dark": "#201c12",
+            },
+            fontFamily: {
+              "display": ["Noto Sans Arabic", "Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 lg:px-20 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl">menu_book</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">قرآن أونلاين</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-10 w-10 rounded-full border-2 border-primary overflow-hidden">
+<img alt="صورة الملف الشخصي للمستخدم" class="w-full h-full object-cover" data-alt="صورة جانبية لرجل مبتسم بملابس رسمية" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIi-FxTSnhQjYMzY_knSI0dReXovJbwyDIioGd7GXrXRPFZZh0dtAkAno-BPxFRiX_SUmhly9dhFk_4DlL3vffAqUK4kpBdaUjo93a57rMBeYXVFO0s41Ej3vVWRaTkM0CMVvdH5GgIXzCnf56Iq3nTeuRd20_9ZhnngxYbWA--y20GETxDUDo-cPDX77SbkdAXowtM70jL16HWtD92QQ3ZnOWHozqk-n6E2lEbRzOmaITFy_jprGhYGCDTsmbJRxBeB6XNqtMswPq"/>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-[1400px] mx-auto w-full p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Sidebar: Profile Info -->
+<aside class="lg:col-span-3 space-y-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
+<div class="relative group">
+<div class="size-32 rounded-full border-4 border-primary/20 p-1 mb-4">
+<img alt="صورة المستخدم الكبيرة" class="w-full h-full rounded-full object-cover" data-alt="صورة مقربة لوجه رجل بملامح عربية" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaHCQpQDIhRCTg8znqGbspw1A1F6Zar1Syu1aLwWIQat1CNApShCs6EKLwGnERa9BLy_zwlwOAPw7sLW8qgsiPJIiXGWL4B0KMcMnHdJcvbOIrtiSKYYlhWoiyKFRz7ol7BumuHGknAqEeSUXxfrzxk6sHDfrepKu8GiXJcm8IJpTCYIlEKrMDSvQP_eE-ePAzmoROe-xBU2UtjrP8j93LQuthyn4pLtWeWolZnyevkFcf-cE_8Ugxc-6zr4dclaScsP8KvndSVtUa"/>
+</div>
+<button class="absolute bottom-4 left-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-900">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<h3 class="text-xl font-bold mb-1">أحمد محمد العامري</h3>
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-6">المستوى المتقدم - تجويد</span>
+<div class="w-full grid grid-cols-2 gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-center">
+<span class="text-2xl font-bold text-primary">١٥٠</span>
+<span class="text-xs text-slate-500">إجمالي الحصص</span>
+</div>
+<div class="flex flex-col items-center border-r border-slate-100 dark:border-slate-800">
+<span class="text-2xl font-bold text-primary">١٨</span>
+<span class="text-xs text-slate-500">أجزاء محفوظة</span>
+</div>
+</div>
+</div>
+<nav class="bg-white dark:bg-slate-900 rounded-xl p-2 shadow-sm border border-slate-100 dark:border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-white font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>نظرة عامة</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span>جدول الحصص</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span>سجل الحفظ</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+<span>الإنجازات</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<div class="lg:col-span-9 space-y-8">
+<!-- Navigation Tabs -->
+<div class="flex border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+<button class="px-8 py-4 text-primary border-b-2 border-primary font-bold whitespace-nowrap">نظرة عامة</button>
+<button class="px-8 py-4 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors whitespace-nowrap">جدول الحصص</button>
+<button class="px-8 py-4 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors whitespace-nowrap">سجل الحفظ</button>
+<button class="px-8 py-4 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors whitespace-nowrap">الإنجازات</button>
+</div>
+<!-- Top Row: Goal Progress & Upcoming Session -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Circular Progress Card -->
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<div class="space-y-2">
+<h4 class="text-lg font-bold">هدف الحفظ الحالي</h4>
+<p class="text-sm text-slate-500">حفظ سورة الكهف</p>
+<div class="pt-4">
+<span class="text-3xl font-bold text-primary">٧٥٪</span>
+<p class="text-xs text-slate-400 mt-1">بقي ٥ صفحات للإتمام</p>
+</div>
+</div>
+<div class="relative size-28 flex items-center justify-center">
+<svg class="size-full" viewbox="0 0 100 100">
+<circle class="text-slate-100 dark:text-slate-800" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="62.8" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<span class="absolute material-symbols-outlined text-primary text-3xl">auto_awesome</span>
+</div>
+</div>
+<!-- Upcoming Session Card -->
+<div class="bg-primary rounded-xl p-6 shadow-lg text-white flex flex-col justify-between overflow-hidden relative">
+<div class="z-10">
+<div class="flex items-center gap-2 mb-4 opacity-90">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="text-sm font-medium">الحصة القادمة</span>
+</div>
+<h4 class="text-xl font-bold mb-1">تسميع سورة الإسراء</h4>
+<p class="opacity-80 text-sm">الأحد، ٢٢ مايو • ٠٦:٣٠ مساءً</p>
+</div>
+<div class="mt-6 flex justify-between items-end z-10">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full border border-white/30 overflow-hidden">
+<img alt="صورة المعلم" class="w-full h-full object-cover" data-alt="صورة وجه معلم بابتسامة وقورة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATkUyF19AckE7-EAcEpTWbRp5BQ0QDZNDQTcP5IXl3SwoL-89c4tiTdoUn-9IGSenrFQScQT4lWpcUyRRnAkDF-6_Fx2S982e836ZjDcJGeTjNYQkXPgIfjL6-zeFPuUtEaWELB7cXJgFspyWWdg7i8WfUM8r0xiGqv1KCpwEOW4QF4dwXP5KzcJVYDwH_jRvtKe7zqBGMv5SH8aDAo1dk4ioSVPjNYTeeoJZeuboSlu-jQmO9SY2C560OiDtk4rRxVyYWuqXfIL3H"/>
+</div>
+<span class="text-sm font-medium">الشيخ عبدالله القحطاني</span>
+</div>
+<button class="bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">دخول الحلقة</button>
+</div>
+<!-- Decoration Pattern -->
+<div class="absolute -right-8 -bottom-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]">mosque</span>
+</div>
+</div>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Log of Surahs (Completed) -->
+<div class="lg:col-span-2 space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold">آخر الإنجازات في سجل الحفظ</h4>
+<button class="text-primary text-sm font-bold flex items-center gap-1">عرض الكل <span class="material-symbols-outlined text-xs">arrow_back</span></button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined">task_alt</span>
+</div>
+<div>
+<p class="font-bold">سورة النحل</p>
+<p class="text-xs text-slate-500">حفظ من آية ١ إلى آية ٤٠</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-sm font-medium">١٨ مايو ٢٠٢٤</p>
+<span class="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">ممتاز</span>
+</div>
+</div>
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined">task_alt</span>
+</div>
+<div>
+<p class="font-bold">سورة الحجر</p>
+<p class="text-xs text-slate-500">مراجعة كامل السورة</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-sm font-medium">١٥ مايو ٢٠٢٤</p>
+<span class="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">جيد جداً</span>
+</div>
+</div>
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined">task_alt</span>
+</div>
+<div>
+<p class="font-bold">سورة إبراهيم</p>
+<p class="text-xs text-slate-500">إتمام الجزء الثالث عشر</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-sm font-medium">١٠ مايو ٢٠٢٤</p>
+<span class="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">ممتاز</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Feed -->
+<div class="space-y-4">
+<h4 class="text-lg font-bold">النشاط الأخير</h4>
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="relative space-y-6 before:absolute before:right-[15px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
+<!-- Activity Item 1 -->
+<div class="relative pr-8">
+<div class="absolute right-0 top-1 size-8 rounded-full bg-primary/20 flex items-center justify-center border-4 border-white dark:border-slate-900">
+<div class="size-2 rounded-full bg-primary"></div>
+</div>
+<p class="text-sm leading-relaxed"><span class="font-bold">حجزت</span> موعداً جديداً مع الشيخ عبدالله القحطاني.</p>
+<p class="text-xs text-slate-400 mt-1">منذ ساعتين</p>
+</div>
+<!-- Activity Item 2 -->
+<div class="relative pr-8">
+<div class="absolute right-0 top-1 size-8 rounded-full bg-primary/20 flex items-center justify-center border-4 border-white dark:border-slate-900">
+<div class="size-2 rounded-full bg-primary"></div>
+</div>
+<p class="text-sm leading-relaxed">أتممت <span class="font-bold">اختبار التجويد</span> بنجاح في المستوى المتقدم.</p>
+<p class="text-xs text-slate-400 mt-1">أمس</p>
+</div>
+<!-- Activity Item 3 -->
+<div class="relative pr-8">
+<div class="absolute right-0 top-1 size-8 rounded-full bg-primary/20 flex items-center justify-center border-4 border-white dark:border-slate-900">
+<div class="size-2 rounded-full bg-primary"></div>
+</div>
+<p class="text-sm leading-relaxed">حصلت على وسام <span class="font-bold">"المثابر"</span> لالتزامك لمدة ٣٠ يوماً.</p>
+<p class="text-xs text-slate-400 mt-1">قبل يومين</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Achievements Preview -->
+<div class="space-y-4 pb-12">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold">آخر الأوسمة</h4>
+<button class="text-primary text-sm font-bold">كل الإنجازات</button>
+</div>
+<div class="flex flex-wrap gap-4">
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center gap-2 w-32 shadow-sm">
+<div class="size-16 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-primary">military_tech</span>
+</div>
+<span class="text-xs font-bold text-center">أسبوع مثالي</span>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center gap-2 w-32 shadow-sm">
+<div class="size-16 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-blue-500">auto_stories</span>
+</div>
+<span class="text-xs font-bold text-center">حافظ الأجزاء</span>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center gap-2 w-32 shadow-sm">
+<div class="size-16 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-purple-500">rocket_launch</span>
+</div>
+<span class="text-xs font-bold text-center">انطلاقة سريعة</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

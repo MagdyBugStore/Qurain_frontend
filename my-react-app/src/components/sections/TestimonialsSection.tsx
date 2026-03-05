@@ -12,7 +12,7 @@ export default function TestimonialsSection() {
     {
       name: 'خالد عبدالله',
       role: 'والد الطالبة مريم (10 سنوات)',
-      text: '"أفضل استثمار لتعليم أبنائي القرآن. المرونة في اختيار الأوقات ساعدتنا كثيراً في تنظيم وقتنا. المعلمون محترفون ويعرفون كيف يتعاملون مع الأطفال ويشجعونهم باستمرار."',
+      text: '"أفضل استثمار لتعلم القرآن. المرونة في اختيار الأوقات ساعدتني كثيراً في تنظيم وقتي. المعلمون محترفون ويعرفون كيف يتعاملون مع الطلاب من جميع الأعمار ويشجعونهم باستمرار."',
       image:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuAVizUeQKJZ8s0rw1W6eTI4eoF4HtcgfU4L57y6YdbOK3sneAvjuyK0pdko9aGepjA7YoCYOrUCMjYDFvoS06Kq7kdUGZI2xLNq-deCLKhynEiWl19mUb9wLkCsqK-8glAIZFh4ROSUUIVNzW8oUjeJ_cXG9XsgcvV1cG0jEhCiSfwde6woO3xcTxLjK1ltGxmtyTfqVQihQoRXJe6Rox2bnJtWNRiSVzuBDw_fTIkSJSu2DnISKZZkMXqNKeBqvLY4HdOQGpJUJimX',
     },
@@ -26,7 +26,7 @@ export default function TestimonialsSection() {
             قصص النجاح
           </h2>
           <h3 className="text-3xl md:text-4xl font-black text-text-main">
-            ماذا يقول الآباء عن تجربتهم
+            ماذا يقول طلابنا عن تجربتهم
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

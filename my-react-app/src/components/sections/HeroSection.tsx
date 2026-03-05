@@ -19,12 +19,12 @@ export default function HeroSection() {
             <span className="text-xs font-medium">متاح الآن للتسجيل المبكر</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black leading-tight">
-            أفضل بداية <span className="text-primary">لقلب طفلك</span> مع القرآن
+            أفضل بداية <span className="text-primary">لرحلتك</span> مع القرآن
             الكريم
           </h1>
           <p className="text-lg md:text-xl text-gray-100 leading-relaxed font-light max-w-lg">
-            انضم إلى آلاف العائلات التي تثق بنا لغرس حب القرآن في قلوب أطفالهم.
-            معلمون معتمدون، جداول مرنة، ومنهجية ممتعة.
+            انضم إلى آلاف الطلاب من جميع الأعمار الذين يثقون بنا لتعلم القرآن الكريم.
+            معلمون معتمدون، جداول مرنة، ومنهجية متكاملة تناسب جميع المستويات.
           </p>
 
           {/* Social Proof */}
@@ -57,7 +57,7 @@ export default function HeroSection() {
                   </span>
                 ))}
               </div>
-              <span className="text-sm text-gray-200">موثوق من قبل 2000+ عائلة</span>
+              <span className="text-sm text-gray-200">موثوق من قبل 2000+ طالب</span>
             </div>
           </div>
         </div>

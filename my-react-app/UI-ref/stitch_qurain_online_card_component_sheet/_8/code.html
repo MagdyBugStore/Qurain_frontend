@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Noto+Sans+Arabic:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d5aa2a",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#201c12",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans Arabic", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+        .selection-card:has(input:checked) {
+            border-color: #d5aa2a;
+            background-color: rgba(213, 170, 42, 0.05);
+        }
+        .selection-card:has(input:checked) .icon-container {
+            background-color: #d5aa2a;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center whitespace-nowrap border-b border-solid border-primary/10 px-6 py-4 md:px-20 lg:px-40 bg-white/50 backdrop-blur-sm sticky top-0 z-50 justify-center">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 font-bold text-xl tracking-tight">قرآن أونلاين</h2>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center px-6 py-10 md:py-16">
+<div class="w-full max-w-[600px] flex flex-col gap-8"><div class="flex flex-col items-center mb-4">
+<div class="relative flex items-center justify-center w-16 h-16">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-100" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="117.2" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute text-sm font-bold text-slate-900">1/3</span>
+</div>
+<p class="text-xs font-semibold text-primary mt-2 uppercase tracking-wider">الخطوة الأولى</p>
+</div>
+<div class="text-center space-y-3 md:text-center">
+<h1 class="text-slate-900 text-3xl md:text-4xl font-black leading-tight">ما هو هدفك من تعلم القرآن؟</h1>
+<p class="text-slate-500 text-lg font-normal">يمكنك اختيار أكثر من مسار لتخصيص تجربتك التعليمية.</p>
+</div>
+<div class="grid gap-4">
+<!-- Card 1: Memorization -->
+<label class="selection-card relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-200 bg-white cursor-pointer transition-all hover:border-primary/50">
+<input checked="" class="peer absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border-slate-300 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary" type="checkbox"/>
+<div class="icon-container flex items-center justify-center size-14 rounded-lg bg-slate-50 text-slate-400 shrink-0 transition-colors">
+<span class="material-symbols-outlined text-3xl">menu_book</span>
+</div>
+<div class="flex flex-col gap-1 pr-2 pl-10">
+<h3 class="text-slate-900 text-lg font-bold">حفظ القرآن الكريم</h3>
+<p class="text-slate-500 text-sm leading-relaxed">حفظ كتاب الله عز وجل بطريقة ميسرة ومتقنة مع خطط متابعة ذكية</p>
+</div>
+</label>
+<!-- Card 2: Contemplation -->
+<label class="selection-card relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-200 bg-white cursor-pointer transition-all hover:border-primary/50">
+<input class="peer absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border-slate-300 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary" type="checkbox"/>
+<div class="icon-container flex items-center justify-center size-14 rounded-lg bg-slate-50 text-slate-400 shrink-0 transition-colors">
+<span class="material-symbols-outlined text-3xl">psychology_alt</span>
+</div>
+<div class="flex flex-col gap-1 pr-2 pl-10">
+<h3 class="text-slate-900 text-lg font-bold">تدبر القرآن</h3>
+<p class="text-slate-500 text-sm leading-relaxed">فهم معاني الآيات والتعمق في مقاصد القرآن الكريم وأسراره البلاغية</p>
+</div>
+</label>
+<!-- Card 3: Recitation -->
+<label class="selection-card relative flex items-start gap-4 p-5 rounded-xl border-2 border-slate-200 bg-white cursor-pointer transition-all hover:border-primary/50">
+<input class="peer absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border-slate-300 text-primary focus:ring-primary/20 bg-transparent checked:bg-primary" type="checkbox"/>
+<div class="icon-container flex items-center justify-center size-14 rounded-lg bg-slate-50 text-slate-400 shrink-0 transition-colors">
+<span class="material-symbols-outlined text-3xl">record_voice_over</span>
+</div>
+<div class="flex flex-col gap-1 pr-2 pl-10">
+<h3 class="text-slate-900 text-lg font-bold">تلاوة القرآن</h3>
+<p class="text-slate-500 text-sm leading-relaxed">تحسين النطق وإتقان أحكام التجويد والمخارج بأعلى معايير الإتقان</p>
+</div>
+</label>
+</div>
+<div class="pt-6">
+<button class="w-full flex items-center justify-center h-14 bg-primary hover:bg-primary/90 text-slate-900 text-lg font-bold rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-[0.98]">
+<span>استمرار</span>
+<span class="material-symbols-outlined mr-2">arrow_back</span>
+</button>
+</div>
+</div>
+</main>
+<footer class="p-6 text-center text-slate-400 text-sm">
+<p>© 2024 قرآن أونلاين - منصتكم لتعلم القرآن</p>
+</footer>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="fixed top-0 right-0 -z-10 opacity-5 pointer-events-none">
+<svg fill="none" height="400" viewbox="0 0 100 100" width="400" xmlns="http://www.w3.org/2000/svg">
+<circle cx="100" cy="0" fill="#d5aa2a" r="100"></circle>
+</svg>
+</div>
+<div class="fixed bottom-0 left-0 -z-10 opacity-5 pointer-events-none">
+<svg fill="none" height="300" viewbox="0 0 100 100" width="300" xmlns="http://www.w3.org/2000/svg">
+<circle cx="0" cy="100" fill="#d5aa2a" r="100"></circle>
+</svg>
+</div>
+</body></html>

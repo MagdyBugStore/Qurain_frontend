@@ -1,5 +1,6 @@
 'use client'
 import React from "react";
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../../components/layout/Header'
 import LoginModal from '../../components/modals/LoginModal'
@@ -8,6 +9,7 @@ import { useAuthGuard } from '../../hooks/useRequireAuth'
 
 export default function TeachersPage() {
   const { requireAuth } = useAuthGuard()
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const handleBookTrial = () => {
     requireAuth(() => {
@@ -21,7 +23,7 @@ export default function TeachersPage() {
     {
       id: '1',
       name: 'الشيخ أحمد محمد',
-      specialty: 'متخصص في تعليم الأطفال والقاعدة النورانية',
+      specialty: 'متخصص في القاعدة النورانية لجميع الأعمار',
       description: 'خبرة 10 سنوات في التحفيظ أونلاين، إجازة في حفص عن عاصم.',
       rating: 5.0,
       reviews: 200,
@@ -73,7 +75,7 @@ export default function TeachersPage() {
       id: '4',
       name: 'الشيخ أحمد محمد',
       specialty: 'متخصص في التجويد والقراءات',
-      description: 'إجازة في القراءات العشر، خبرة أكثر من 10 سنوات في تعليم الأطفال والناشئة.',
+      description: 'إجازة في القراءات العشر، خبرة أكثر من 10 سنوات في تعليم القرآن لجميع الفئات العمرية.',
       rating: 4.9,
       reviews: 200,
       price: 18,
@@ -90,7 +92,7 @@ export default function TeachersPage() {
       id: '5',
       name: 'الأستاذة فاطمة علي',
       specialty: 'متخصصة في القاعدة النورانية',
-      description: 'أسلوب مميز في تحبيب الأطفال في القرآن، صبورة جداً مع المبتدئين.',
+      description: 'أسلوب مميز في تحبيب القرآن للطلاب، صبورة جداً مع المبتدئين من جميع الأعمار.',
       rating: 5.0,
       reviews: 350,
       price: 14,
@@ -140,8 +142,8 @@ export default function TeachersPage() {
     {
       id: '8',
       name: 'الأستاذة سارة إبراهيم',
-      specialty: 'معلمة نورانية للأطفال',
-      description: 'متخصصة في تعليم القاعدة النورانية للأطفال من 5-12 سنة.',
+      specialty: 'معلمة نورانية',
+      description: 'متخصصة في تعليم القاعدة النورانية للمبتدئين من جميع الأعمار.',
       rating: 5.0,
       reviews: 95,
       price: 12,
@@ -241,7 +243,7 @@ export default function TeachersPage() {
         </div>
 
         {/* Hero: Top 3 Recommendations */}
-        <section className="mb-12">
+        <section className="mb-12 hidden">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-[#181611] dark:text-white text-2xl md:text-3xl font-bold leading-tight font-arabic">
@@ -343,16 +345,34 @@ export default function TeachersPage() {
         </section>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Mobile Filter Overlay */}
+          {isFilterOpen && (
+            <button
+              type="button"
+              aria-label="Close filter"
+              className="lg:hidden fixed inset-0 bg-black/30 z-40"
+              onClick={() => setIsFilterOpen(false)}
+            />
+          )}
           {/* Filters Sidebar */}
-          <aside className="w-full lg:w-72 flex-shrink-0 space-y-6">
+          <aside className={`w-full lg:w-72 flex-shrink-0 space-y-6 transition-transform duration-300 ${isFilterOpen ? 'fixed lg:relative top-0 right-0 h-full lg:h-auto overflow-y-auto lg:overflow-visible bg-white dark:bg-[#1a170d] z-50 lg:z-auto p-4 lg:p-0 block max-w-sm lg:max-w-none' : 'hidden lg:block'}`}>
             <div className="bg-white dark:bg-[#1a170d] rounded-xl p-5 shadow-sm border border-[#e6e2de] dark:border-[#3a3528]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-lg font-arabic text-[#181611] dark:text-white">
                   تصفية النتائج
                 </h3>
-                <button className="text-primary text-sm font-medium hover:underline font-arabic">
-                  مسح الكل
-                </button>
+                <div className="flex items-center gap-2">
+                  <button className="text-primary text-sm font-medium hover:underline font-arabic">
+                    مسح الكل
+                  </button>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="lg:hidden text-text-main hover:text-primary p-1"
+                    aria-label="Close filter"
+                  >
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                </div>
               </div>
               {/* Subjects Filter */}
               <div className="mb-6">
@@ -486,9 +506,19 @@ export default function TeachersPage() {
           <div className="flex-grow">
             {/* Sorting Bar */}
             <div className="flex flex-wrap items-center justify-between mb-6 pb-4 border-b border-[#e6e2de] dark:border-[#3a3528]">
-              <p className="text-[#8a8060] font-arabic text-sm">
-                <span className="font-bold text-[#181611] dark:text-white">{allTeachers.length}</span> معلم متاح
-              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-lg border border-[#e6e2de] dark:border-[#3a3528] bg-white dark:bg-[#1a170d] text-[#181611] dark:text-white hover:bg-[#f5f3f0] dark:hover:bg-[#2d2a24] transition-colors font-arabic"
+                  aria-label="Toggle filter"
+                >
+                  <span className="material-symbols-outlined text-lg">tune</span>
+                  <span className="text-sm font-medium">تصفية</span>
+                </button>
+                <p className="text-[#8a8060] font-arabic text-sm">
+                  <span className="font-bold text-[#181611] dark:text-white">{allTeachers.length}</span> معلم متاح
+                </p>
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[#8a8060] font-arabic">ترتيب حسب:</span>
                 <select className="bg-transparent border-none text-[#181611] dark:text-white font-medium text-sm focus:ring-0 cursor-pointer font-arabic pr-0 pl-8">
@@ -500,12 +530,12 @@ export default function TeachersPage() {
               </div>
             </div>
             {/* Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 place-items-center">
               {regularTeachers.map((teacher) => (
                 <Link
                   key={teacher.id}
                   to={`/teachers/${teacher.id}`}
-                  className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
+                  className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer w-full"
                 >
                   <div className="p-5 flex flex-col h-full">
                     <div className="flex items-start justify-between mb-4">
@@ -566,7 +596,7 @@ export default function TeachersPage() {
                         e.stopPropagation()
                         handleBookTrial()
                       }}
-                      className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto"
+                      className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto text-center"
                     >
                       احجز تجربة
                     </button>

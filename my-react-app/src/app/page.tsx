@@ -20,7 +20,6 @@ export default function Home() {
         <FeaturedTutorsSection />
         <TestimonialsSection />
       </main>
-      <Footer />
       <LoginModal />
       <Popup />
     </>
