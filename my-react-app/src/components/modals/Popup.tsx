@@ -1,5 +1,6 @@
 'use client'
 
+import React from "react";
 import { useAppStore } from '../../store/useAppStore'
 
 export default function Popup() {

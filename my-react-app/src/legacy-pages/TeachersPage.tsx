@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TEACHERS, SLOTS, SLOTS_AR, type Teacher } from "../jannat-alquran-data";

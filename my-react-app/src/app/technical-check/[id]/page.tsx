@@ -1,5 +1,6 @@
 'use client'
 
+import React from "react";
 import { useState, useEffect } from 'react'
 import Header from '../../../components/layout/Header'
 import { useNavigate, useParams } from 'react-router-dom'

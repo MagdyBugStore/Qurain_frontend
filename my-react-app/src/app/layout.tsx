@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import './globals.css'
 
 // Root layout wrapper for React Router

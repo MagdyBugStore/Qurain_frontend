@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const QuranProgramIcon = (
   <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">

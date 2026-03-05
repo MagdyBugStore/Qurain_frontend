@@ -1,4 +1,5 @@
 'use client'
+import React from "react";
 import { Link } from 'react-router-dom'
 import Header from '../../components/layout/Header'
 import LoginModal from '../../components/modals/LoginModal'
