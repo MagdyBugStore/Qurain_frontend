@@ -38,6 +38,14 @@ body {
     'opsz' 24;
 }
 
+.material-symbols-outlined.filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
 /* RTL Utilities */
 [dir="rtl"] {
   direction: rtl;
@@ -58,6 +66,16 @@ body {
 }
 
 /* Custom scrollbar removed for production build compatibility */
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
 
 /* Range Slider Styles */
 .range-slider {

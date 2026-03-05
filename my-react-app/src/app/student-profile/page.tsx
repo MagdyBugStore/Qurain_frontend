@@ -1,12 +1,23 @@
 'use client'
 
 import React, { useState } from "react";
+import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 
 type TabType = 'overview' | 'schedule' | 'memorization' | 'achievements'
 
 export default function StudentProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
+  const { user, userProfile } = useAuth()
+
+  // Get student data from userProfile
+  const studentName = userProfile?.displayName || 
+    `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() ||
+    user?.displayName ||
+    'الطالب'
+  
+  const studentLevel = userProfile?.level || 'غير محدد'
+  const studentPhoto = userProfile?.photoURL || user?.photoURL || ''
 
   const tabs = [
     { id: 'overview' as TabType, label: 'نظرة عامة' },
@@ -77,19 +88,25 @@ export default function StudentProfilePage() {
             <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
               <div className="relative group">
                 <div className="size-32 rounded-full border-4 border-primary/20 p-1 mb-4">
-                  <img
-                    alt="صورة المستخدم الكبيرة"
-                    className="w-full h-full rounded-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaHCQpQDIhRCTg8znqGbspw1A1F6Zar1Syu1aLwWIQat1CNApShCs6EKLwGnERa9BLy_zwlwOAPw7sLW8qgsiPJIiXGWL4B0KMcMnHdJcvbOIrtiSKYYlhWoiyKFRz7ol7BumuHGknAqEeSUXxfrzxk6sHDfrepKu8GiXJcm8IJpTCYIlEKrMDSvQP_eE-ePAzmoROe-xBU2UtjrP8j93LQuthyn4pLtWeWolZnyevkFcf-cE_8Ugxc-6zr4dclaScsP8KvndSVtUa"
-                  />
+                  {studentPhoto ? (
+                    <img
+                      alt="صورة المستخدم الكبيرة"
+                      className="w-full h-full rounded-full object-cover"
+                      src={studentPhoto}
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-4xl text-slate-400">person</span>
+                    </div>
+                  )}
                 </div>
                 <button className="absolute bottom-4 left-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-900">
                   <span className="material-symbols-outlined text-sm">edit</span>
                 </button>
               </div>
-              <h3 className="text-xl font-bold mb-1">أحمد محمد العامري</h3>
+              <h3 className="text-xl font-bold mb-1">{studentName}</h3>
               <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-6">
-                المستوى المتقدم - تجويد
+                {studentLevel}
               </span>
               <div className="w-full grid grid-cols-2 gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex flex-col items-center">

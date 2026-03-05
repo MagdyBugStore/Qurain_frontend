@@ -89,8 +89,12 @@ export default function PersonalInfoPage() {
     await saveUserProfile(profileData)
     resetFormData()
     
-    // Redirect to dashboard or student profile
-    navigate('/student-profile')
+    // Redirect to profile with user ID
+    if (user?.uid) {
+      navigate(`/profile/${user.uid}`)
+    } else {
+      navigate('/profile')
+    }
   }
 
   const handleBack = () => {

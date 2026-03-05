@@ -21,7 +21,7 @@ export default function TeachersPage() {
 
   const allTeachers = [
     {
-      id: '1',
+      id: 'test-teacher-123', // Test teacher ID for testing profile page
       name: 'الشيخ أحمد محمد',
       specialty: 'متخصص في القاعدة النورانية لجميع الأعمار',
       description: 'خبرة 10 سنوات في التحفيظ أونلاين، إجازة في حفص عن عاصم.',
@@ -534,7 +534,7 @@ export default function TeachersPage() {
               {regularTeachers.map((teacher) => (
                 <Link
                   key={teacher.id}
-                  to={`/teachers/${teacher.id}`}
+                  to={`/profile/test-teacher-123`}
                   className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer w-full"
                 >
                   <div className="p-5 flex flex-col h-full">

@@ -1,11 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
-import { db } from '../../../config/firebase'
-import { useAuth } from '../../../contexts/AuthContext'
-import Header from '../../../components/layout/Header'
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../../config/firebase'
+import { useAuth } from '../../contexts/AuthContext'
+import Header from '../../components/layout/Header'
 
 type TabType = 'personal' | 'qualifications' | 'availability' | 'reviews'
 
@@ -26,120 +25,57 @@ interface TeacherApplication {
   status?: 'pending' | 'approved' | 'rejected'
   createdAt?: any
   updatedAt?: any
-  userId?: string
 }
 
-interface UserProfile {
-  uid?: string
-  firstName?: string
-  lastName?: string
-  displayName?: string
-  photoURL?: string
-  email?: string
-}
-
-export default function TeacherDetailPageClient() {
-  const { id } = useParams<{ id: string }>()
-  const { user: currentUser } = useAuth()
-  const navigate = useNavigate()
+export default function TeacherProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('personal')
+  const { user, userProfile } = useAuth()
   const [teacherApplication, setTeacherApplication] = useState<TeacherApplication | null>(null)
-  const [teacherProfile, setTeacherProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Test teacher ID for testing purposes
-  const TEST_TEACHER_ID = 'test-teacher-123'
-
-  // Fetch teacher data by ID
+  // Fetch teacher application data
   useEffect(() => {
-    const fetchTeacherData = async () => {
-      if (!id) {
+    const fetchTeacherApplication = async () => {
+      if (!user) {
         setLoading(false)
         return
       }
 
       try {
-        // Check if it's a test teacher ID
-        if (id === TEST_TEACHER_ID) {
-          // Use mock data for test teacher
-          const mockApplication: TeacherApplication = {
-            id: TEST_TEACHER_ID,
-            fullName: 'الشيخ أحمد محمد',
-            email: 'ahmed@example.com',
-            phone: '501234567',
-            countryCode: '+966',
-            gender: 'male',
-            nationality: 'السعودية',
-            yearsOfExperience: 15,
-            educationLevel: 'دكتوراة في التفسير وعلوم القرآن',
-            bio: 'السلام عليكم ورحمة الله وبركاته، أنا الشيخ أحمد محمد، مدرس قرآن كريم وتجويد وقراءات معتمد من الأزهر الشريف. لدي شغف كبير بتعليم كتاب الله للطلاب من جميع الأعمار والمستويات. بفضل الله، قمت بتدريس مئات الطلاب حول العالم عبر الإنترنت، وأتميز بأسلوب تعليمي مرن يتناسب مع قدرات كل طالب.',
-            subjects: ['حفظ القرآن', 'تجويد', 'قراءات'],
-            hourlyRate: 75,
-            currency: 'SAR',
-            status: 'approved',
-          }
-          const mockProfile: UserProfile = {
-            uid: TEST_TEACHER_ID,
-            firstName: 'أحمد',
-            lastName: 'محمد',
-            displayName: 'الشيخ أحمد محمد',
-            photoURL: 'https://lh3.googleusercontent.com/aida-public/AB6AXuANceWlhvlc5OzyEQ6Yw5RuVW0W5G1RQpo9Cjj6vuonq6SDWjA3GyxPV_S4eFslf3V1rwsQubSIL6zJZOTE4fNRB8Mz8IjNwygqUGBKvFWBdnpgV0KFhaTxrCrP75bX-cliClUezCSQF0dkFVyux2zbD4XpISu50SyBWXWxAldf9Jx-jyB4xzXt9JpodwWI26p90gZ53j_lwg5jfqkschS94M6KkQC0kqP4WWrJd2EAobsTH2DFB9t0oaOwKI_2aoZD2guovmb1yZBg',
-            email: 'ahmed@example.com',
-          }
-          setTeacherApplication(mockApplication)
-          setTeacherProfile(mockProfile)
-          setLoading(false)
-          return
-        }
-
-        // First, try to get teacher application by userId
         const applicationsQuery = query(
           collection(db, 'teacherApplications'),
-          where('userId', '==', id),
-          where('status', '==', 'approved')
+          where('userId', '==', user.uid)
         )
         const querySnapshot = await getDocs(applicationsQuery)
         
         if (!querySnapshot.empty) {
           const doc = querySnapshot.docs[0]
-          const appData = {
+          setTeacherApplication({
             id: doc.id,
             ...doc.data()
-          } as TeacherApplication
-          setTeacherApplication(appData)
-
-          // Fetch user profile
-          if (appData.userId) {
-            try {
-              const userDoc = await getDoc(doc(db, 'users', appData.userId))
-              if (userDoc.exists()) {
-                setTeacherProfile({
-                  ...userDoc.data()
-                } as UserProfile)
-              }
-            } catch (error) {
-              console.error('Error fetching user profile:', error)
-            }
-          }
+          } as TeacherApplication)
         }
       } catch (error) {
-        console.error('Error fetching teacher data:', error)
+        console.error('Error fetching teacher application:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTeacherData()
-  }, [id])
+    fetchTeacherApplication()
+  }, [user])
 
-  // Get teacher data
-  const teacherName = teacherProfile?.displayName || 
-    `${teacherProfile?.firstName || ''} ${teacherProfile?.lastName || ''}`.trim() ||
+  // Get teacher data from userProfile and teacherApplication
+  const teacherName = userProfile?.displayName || 
+    `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() ||
     teacherApplication?.fullName ||
+    user?.displayName ||
     'المعلم'
   
   const teacherTitle = teacherApplication?.status === 'approved' 
     ? 'مدرس معتمد' 
+    : teacherApplication?.status === 'pending'
+    ? 'في انتظار الموافقة'
     : 'مدرس'
   
   const specialization = teacherApplication?.subjects?.join(' و ') || 'التجويد والقراءات'
@@ -148,10 +84,12 @@ export default function TeacherDetailPageClient() {
                    teacherApplication?.currency === 'USD' ? '$' :
                    teacherApplication?.currency === 'EGP' ? 'ج.م' : 'ر.س'
   
-  const profileImage = teacherProfile?.photoURL || ''
+  const profileImage = userProfile?.photoURL || user?.photoURL || ''
+  
+  const isPending = teacherApplication?.status === 'pending'
   const isApproved = teacherApplication?.status === 'approved'
 
-  // Qualifications from educationLevel
+  // Qualifications from educationLevel (simplified - in production, this would be a separate collection)
   const qualifications = teacherApplication?.educationLevel ? [
     {
       title: teacherApplication.educationLevel,
@@ -160,7 +98,7 @@ export default function TeacherDetailPageClient() {
     },
   ] : []
 
-  // Ijazahs - TODO: Fetch from separate collection
+  // Ijazahs - TODO: Fetch from separate collection or storage
   const ijazahs: Array<{ title: string; description: string; image: string }> = []
 
   // Mock Reviews Data - بيانات وهمية للتقييمات
@@ -203,7 +141,7 @@ export default function TeacherDetailPageClient() {
   ]
   const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
   
-  // Mock availability data
+  // Mock availability data: [dayIndex][timeIndex] = 'available' | 'booked' | 'unavailable'
   const availability: (string | null)[][] = [
     ['available', 'available', 'booked', 'booked', 'available', 'available', null, null, 'available', 'available', 'booked', null], // Saturday
     ['booked', 'booked', 'available', 'available', 'booked', 'available', 'available', null, 'booked', 'available', 'available', 'available'], // Sunday
@@ -221,15 +159,6 @@ export default function TeacherDetailPageClient() {
     { id: 'reviews' as TabType, label: 'التقييمات' },
   ]
 
-  const handleBookSession = () => {
-    if (!currentUser) {
-      navigate('/login')
-      return
-    }
-    // Navigate to booking page
-    navigate(`/booking/${id}`)
-  }
-
   if (loading) {
     return (
       <>
@@ -244,39 +173,21 @@ export default function TeacherDetailPageClient() {
     )
   }
 
-  if (!teacherApplication || !isApproved) {
-    return (
-      <>
-        <Header />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <p className="text-slate-600 dark:text-slate-400 mb-4">المعلم غير موجود أو غير معتمد</p>
-            <Link to="/teachers" className="text-primary hover:underline">
-              العودة إلى قائمة المعلمين
-            </Link>
-          </div>
-        </div>
-      </>
-    )
-  }
-
   return (
     <>
       <Header />
       <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
         <main className="flex-1 px-6 py-8 lg:px-20">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
-            <Link to="/" className="hover:text-primary transition-colors">
-              الرئيسية
-            </Link>
-            <span className="material-symbols-outlined text-sm">chevron_right</span>
-            <Link to="/teachers" className="hover:text-primary transition-colors">
-              المعلمين
-            </Link>
-            <span className="material-symbols-outlined text-sm">chevron_right</span>
-            <span className="text-slate-900 dark:text-white font-medium">{teacherName}</span>
-          </nav>
+          {/* Pending Status Banner */}
+          {isPending && (
+            <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+              <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">schedule</span>
+              <div className="flex-1">
+                <p className="font-bold text-amber-900 dark:text-amber-200">طلبك قيد المراجعة</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">سيتم مراجعة طلبك خلال 48 ساعة. سيتم إشعارك عند الموافقة على طلبك.</p>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Sidebar Column */}
@@ -308,8 +219,8 @@ export default function TeacherDetailPageClient() {
                   {isApproved && (
                     <div className="flex items-center gap-1 mb-6">
                       <span className="material-symbols-outlined text-primary text-lg filled">star</span>
-                      <span className="text-lg font-bold text-slate-900 dark:text-white">4.9</span>
-                      <span className="text-slate-500 dark:text-slate-400 text-xs mr-1">({reviews.length} تقييم)</span>
+                      <span className="text-lg font-bold text-slate-900 dark:text-white">-</span>
+                      <span className="text-slate-500 dark:text-slate-400 text-xs mr-1">(لا توجد تقييمات بعد)</span>
                     </div>
                   )}
                   <div className="w-full space-y-3 pt-6 border-t border-slate-200 dark:border-slate-700 text-right">
@@ -323,39 +234,38 @@ export default function TeacherDetailPageClient() {
                         <span className="text-primary font-bold">{sessionPrice} {currency}/ساعة</span>
                       </div>
                     )}
-                    {teacherApplication.yearsOfExperience && (
+                    {isApproved && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 dark:text-slate-400">سنوات الخبرة:</span>
-                        <span className="font-medium text-slate-900 dark:text-white">{teacherApplication.yearsOfExperience} سنة</span>
+                        <span className="text-slate-500 dark:text-slate-400">إجمالي الساعات:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">٠ ساعة</span>
                       </div>
                     )}
                   </div>
-                  <button 
-                    onClick={handleBookSession}
-                    className="w-full mt-8 bg-primary text-white dark:text-slate-900 font-bold py-3 rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">event</span>
-                    احجز جلسة
-                  </button>
+                  {isApproved && (
+                    <button className="w-full mt-8 bg-primary text-slate-900 font-bold py-3 rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-sm">edit</span>
+                      تعديل الملف العام
+                    </button>
+                  )}
                 </div>
 
-                {/* Quick Info Card */}
-                <div className="bg-white dark:bg-slate-800 border border-primary/10 rounded-xl p-6 space-y-4">
-                  <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider">معلومات سريعة</h4>
-                  <div className="space-y-3 text-sm">
-                    {teacherApplication.nationality && (
-                      <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                        <span className="material-symbols-outlined text-primary">location_on</span>
-                        <span>{teacherApplication.nationality}</span>
-                      </div>
-                    )}
-                    {teacherApplication.phone && (
-                      <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                        <span className="material-symbols-outlined text-primary">phone</span>
-                        <span>{teacherApplication.countryCode} {teacherApplication.phone}</span>
-                      </div>
-                    )}
-                  </div>
+                {/* Quick Links */}
+                <div className="bg-white dark:bg-background-dark border border-primary/10 rounded-xl p-6 space-y-4">
+                  <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider">روابط سريعة</h4>
+                  <nav className="space-y-1">
+                    <a className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary" href="#">
+                      <span className="material-symbols-outlined filled">account_circle</span>
+                      <span className="text-sm font-medium">البيانات الشخصية</span>
+                    </a>
+                    <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+                      <span className="material-symbols-outlined">description</span>
+                      <span className="text-sm font-medium">إدارة المحفظة</span>
+                    </a>
+                    <a className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+                      <span className="material-symbols-outlined">support_agent</span>
+                      <span className="text-sm font-medium">الدعم الفني</span>
+                    </a>
+                  </nav>
                 </div>
               </div>
             </aside>
@@ -384,47 +294,65 @@ export default function TeacherDetailPageClient() {
                 {/* Personal Information Tab */}
                 {activeTab === 'personal' && (
                   <div className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                    <h3 className="text-xl font-bold mb-6">نبذة عن المعلم</h3>
+                    <h3 className="text-xl font-bold mb-6">البيانات الشخصية</h3>
                     <div className="space-y-6">
-                      <div className="prose dark:prose-invert max-w-none">
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">
-                          {teacherApplication.bio || 'لا توجد نبذة متاحة'}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الاسم الكامل</label>
-                          <p className="text-slate-900 dark:text-white font-medium">{teacherName}</p>
+                          <input
+                            type="text"
+                            defaultValue={teacherName}
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                            readOnly={isPending}
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">البريد الإلكتروني</label>
-                          <p className="text-slate-900 dark:text-white font-medium">{teacherApplication.email || teacherProfile?.email || '-'}</p>
+                          <input
+                            type="email"
+                            defaultValue={userProfile?.email || teacherApplication?.email || user?.email || ''}
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                            readOnly={isPending}
+                          />
                         </div>
-                        {teacherApplication.phone && (
-                          <div>
-                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">رقم الهاتف</label>
-                            <p className="text-slate-900 dark:text-white font-medium">{teacherApplication.countryCode} {teacherApplication.phone}</p>
-                          </div>
-                        )}
-                        {teacherApplication.nationality && (
-                          <div>
-                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الجنسية</label>
-                            <p className="text-slate-900 dark:text-white font-medium">{teacherApplication.nationality}</p>
-                          </div>
-                        )}
-                        {teacherApplication.yearsOfExperience && (
-                          <div>
-                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">سنوات الخبرة</label>
-                            <p className="text-slate-900 dark:text-white font-medium">{teacherApplication.yearsOfExperience} سنة</p>
-                          </div>
-                        )}
-                        {teacherApplication.gender && (
-                          <div>
-                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الجنس</label>
-                            <p className="text-slate-900 dark:text-white font-medium">{teacherApplication.gender === 'male' ? 'ذكر' : teacherApplication.gender === 'female' ? 'أنثى' : teacherApplication.gender}</p>
-                          </div>
-                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">رقم الهاتف</label>
+                          <input
+                            type="tel"
+                            defaultValue={`${teacherApplication?.countryCode || '+966'} ${teacherApplication?.phone || ''}`}
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                            readOnly={isPending}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الجنسية</label>
+                          <input
+                            type="text"
+                            defaultValue={teacherApplication?.nationality || ''}
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                            readOnly={isPending}
+                          />
+                        </div>
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">نبذة عني</label>
+                        <textarea
+                          rows={6}
+                          defaultValue={teacherApplication?.bio || ''}
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                          readOnly={isPending}
+                        />
+                      </div>
+                      {isPending && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                          <p className="text-sm text-amber-700 dark:text-amber-300">
+                            لا يمكنك تعديل البيانات أثناء انتظار الموافقة على طلبك.
+                          </p>
+                        </div>
+                      )}
+                      <button className="bg-primary text-slate-900 font-bold py-3 px-6 rounded-lg hover:brightness-110 transition-all">
+                        حفظ التغييرات
+                      </button>
                     </div>
                   </div>
                 )}
@@ -466,6 +394,9 @@ export default function TeacherDetailPageClient() {
                           <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">workspace_premium</span>
                           <h3 className="text-xl font-bold">الإجازات والسند</h3>
                         </div>
+                        <button className="text-sm font-bold text-primary flex items-center gap-1 hover:underline">
+                          <span className="material-symbols-outlined text-sm">add</span> إضافة إجازة
+                        </button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {ijazahs.length > 0 ? (
@@ -542,7 +473,7 @@ export default function TeacherDetailPageClient() {
                               return (
                                 <div key={`${dayIndex}-${timeIndex}`} className="p-1 border-l border-b border-slate-100 dark:border-slate-800">
                                   {status === 'available' && (
-                                    <div className="h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[35px] flex items-center justify-center">
+                                    <div className="h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[35px] flex items-center justify-center cursor-pointer hover:bg-primary/30 transition-colors">
                                       <span className="text-[10px] font-bold text-primary">متاح</span>
                                     </div>
                                   )}
@@ -561,6 +492,11 @@ export default function TeacherDetailPageClient() {
                         ))}
                       </div>
                     </div>
+                    <div className="mt-6 flex justify-end">
+                      <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors">
+                        حفظ التغييرات
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -569,12 +505,7 @@ export default function TeacherDetailPageClient() {
                   <div className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                       <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">reviews</span>
-                      <h3 className="text-xl font-bold">التقييمات</h3>
-                      <div className="flex items-center gap-2 mr-auto">
-                        <span className="material-symbols-outlined text-primary text-lg filled">star</span>
-                        <span className="text-lg font-bold">4.9</span>
-                        <span className="text-slate-500 text-sm">({reviews.length} تقييم)</span>
-                      </div>
+                      <h3 className="text-xl font-bold">آخر التقييمات</h3>
                     </div>
                     <div className="space-y-6">
                       {reviews.length > 0 ? (
@@ -601,6 +532,9 @@ export default function TeacherDetailPageClient() {
                               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{review.comment}</p>
                             </div>
                           ))}
+                          <button className="w-full text-center py-2 text-primary font-bold text-sm hover:underline">
+                            مشاهدة جميع التقييمات
+                          </button>
                         </>
                       ) : (
                         <p className="text-slate-500 text-sm text-center py-8">لا توجد تقييمات بعد</p>

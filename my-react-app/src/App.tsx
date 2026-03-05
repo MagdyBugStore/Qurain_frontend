@@ -29,10 +29,11 @@ import PostSessionPage from "./app/post-session/[id]/page";
 import StartFreePage from "./app/start-free/page";
 import RoadmapPage from "./app/roadmap/page";
 import SectionsPage from "./app/sections/page";
-import StudentProfilePage from "./app/student-profile/page";
 import PersonalInfoPageNew from "./app/personal-info/page";
 import TeacherApplicationPage from "./app/teacher-application/page";
 import TeacherApplicationReviewPage from "./app/teacher-application/review/page";
+import ProfilePage from "./app/profile/[id]/page";
+import ProfileRedirect from "./app/profile/ProfileRedirect";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
@@ -127,15 +128,35 @@ function AppShell() {
           noindex: true,
           geoLocation
         };
-      case "/student-profile":
+      case "/profile":
         return {
-          title: "الملف الشخصي للطالب - منصة القرآن | Student Profile",
-          description: "تابع تقدمك في تعلم القرآن الكريم، إنجازاتك، وجدول حصصك.",
+          title: "الملف الشخصي - منصة القرآن | Profile",
+          description: "إدارة ملفك الشخصي، تقدمك، إنجازاتك، وجدول حصصك.",
+          type: "website",
+          noindex: true,
+          geoLocation
+        };
+      case "/student-profile":
+      case "/teacher-profile":
+        // Redirect old routes to new unified profile
+        return {
+          title: "الملف الشخصي - منصة القرآن | Profile",
+          description: "إدارة ملفك الشخصي، تقدمك، إنجازاتك، وجدول حصصك.",
           type: "website",
           noindex: true,
           geoLocation
         };
       default:
+        // Handle /profile/:id pattern
+        if (path.startsWith("/profile/")) {
+          return {
+            title: "الملف الشخصي - منصة القرآن | Profile",
+            description: "إدارة ملفك الشخصي، تقدمك، إنجازاتك، وجدول حصصك.",
+            type: "website",
+            noindex: true,
+            geoLocation
+          };
+        }
         return {
           title: "منصة القرآن - تعلم القرآن الكريم عبر الإنترنت",
           description: "منصة متخصصة لتعلم القرآن الكريم عبر الإنترنت مع معلمين معتمدين.",
@@ -175,7 +196,11 @@ function AppShell() {
         <Route path="/start-free" element={<StartFreePage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/sections" element={<SectionsPage />} />
-        <Route path="/student-profile" element={<StudentProfilePage />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfileRedirect />} />
+        {/* Legacy routes - redirect to /profile */}
+        <Route path="/student-profile" element={<ProfileRedirect />} />
+        <Route path="/teacher-profile" element={<ProfileRedirect />} />
         <Route path="/teacher-application" element={<TeacherApplicationPage />} />
         <Route path="/teacher-application/review" element={<TeacherApplicationReviewPage />} />
         

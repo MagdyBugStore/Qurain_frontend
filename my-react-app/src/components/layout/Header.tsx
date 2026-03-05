@@ -85,6 +85,11 @@ export default function Header() {
     return name.substring(0, 2).toUpperCase()
   }
 
+  const getProfileUrl = () => {
+    const userId = firebaseUser?.uid
+    return userId ? `/profile/${userId}` : '/profile'
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
@@ -165,7 +170,7 @@ export default function Header() {
                       </p>
                     </div>
                     <Link
-                      to="/student-profile"
+                      to={getProfileUrl()}
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-gray-50 transition-colors"
                     >
@@ -282,7 +287,7 @@ export default function Header() {
 
                     {/* Profile Links */}
                     <Link
-                      to="/student-profile"
+                      to={getProfileUrl()}
                       onClick={closeMobileMenu}
                       className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold text-text-main hover:bg-gray-50 transition-colors"
                     >
