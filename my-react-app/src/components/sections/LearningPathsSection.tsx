@@ -31,7 +31,7 @@ export default function LearningPathsSection() {
           <h2 className="text-primary text-sm font-bold uppercase tracking-wider mb-2">
             مسارات تعليمية مخصصة
           </h2>
-          <h3 className="text-3xl md:text-4xl font-black text-text-main mb-4">
+          <h3 className="text-3xl md:text-4xl font-black text-text-main mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             برامج مصممة لجميع الأعمار والمستويات
           </h3>
           <p className="text-text-muted text-lg">

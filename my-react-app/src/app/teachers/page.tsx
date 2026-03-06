@@ -530,12 +530,12 @@ export default function TeachersPage() {
               </div>
             </div>
             {/* Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 place-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center items-center">
               {regularTeachers.map((teacher) => (
                 <Link
                   key={teacher.id}
                   to={`/profile/test-teacher-123`}
-                  className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer w-full"
+                  className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer max-w-sm w-full"
                 >
                   <div className="p-5 flex flex-col h-full">
                     <div className="flex items-start justify-between mb-4">
