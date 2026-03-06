@@ -1,5 +1,5 @@
+import React from "react";
 import { Link } from 'react-router-dom'
-
 export default function LearningPathsSection() {
   const paths = [
     {
@@ -31,12 +31,12 @@ export default function LearningPathsSection() {
           <h2 className="text-primary text-sm font-bold uppercase tracking-wider mb-2">
             مسارات تعليمية مخصصة
           </h2>
-          <h3 className="text-3xl md:text-4xl font-black text-text-main mb-4">
-            برامج مصممة لكل مرحلة عمرية
+          <h3 className="text-3xl md:text-4xl font-black text-text-main mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+            برامج مصممة لجميع الأعمار والمستويات
           </h3>
           <p className="text-text-muted text-lg">
-            سواء كان طفلك في بداية رحلته أو يطمح لحفظ القرآن كاملاً، لدينا
-            المسار المناسب لقدراته.
+            سواء كنت في بداية رحلتك أو تطمح لحفظ القرآن كاملاً، لدينا
+            المسار المناسب لمستواك وأهدافك.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

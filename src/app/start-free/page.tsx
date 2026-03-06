@@ -1,15 +1,16 @@
 'use client'
 
+import React from "react";
 import { useState } from 'react'
-import Header from '@/components/layout/Header'
-import LoginModal from '@/components/modals/LoginModal'
-import Popup from '@/components/modals/Popup'
-import EmailSignup from '@/components/forms/EmailSignup'
-import Step1Goals from '@/components/forms/Step1Goals'
-import Step2AgeGroup from '@/components/forms/Step2AgeGroup'
-import Step3Level from '@/components/forms/Step3Level'
-import Step4Budget from '@/components/forms/Step4Budget'
-import { useAppStore } from '@/store/useAppStore'
+import Header from '../../components/layout/Header'
+import LoginModal from '../../components/modals/LoginModal'
+import Popup from '../../components/modals/Popup'
+import EmailSignup from '../../components/forms/EmailSignup'
+import Step1Goals from '../../components/forms/Step1Goals'
+import Step2AgeGroup from '../../components/forms/Step2AgeGroup'
+import Step3Level from '../../components/forms/Step3Level'
+import Step4Budget from '../../components/forms/Step4Budget'
+import { useAppStore } from '../../store/useAppStore'
 
 export default function StartFreePage() {
   const [currentStep, setCurrentStep] = useState(1)

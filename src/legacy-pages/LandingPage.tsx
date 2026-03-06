@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PROGRAMS, TEACHERS, PLANS, TESTIMONIALS } from "../jannat-alquran-data";

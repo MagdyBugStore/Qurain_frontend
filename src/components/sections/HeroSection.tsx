@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from 'react-router-dom'
 
 export default function HeroSection() {
@@ -18,29 +19,14 @@ export default function HeroSection() {
             <span className="text-xs font-medium">متاح الآن للتسجيل المبكر</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black leading-tight">
-            أفضل بداية <span className="text-primary">لقلب طفلك</span> مع القرآن
+            أفضل بداية <span className="text-primary">لرحلتك</span> مع القرآن
             الكريم
           </h1>
           <p className="text-lg md:text-xl text-gray-100 leading-relaxed font-light max-w-lg">
-            انضم إلى آلاف العائلات التي تثق بنا لغرس حب القرآن في قلوب أطفالهم.
-            معلمون معتمدون، جداول مرنة، ومنهجية ممتعة.
+            انضم إلى آلاف الطلاب من جميع الأعمار الذين يثقون بنا لتعلم القرآن الكريم.
+            معلمون معتمدون، جداول مرنة، ومنهجية متكاملة تناسب جميع المستويات.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Link
-              to="/start-free"
-              className="bg-primary hover:bg-primary-dark text-white text-base font-bold px-8 py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2"
-            >
-              <span>ابدأ التجربة المجانية</span>
-              <span className="material-symbols-outlined text-sm">arrow_back</span>
-            </Link>
-            <Link
-              to="/programs"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 text-base font-bold px-8 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              <span>مشاهدة المنهج</span>
-              <span className="material-symbols-outlined text-sm">menu_book</span>
-            </Link>
-          </div>
+
           {/* Social Proof */}
           <div className="flex items-center gap-4 mt-6 pt-6 border-t border-white/10">
             <div className="flex -space-x-3 space-x-reverse">
@@ -71,7 +57,7 @@ export default function HeroSection() {
                   </span>
                 ))}
               </div>
-              <span className="text-sm text-gray-200">موثوق من قبل 2000+ عائلة</span>
+              <span className="text-sm text-gray-200">موثوق من قبل 2000+ طالب</span>
             </div>
           </div>
         </div>

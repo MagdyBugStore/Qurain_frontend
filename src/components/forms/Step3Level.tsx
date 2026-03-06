@@ -1,6 +1,7 @@
 'use client'
 
-import { useAppStore } from '@/store/useAppStore'
+import React from "react";
+import { useAppStore } from '../../store/useAppStore'
 
 interface Step3LevelProps {
   onNext: () => void
@@ -20,7 +21,7 @@ export default function Step3Level({ onNext, onBack }: Step3LevelProps) {
     {
       id: 'intermediate',
       icon: 'menu_book',
-      title: 'متوسط',
+      title: 'متوسط',   
       description: 'يقرأ الكلمات ولكن بتهجئة بطيئة، ويحتاج للتدريب على الوصل والطلاقة.',
     },
     {

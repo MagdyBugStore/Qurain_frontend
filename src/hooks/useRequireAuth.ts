@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppStore } from '@/store/useAppStore'
+import { useAppStore } from '../store/useAppStore'
 
 /**
  * Hook that returns a function to check auth before performing an action
@@ -17,7 +17,7 @@ export function useAuthGuard() {
     if (callback) {
       callback()
     }
-    return true
+    return true   
   }
 
   return { requireAuth, isAuthenticated }

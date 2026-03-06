@@ -1,3 +1,5 @@
+import React from "react";
+
 interface Toast {
   id: string | number;
   type: string;
@@ -13,7 +15,9 @@ export function ToastContainer({ toasts }: { toasts: Toast[] }) {
     <div className="toast-container">
       {toasts.map((t) => (
         <div key={t.id} className={`toast ${t.type}`}>
-          <span>{t.type === "success" ? "✅" : "ℹ️"}</span>
+          <span>
+            {t.type === "success" ? "✅" : t.type === "error" ? "❌" : "ℹ️"}
+          </span>
           {t.msg}
         </div>
       ))}

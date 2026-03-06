@@ -1,8 +1,9 @@
 'use client'
 
+import React from "react";
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import Header from '@/components/layout/Header'
+import Header from '../../../../components/layout/Header'
 
 export default function BookingConfirmPage() {
   const { id } = useParams<{ id: string }>()

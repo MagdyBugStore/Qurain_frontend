@@ -38,6 +38,10 @@ interface AppState {
   }
   updateFormData: (data: Partial<AppState['formData']>) => void
   resetFormData: () => void
+  
+  // Toast notifications
+  toasts: { id: number; msg: string; type: string }[]
+  addToast: (msg: string, type?: 'success' | 'error' | 'info') => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -88,4 +92,18 @@ export const useAppStore = create<AppState>((set) => ({
       learningGoal: null,
     }
   }),
+  
+  // Toast notifications
+  toasts: [],
+  addToast: (msg, type = 'success') => {
+    const id = Date.now()
+    set((state) => ({
+      toasts: [...state.toasts, { id, msg, type }]
+    }))
+    setTimeout(() => {
+      set((state) => ({
+        toasts: state.toasts.filter((t) => t.id !== id)
+      }))
+    }, 3500)
+  },
 }))

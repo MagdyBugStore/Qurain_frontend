@@ -1,6 +1,7 @@
 'use client'
 
-import { useAppStore } from '@/store/useAppStore'
+import React from "react";
+import { useAppStore } from '../../store/useAppStore'
 
 interface Step2AgeGroupProps {
   onNext: () => void

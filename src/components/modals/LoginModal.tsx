@@ -1,31 +1,83 @@
 'use client'
 
+import React from "react";
 import { useState } from 'react'
-import { useAppStore } from '@/store/useAppStore'
+import { useAppStore } from '../../store/useAppStore'
+import { signInWithPopup } from 'firebase/auth'
+import { auth, googleProvider } from '../../config/firebase'
 
 export default function LoginModal() {
   const isOpen = useAppStore((state) => state.isLoginModalOpen)
   const closeModal = useAppStore((state) => state.closeLoginModal)
   const setAuthenticated = useAppStore((state) => state.setAuthenticated)
-  const [isLoading, setIsLoading] = useState(false)
+  const addToast = useAppStore((state) => state.addToast)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false)
+  const [isAppleLoading, setIsAppleLoading] = useState(false)
 
   const handleLogin = async (provider: 'google' | 'facebook' | 'apple') => {
-    setIsLoading(true)
+    if (provider === 'google') {
+      setIsGoogleLoading(true)
+    } else if (provider === 'facebook') {
+      setIsFacebookLoading(true)
+    } else if (provider === 'apple') {
+      setIsAppleLoading(true)
+    }
     try {
-      // Simulate login API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      
-      // Set authenticated state
-      setAuthenticated(true, {
-        email: `user@${provider}.com`,
-        name: `User ${provider}`,
-      })
-      
-      closeModal()
-    } catch (error) {
+      if (provider === 'google') {
+        // Google authentication with Firebase
+        const result = await signInWithPopup(auth, googleProvider)
+        const user = result.user
+        
+        // Set authenticated state with real user data
+        setAuthenticated(true, {
+          email: user.email || '',
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+        })
+        
+        // Show success toast
+        addToast('تم تسجيل الدخول بنجاح! مرحباً بك', 'success')
+        
+        closeModal()
+      } else {
+        // Simulate login API call for other providers (not yet implemented)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        
+        // Set authenticated state
+        setAuthenticated(true, {
+          email: `user@${provider}.com`,
+          name: `User ${provider}`,
+        })
+        
+        // Show success toast
+        addToast('تم تسجيل الدخول بنجاح! مرحباً بك', 'success')
+        
+        closeModal()
+      }
+    } catch (error: any) {
       console.error('Login error:', error)
+      // Handle specific Firebase errors
+      if (error.code === 'auth/popup-closed-by-user') {
+        addToast('تم إلغاء تسجيل الدخول', 'info')
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        addToast('يرجى الانتظار، جاري معالجة الطلب السابق', 'info')
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        addToast('يوجد حساب آخر بنفس البريد الإلكتروني', 'error')
+      } else if (error.code === 'auth/popup-blocked') {
+        addToast('تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة', 'error')
+      } else if (error.code === 'auth/network-request-failed') {
+        addToast('خطأ في الاتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى', 'error')
+      } else {
+        addToast('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى', 'error')
+      }
     } finally {
-      setIsLoading(false)
+      if (provider === 'google') {
+        setIsGoogleLoading(false)
+      } else if (provider === 'facebook') {
+        setIsFacebookLoading(false)
+      } else if (provider === 'apple') {
+        setIsAppleLoading(false)
+      }
     }
   }
 
@@ -67,7 +119,7 @@ export default function LoginModal() {
             </div>
             <h2 className="text-2xl font-bold text-text-main">مرحباً بعودتكم</h2>
             <p className="mt-1 text-sm text-text-muted">
-              اختر وسيلة تسجيل الدخول للمتابعة إلى قرين أونلاين
+              اختر وسيلة تسجيل الدخول للمتابعة إلى قرآن أونلاين
             </p>
           </div>
 
@@ -76,7 +128,7 @@ export default function LoginModal() {
             <button
               type="button"
               onClick={() => handleLogin('google')}
-              disabled={isLoading}
+              disabled={isGoogleLoading}
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#e4e2dc] bg-white py-3 px-4 text-base font-medium text-text-main transition-all hover:border-primary/30 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -97,13 +149,13 @@ export default function LoginModal() {
                   fill="#EA4335"
                 />
               </svg>
-              <span>{isLoading ? 'جاري...' : 'Google'}</span>
+              <span>{isGoogleLoading ? 'جاري...' : 'Google'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleLogin('facebook')}
-              disabled={isLoading}
+              disabled={isFacebookLoading}
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#e4e2dc] bg-white py-3 px-4 text-base font-medium text-text-main transition-all hover:border-primary/30 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg
@@ -114,13 +166,13 @@ export default function LoginModal() {
               >
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
-              <span>{isLoading ? 'جاري...' : 'Facebook'}</span>
+              <span>{isFacebookLoading ? 'جاري...' : 'Facebook'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleLogin('apple')}
-              disabled={isLoading}
+              disabled={isAppleLoading}
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-[#e4e2dc] bg-white py-3 px-4 text-base font-medium text-text-main transition-all hover:border-primary/30 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg
@@ -131,7 +183,7 @@ export default function LoginModal() {
               >
                 <path d="M17.05 20.28c-.98.95-2.05 1.72-3.21 2.31-1.16.59-2.32.88-3.48.88-1.16 0-2.32-.29-3.48-.88-1.16-.59-2.23-1.36-3.21-2.31C1.84 18.52 1 16.4 1 13.91c0-2.49.84-4.61 2.52-6.37 1.68-1.76 3.8-2.64 6.36-2.64.91 0 1.8.14 2.67.42.87.28 1.62.7 2.25 1.26.63-.56 1.38-.98 2.25-1.26.87-.28 1.76-.42 2.67-.42 2.56 0 4.68.88 6.36 2.64C22.16 9.3 23 11.42 23 13.91c0 2.49-.84 4.61-2.52 6.37-.98.95-2.05 1.72-3.21 2.31-1.16.59-2.32.88-3.48.88-1.16 0-2.32-.29-3.48-.88-1.16-.59-2.23-1.36-3.21-2.31zM12 4.14c-.01-1.13.43-2.14 1.32-3.03C14.21.22 15.22-.22 16.35-.21c.01 1.13-.43 2.14-1.32 3.03-.89.89-1.9 1.33-3.03 1.32z" />
               </svg>
-              <span>{isLoading ? 'جاري...' : 'Apple'}</span>
+              <span>{isAppleLoading ? 'جاري...' : 'Apple'}</span>
             </button>
           </div>
 

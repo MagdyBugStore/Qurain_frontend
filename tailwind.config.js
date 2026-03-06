@@ -1,6 +1,7 @@
-import type { Config } from 'tailwindcss'
+import tailwindcssRtl from 'tailwindcss-rtl'
 
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+export default {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -28,6 +29,5 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [tailwindcssRtl],
 }
-export default config

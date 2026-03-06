@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -10,9 +11,25 @@ interface LoginPageProps {
 export function LoginPage({ addToast }: LoginPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signInWithGoogle, signInWithApple } = useAuth();
+  const { user, loading: authLoading, signInWithGoogle, signInWithApple } = useAuth();
   const [loading, setLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
+
+  // Redirect if user is already authenticated
+  // إعادة التوجيه إذا كان المستخدم مسجل دخول بالفعل
+  useEffect(() => {
+    if (!authLoading && user) {
+      // User is already logged in, redirect to personal-info page
+      // المستخدم مسجل دخول بالفعل، إعادة التوجيه إلى صفحة ملء البيانات
+      navigate("/personal-info", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  // Don't show login form if user is already authenticated or still loading
+  // عدم عرض نموذج تسجيل الدخول إذا كان المستخدم مسجل دخول بالفعل أو ما زال في حالة تحميل
+  if (authLoading || user) {
+    return null; // أو يمكن عرض spinner للتحميل
+  }
 
   const handleGoogleSignIn = async () => {
     try {

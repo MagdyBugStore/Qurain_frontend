@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from 'react-router-dom'
 
 export default function FeaturedTutorsSection() {
@@ -5,7 +6,7 @@ export default function FeaturedTutorsSection() {
     {
       name: 'الشيخ أحمد محمد',
       specialty: 'متخصص في التجويد والقراءات',
-      description: 'إجازة في القراءات العشر، خبرة أكثر من 10 سنوات في تعليم الأطفال والناشئة.',
+      description: 'إجازة في القراءات العشر، خبرة أكثر من 10 سنوات في تعليم القرآن لجميع الفئات العمرية.',
       rating: 4.9,
       image:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuANceWlhvlc5OzyEQ6Yw5RuVW0W5G1RQpo9Cjj6vuonq6SDWjA3GyxPV_S4eFslf3V1rwsQubSIL6zJZOTE4fNRB8Mz8IjNwygqUGBKvFWBdnpgV0KFhaTxrCrP75bX-cliClUezCSQF0dkFVyux2zbD4XpISu50SyBWXWxAldf9Jx-jyB4xzXt9JpodwWI26p90gZ53j_lwg5jfqkschS94M6KkQC0kqP4WWrJd2EAobsTH2DFB9t0oaOwKI_2aoZD2guovmb1yZBg',
@@ -14,7 +15,7 @@ export default function FeaturedTutorsSection() {
     {
       name: 'الأستاذة فاطمة علي',
       specialty: 'متخصصة في القاعدة النورانية',
-      description: 'أسلوب مميز في تحبيب الأطفال في القرآن، صبورة جداً مع المبتدئين.',
+      description: 'أسلوب مميز في تحبيب القرآن للطلاب، صبورة جداً مع المبتدئين من جميع الأعمار.',
       rating: 5.0,
       image:
         'https://lh3.googleusercontent.com/aida-public/AB6AXuAKri3d2YSfegaGvjE-qQ9qr4zd-Tw_SDeqL9OCvZ63AvMIDb7WNzFkls7sYSYAmTRN65oa6zl9wvgihy73ySmxuFr_UiOO3s47YDDr6LuVom-XtB9eSGY_1MJWhOQISznulDWYHL6qtH4G_0Gjh961xVSBUX44IqUFQg-Mrg2JGe1Pf0fT7KvL0Ecg1mdEpD-WYc_47dFO0_g9U3gAOFiZzs6X9w-GHW0LPX5RdHUKk9_ZuIdFSaET5I8zVJSjF9vLMU_7AY2MfkSY',
@@ -46,7 +47,7 @@ export default function FeaturedTutorsSection() {
           {tutors.map((tutor, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-shadow"
+              className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-shadow max-w-sm mx-auto"
             >
               <div className="h-48 bg-gray-200 relative overflow-hidden">
                 <img

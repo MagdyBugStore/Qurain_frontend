@@ -1,3 +1,5 @@
+import React from "react";
+
 const STATUS_CLASS: Record<string, string> = {
   scheduled: "status-scheduled",
   completed: "status-completed",

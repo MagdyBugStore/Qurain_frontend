@@ -1,7 +1,8 @@
 'use client'
 
+import React from "react";
 import { useState, useEffect } from 'react'
-import Header from '@/components/layout/Header'
+import Header from '../../../components/layout/Header'
 import { useNavigate, useParams } from 'react-router-dom'
 
 type CheckStatus = 'checking' | 'passed' | 'failed'
@@ -126,7 +127,6 @@ export default function TechnicalCheckPage() {
               </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="p-6 sm:p-8 bg-[#f8f8f5] dark:bg-[#221e10] border-t border-[#e6e3db] dark:border-[#3a3528] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-[#8a8060] dark:text-[#a39b80] text-sm">
                 <span className="material-symbols-outlined text-[18px]">info</span>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import './globals.css'
 
 // Root layout wrapper for React Router
@@ -11,7 +11,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-background-light text-text-main font-body flex flex-col min-h-screen">
+    <div className="bg-background-light text-text-main font-body flex flex-col min-h-screen" dir="rtl">
       {children}
     </div>
   )

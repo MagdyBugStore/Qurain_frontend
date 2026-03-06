@@ -1,10 +1,11 @@
 'use client'
 
+import React from "react";
 import { useState } from 'react'
-import Header from '@/components/layout/Header'
-import LoginModal from '@/components/modals/LoginModal'
-import Popup from '@/components/modals/Popup'
-import { useAppStore } from '@/store/useAppStore'
+import Header from '../../components/layout/Header'
+import LoginModal from '../../components/modals/LoginModal'
+import Popup from '../../components/modals/Popup'
+import { useAppStore } from '../../store/useAppStore'
 
 
 interface EmailSignupProps {

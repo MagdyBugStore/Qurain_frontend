@@ -1,6 +1,7 @@
 'use client'
 
-import { useAppStore } from '@/store/useAppStore'
+import React from "react";
+import { useAppStore } from '../../store/useAppStore'
 
 export default function Popup() {
   const { isPopupOpen, closePopup } = useAppStore()
@@ -16,7 +17,7 @@ export default function Popup() {
           className="absolute top-4 left-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
         >
           <span className="material-symbols-outlined">close</span>
-        </button>
+        </button> 
 
         {/* Modal Header */}
         <div className="px-8 pt-10 pb-6 text-center">
@@ -24,7 +25,7 @@ export default function Popup() {
             <span className="material-symbols-outlined text-3xl">menu_book</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            أهلاً بك في قرين أونلاين
+            أهلاً بك في قرآن أونلاين
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-lg">
             يرجى اختيار الفئة العمرية لنتمكن من تخصيص تجربتك
@@ -33,26 +34,35 @@ export default function Popup() {
 
         {/* Age Group Grid */}
         <div className="px-8 pb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
             {/* Option 1: Children */}
             <div className="group relative flex flex-col items-center p-4 rounded-xl border-2 border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/50 hover:border-primary/50 cursor-pointer transition-all">
               <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
                 <span className="material-symbols-outlined text-3xl">child_care</span>
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100">أطفال</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">5-12</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">5-12 سنة</p>
             </div>
 
             {/* Option 2: Youth */}
+            <div className="group relative flex flex-col items-center p-4 rounded-xl border-2 border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/50 hover:border-primary/50 cursor-pointer transition-all">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+                <span className="material-symbols-outlined text-3xl">school</span>
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100">شباب</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">13-18 سنة</p>
+            </div>
+
+            {/* Option 3: Adults */}
             <div className="group relative flex flex-col items-center p-4 rounded-xl border-2 border-primary bg-primary/5 dark:bg-primary/10 cursor-pointer transition-all shadow-sm">
               <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
                 <span className="material-symbols-outlined text-xs">check</span>
               </div>
               <div className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/20 text-primary mb-3">
-                <span className="material-symbols-outlined text-3xl">school</span>
+                <span className="material-symbols-outlined text-3xl">person</span>
               </div>
-              <h3 className="font-bold text-slate-900 dark:text-slate-100">شباب</h3>
-              <p className="text-sm text-primary font-medium">13-18</p>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100">بالغون</h3>
+              <p className="text-sm text-primary font-medium">18+ سنة</p>
             </div>
           </div>
         </div>

@@ -1,7 +1,8 @@
 'use client'
 
+import React from "react";
 import { useState, useEffect } from 'react'
-import Header from '@/components/layout/Header'
+import Header from '../../../components/layout/Header'
 
 export default function WaitingRoomPage() {
   const [isTutorLate, setIsTutorLate] = useState(false)

@@ -1,6 +1,7 @@
-import Header from '@/components/layout/Header'
-import LoginModal from '@/components/modals/LoginModal'
-import Popup from '@/components/modals/Popup'
+import React from "react";
+import Header from '../../components/layout/Header'
+import LoginModal from '../../components/modals/LoginModal'
+import Popup from '../../components/modals/Popup'
 import { Link } from 'react-router-dom'
 
 

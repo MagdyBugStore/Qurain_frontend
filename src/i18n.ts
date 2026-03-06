@@ -102,6 +102,17 @@ const resources = {
           advanced: "متقدم"
         },
         submit: "إرسال الطلب"
+      },
+      loginPage: {
+        eyebrow: "تسجيل الدخول",
+        title: "سجّل الدخول إلى حسابك",
+        desc: "استخدم حساب Google أو Apple لتسجيل الدخول والبدء في رحلتك مع القرآن.",
+        success: "تم تسجيل الدخول بنجاح! مرحباً بك",
+        error: "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى",
+        loading: "جاري تسجيل الدخول...",
+        googleSignIn: "تسجيل الدخول باستخدام Google",
+        appleSignIn: "تسجيل الدخول باستخدام Apple",
+        privacy: "بمتابعة تسجيل الدخول، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا."
       }
     }
   },
@@ -205,6 +216,17 @@ const resources = {
           advanced: "Advanced"
         },
         submit: "Submit Request"
+      },
+      loginPage: {
+        eyebrow: "Log In",
+        title: "Sign in to your account",
+        desc: "Use your Google or Apple account to sign in and begin your Quran journey.",
+        success: "Successfully signed in! Welcome",
+        error: "An error occurred during sign in. Please try again",
+        loading: "Signing in...",
+        googleSignIn: "Sign in with Google",
+        appleSignIn: "Sign in with Apple",
+        privacy: "By continuing to sign in, you agree to our Terms of Service and Privacy Policy."
       }
     }
   }

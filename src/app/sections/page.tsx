@@ -1,8 +1,9 @@
+import React from "react";
 import { Link } from 'react-router-dom'
-import Header from '@/components/layout/Header'
+import Header from '../../components/layout/Header'
 
-import LoginModal from '@/components/modals/LoginModal'
-import Popup from '@/components/modals/Popup'
+import LoginModal from '../../components/modals/LoginModal'
+import Popup from '../../components/modals/Popup'
 
 export default function SectionsPage() {
   return (
@@ -25,7 +26,7 @@ export default function SectionsPage() {
                     <span className="text-primary block mt-2">بأسلوب ممتع وتفاعلي</span>
                   </h1>
                   <p className="text-lg leading-relaxed text-text-muted max-w-xl">
-                    منصة متخصصة لتعليم القرآن الكريم للأطفال والكبار مع نخبة من المعلمين
+                    منصة متخصصة لتعليم القرآن الكريم لجميع الأعمار مع نخبة من المعلمين
                     المجازين وبرامج تعليمية مخصصة
                   </p>
                 </div>
@@ -59,7 +60,7 @@ export default function SectionsPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-6 right-6 text-white text-right">
                       <p className="font-bold text-lg">تعليم ممتع وتفاعلي</p>
-                      <p className="text-sm opacity-90">بيئة آمنة لطفلك</p>
+                      <p className="text-sm opacity-90">بيئة آمنة للجميع</p>
                     </div>
                   </div>
                 </div>
@@ -105,7 +106,7 @@ export default function SectionsPage() {
                 {
                   icon: 'child_care',
                   title: 'القاعدة النورانية',
-                  description: 'تأسيس القراءة الصحيحة للأطفال المبتدئين بطريقة مبسطة.',
+                  description: 'تأسيس القراءة الصحيحة للمبتدئين من جميع الأعمار بطريقة مبسطة.',
                 },
                 {
                   icon: 'language',
@@ -137,14 +138,14 @@ export default function SectionsPage() {
                   كيف يعمل قرآن أونلاين؟
                 </h2>
                 <p className="text-lg text-text-muted mb-8">
-                  ابدأ رحلة تعلم القرآن في 3 خطوات بسيطة وميسرة لك ولطفلك.
+                  ابدأ رحلة تعلم القرآن في 3 خطوات بسيطة وميسرة تناسب جميع الأعمار.
                 </p>
                 <div className="space-y-6">
                   {[
                     {
                       step: 1,
                       title: 'اختر المعلم المناسب',
-                      description: 'تصفح ملفات المعلمين، استمع لتلاوتهم، واختر الأنسب لطفلك.',
+                      description: 'تصفح ملفات المعلمين، استمع لتلاوتهم، واختر الأنسب لمستواك وأهدافك.',
                     },
                     {
                       step: 2,
