@@ -52,9 +52,13 @@ export function PersonalInfoPage({ addToast }: PersonalInfoPageProps) {
     // Load existing profile if available
     if (userProfile) {
       setForm(userProfile as UserProfileForm);
-      // If profile is complete, redirect to dashboard
+      // If profile is complete, redirect to profile page
       if (userProfile.firstName && userProfile.lastName && userProfile.phone) {
-        navigate("/dashboard");
+        if (user?.uid) {
+          navigate(`/profile/${user.uid}`);
+        } else {
+          navigate("/profile");
+        }
       }
     } else {
       // Pre-fill from auth user
@@ -109,7 +113,11 @@ export function PersonalInfoPage({ addToast }: PersonalInfoPageProps) {
     saveUserProfile(form);
     addToast(t("personalInfoPage.toastSubmitted"), "success");
     setTimeout(() => {
-      navigate("/dashboard");
+      if (user?.uid) {
+        navigate(`/profile/${user.uid}`);
+      } else {
+        navigate("/profile");
+      }
     }, 1000);
   };
 

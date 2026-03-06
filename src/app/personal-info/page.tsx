@@ -27,9 +27,13 @@ export default function PersonalInfoPage() {
       return
     }
 
-    // If profile is already complete, redirect to dashboard
+    // If profile is already complete, redirect to profile page
     if (userProfile && isProfileComplete(userProfile)) {
-      navigate('/dashboard')
+      if (user?.uid) {
+        navigate(`/profile/${user.uid}`)
+      } else {
+        navigate('/profile')
+      }
       return
     }
 

@@ -117,9 +117,9 @@ export default function LoginModal() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-text-main">مرحباً بعودتكم</h2>
+            <h2 className="text-2xl font-bold text-text-main">تسجيل الدخول</h2>
             <p className="mt-1 text-sm text-text-muted">
-              اختر وسيلة تسجيل الدخول للمتابعة إلى قرآن أونلاين
+              سجّل الدخول باستخدام حسابك في إحدى المنصات التالية للبدء في رحلتك مع القرآن
             </p>
           </div>
 
@@ -189,14 +189,22 @@ export default function LoginModal() {
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-text-muted">
-              ليس لديك حساب؟{' '}
+            <p className="text-xs text-text-muted leading-relaxed">
+              بمتابعة تسجيل الدخول، أنت توافق على{' '}
               <a
-                className="font-bold text-primary hover:underline transition-colors"
+                className="font-medium text-primary hover:underline transition-colors"
                 href="#"
               >
-                إنشاء حساب جديد
+                شروط الخدمة
               </a>
+              {' '}و{' '}
+              <a
+                className="font-medium text-primary hover:underline transition-colors"
+                href="#"
+              >
+                سياسة الخصوصية
+              </a>
+              . سيتم إنشاء حساب تلقائياً عند أول تسجيل دخول.
             </p>
           </div>
         </div>
