@@ -11,6 +11,12 @@ interface AppState {
   openLoginModal: () => void
   closeLoginModal: () => void
   
+  // Booking modal state
+  isBookingModalOpen: boolean
+  bookingTeacherId: string | null
+  openBookingModal: (teacherId: string) => void
+  closeBookingModal: () => void
+  
   // Authentication state
   isAuthenticated: boolean
   user: { email: string; name?: string } | null
@@ -54,6 +60,12 @@ export const useAppStore = create<AppState>((set) => ({
   isLoginModalOpen: false,
   openLoginModal: () => set({ isLoginModalOpen: true }),
   closeLoginModal: () => set({ isLoginModalOpen: false }),
+  
+  // Booking modal state
+  isBookingModalOpen: false,
+  bookingTeacherId: null,
+  openBookingModal: (teacherId) => set({ isBookingModalOpen: true, bookingTeacherId: teacherId }),
+  closeBookingModal: () => set({ isBookingModalOpen: false, bookingTeacherId: null }),
   
   // Authentication state
   isAuthenticated: false,

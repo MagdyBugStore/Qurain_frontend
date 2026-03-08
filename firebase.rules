@@ -116,6 +116,165 @@ service cloud.firestore {
                         || resource.data.teacherId == request.auth.uid) || isAdmin();
     }
     
+    // Teacher Availability collection - مجموعة توفر المعلمين
+    // Allow teachers to manage their own availability schedule
+    // السماح للمعلمين بإدارة جدول توفرهم
+    // teacherId in the path is the document ID and should match the authenticated user's ID
+    // teacherId في المسار هو معرف المستند ويجب أن يطابق معرف المستخدم المسجل
+    match /teacherAvailability/{teacherId} {
+      // Allow read if user is authenticated (teachers can read their own, students can read any teacher's availability)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (المعلمون يمكنهم قراءة توفرهم، الطلاب يمكنهم قراءة توفر أي معلم)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated and creating their own availability (teacherId in path matches user ID)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ جدول توفر خاص به (teacherId في المسار يطابق معرف المستخدم)
+      allow create: if isAuthenticated() 
+                    && teacherId == request.auth.uid;
+      
+      // Allow update if user is authenticated and owns the document (teacherId in path matches user ID) OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك المستند (teacherId في المسار يطابق معرف المستخدم) أو مشرفاً
+      allow update: if (isAuthenticated() && teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow delete if user is authenticated and owns the document (teacherId in path matches user ID) OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك المستند (teacherId في المسار يطابق معرف المستخدم) أو مشرفاً
+      allow delete: if (isAuthenticated() && teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Teacher Ijazahs collection - مجموعة إجازات المعلمين
+    // Allow teachers to manage their own ijazahs
+    // السماح للمعلمين بإدارة إجازاتهم
+    match /teacherIjazahs/{ijazahId} {
+      // Allow read if user is authenticated (to display teacher ijazahs)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (لعرض إجازات المعلم)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated and creating their own ijazah
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ إجازته الخاصة
+      allow create: if isAuthenticated() 
+                    && request.resource.data.teacherId == request.auth.uid;
+      
+      // Allow update if user is authenticated and owns the document OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك المستند أو مشرفاً
+      allow update: if (isAuthenticated() 
+                    && resource.data.teacherId == request.auth.uid
+                    && request.resource.data.teacherId == resource.data.teacherId) || isAdmin();
+      
+      // Allow delete if user is authenticated and owns the document OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك المستند أو مشرفاً
+      allow delete: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Teacher Wallets collection - مجموعة محافظ المعلمين
+    // Allow teachers to view their own wallet
+    // السماح للمعلمين بعرض محفظتهم
+    match /teacherWallets/{walletId} {
+      // Allow read if user is authenticated and owns the wallet OR is admin
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك المحفظة أو مشرفاً
+      allow read: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow create if user is authenticated and creating their own wallet
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ محفظته الخاصة
+      allow create: if isAuthenticated() 
+                    && request.resource.data.teacherId == request.auth.uid;
+      
+      // Allow update if user is authenticated and owns the wallet OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك المحفظة أو مشرفاً
+      allow update: if (isAuthenticated() 
+                    && resource.data.teacherId == request.auth.uid
+                    && request.resource.data.teacherId == resource.data.teacherId) || isAdmin();
+      
+      // Allow delete if user is authenticated and owns the wallet OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك المحفظة أو مشرفاً
+      allow delete: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Teacher Transactions collection - مجموعة معاملات المعلمين
+    // Allow teachers to view their own transactions
+    // السماح للمعلمين بعرض معاملاتهم
+    match /teacherTransactions/{transactionId} {
+      // Allow read if user is authenticated and owns the transaction OR is admin
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك المعاملة أو مشرفاً
+      allow read: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow create if user is authenticated (system can create transactions)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً (النظام يمكنه إنشاء المعاملات)
+      allow create: if isAuthenticated();
+      
+      // Allow update/delete only for admin (transactions should not be modified)
+      // السماح بالتحديث/الحذف فقط للمشرف (المعاملات لا يجب تعديلها)
+      allow update, delete: if isAdmin();
+    }
+    
+    // Withdrawal Requests collection - مجموعة طلبات السحب
+    // Allow teachers to create and view their own withdrawal requests
+    // السماح للمعلمين بإنشاء وعرض طلبات السحب الخاصة بهم
+    match /withdrawalRequests/{requestId} {
+      // Allow read if user is authenticated and owns the request OR is admin
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً
+      allow read: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow create if user is authenticated and creating their own request
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ طلبه الخاص
+      allow create: if isAuthenticated() 
+                    && request.resource.data.teacherId == request.auth.uid;
+      
+      // Allow update if user is authenticated and owns the request OR is admin (for status updates)
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً (لتحديث الحالة)
+      allow update: if (isAuthenticated() 
+                    && resource.data.teacherId == request.auth.uid
+                    && request.resource.data.teacherId == resource.data.teacherId) || isAdmin();
+      
+      // Allow delete if user is authenticated and owns the request OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً
+      allow delete: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Support Tickets collection - مجموعة تذاكر الدعم الفني
+    // Allow users to create and manage their own support tickets
+    // السماح للمستخدمين بإنشاء وإدارة تذاكر الدعم الخاصة بهم
+    match /supportTickets/{ticketId} {
+      // Allow read if user is authenticated and owns the ticket OR is admin
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك التذكرة أو مشرفاً
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+      
+      // Allow create if user is authenticated and creating their own ticket
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ تذكرته الخاصة
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid;
+      
+      // Allow update if user is authenticated and owns the ticket OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك التذكرة أو مشرفاً
+      allow update: if (isAuthenticated() 
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId) || isAdmin();
+      
+      // Allow delete if user is authenticated and owns the ticket OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك التذكرة أو مشرفاً
+      allow delete: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+      
+      // Replies subcollection - مجموعة ردود التذاكر
+      // Allow users to read and create replies for their own tickets
+      // السماح للمستخدمين بقراءة وإنشاء ردود لتذاكرهم
+      match /replies/{replyId} {
+        // Allow read if user is authenticated and owns the parent ticket OR is admin
+        // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك التذكرة الأصلية أو مشرفاً
+        allow read: if isAuthenticated() 
+                    && (get(/databases/$(database)/documents/supportTickets/$(ticketId)).data.userId == request.auth.uid 
+                        || isAdmin());
+        
+        // Allow create if user is authenticated and owns the parent ticket OR is admin
+        // السماح بالإنشاء إذا كان المستخدم مسجلاً ويملك التذكرة الأصلية أو مشرفاً
+        allow create: if isAuthenticated() 
+                      && (get(/databases/$(database)/documents/supportTickets/$(ticketId)).data.userId == request.auth.uid 
+                          || isAdmin());
+        
+        // Allow update/delete if user is authenticated and owns the reply OR is admin
+        // السماح بالتحديث/الحذف إذا كان المستخدم مسجلاً ويملك الرد أو مشرفاً
+        allow update, delete: if (isAuthenticated() 
+                          && resource.data.userId == request.auth.uid) || isAdmin();
+      }
+    }
+    
     // Default deny rule for all other collections
     // قاعدة الرفض الافتراضية لجميع المجموعات الأخرى
     match /{document=**} {

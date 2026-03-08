@@ -1,0 +1,700 @@
+<!-- الدعم الفني -->
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+    <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+        <!-- Header / Nav -->
+        <header
+            class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 md:px-10 py-3">
+            <div class="max-w-[1200px] mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-3xl">support_agent</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100">
+                            الدعم الفني</h1>
+                        <p class="text-xs text-primary font-medium">قرين أونلاين - نحن دائماً معك</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="flex items-center justify-center rounded-xl h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button
+                        class="flex items-center justify-center rounded-xl h-10 w-10 bg-primary/10 text-primary md:hidden">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 max-w-[1200px] mx-auto w-full px-4 md:px-10 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Sidebar Navigation (Desktop) -->
+                <aside class="hidden lg:flex lg:col-span-3 flex-col gap-2">
+                    <nav class="flex flex-col gap-1">
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/5 text-slate-600 dark:text-slate-400"
+                            href="#">
+                            <span class="material-symbols-outlined">home</span>
+                            <span class="font-medium">الرئيسية</span>
+                        </a>
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/5 text-slate-600 dark:text-slate-400"
+                            href="#">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <span class="font-medium">دروسي</span>
+                        </a>
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20"
+                            href="#">
+                            <span class="material-symbols-outlined">headset_mic</span>
+                            <span class="font-medium">مركز الدعم</span>
+                        </a>
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/5 text-slate-600 dark:text-slate-400"
+                            href="#">
+                            <span class="material-symbols-outlined">person</span>
+                            <span class="font-medium">الملف الشخصي</span>
+                        </a>
+                    </nav>
+                    <div class="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/10">
+                        <h3 class="font-bold text-primary mb-2">أسئلة شائعة</h3>
+                        <ul class="space-y-3">
+                            <li><a class="text-sm text-slate-600 dark:text-slate-400 hover:text-primary underline decoration-primary/20"
+                                    href="#">كيفية استعادة كلمة المرور؟</a></li>
+                            <li><a class="text-sm text-slate-600 dark:text-slate-400 hover:text-primary underline decoration-primary/20"
+                                    href="#">مشاكل في تحميل الدروس</a></li>
+                            <li><a class="text-sm text-slate-600 dark:text-slate-400 hover:text-primary underline decoration-primary/20"
+                                    href="#">تفعيل الاشتراك السنوي</a></li>
+                        </ul>
+                    </div>
+                </aside>
+                <!-- Main Content Area -->
+                <div class="lg:col-span-9 space-y-8">
+                    <!-- Search Section -->
+                    <section
+                        class="relative rounded-3xl overflow-hidden bg-primary/10 p-8 md:p-12 text-center border border-primary/10">
+                        <div class="relative z-10 max-w-xl mx-auto">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-slate-900 dark:text-slate-100">كيف
+                                يمكننا مساعدتك اليوم؟</h2>
+                            <p class="text-slate-600 dark:text-slate-400 mb-8">ابحث في مقالات المساعدة أو تصفح المواضيع
+                                الشائعة</p>
+                            <div class="relative group">
+                                <span
+                                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary group-focus-within:text-primary">search</span>
+                                <input
+                                    class="w-full h-14 pr-12 pl-4 rounded-2xl border-none ring-1 ring-primary/20 focus:ring-2 focus:ring-primary bg-background-light dark:bg-background-dark shadow-sm"
+                                    placeholder="ابحث عن دروس، فواتير، أو مشاكل تقنية..." type="text" />
+                            </div>
+                        </div>
+                        <!-- Decorative background pattern -->
+                        <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"
+                            data-alt="Abstract orange circular gradient background"></div>
+                    </section>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Support Ticket Form -->
+                        <section class="space-y-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                                <h2 class="text-xl font-bold">فتح تذكرة دعم جديدة</h2>
+                            </div>
+                            <form
+                                class="space-y-4 bg-background-light dark:bg-background-dark p-6 rounded-2xl border border-primary/10 shadow-sm">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">موضوع
+                                        المشكلة</label>
+                                    <input
+                                        class="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="مثال: مشكلة في تسجيل الدخول" type="text" />
+                                </div>
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-sm font-semibold text-slate-700 dark:text-slate-300">القسم</label>
+                                    <select
+                                        class="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary">
+                                        <option>مشاكل تقنية</option>
+                                        <option>الاشتراكات والمدفوعات</option>
+                                        <option>محتوى الدروس</option>
+                                        <option>اقتراحات وتطوير</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">تفاصيل
+                                        المشكلة</label>
+                                    <textarea
+                                        class="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary resize-none"
+                                        placeholder="يرجى وصف المشكلة بالتفصيل..." rows="4"></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">المرفقات
+                                        (اختياري)</label>
+                                    <div
+                                        class="border-2 border-dashed border-primary/20 rounded-xl p-4 text-center hover:bg-primary/5 transition-colors cursor-pointer group">
+                                        <span
+                                            class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform mb-1">upload_file</span>
+                                        <p class="text-xs text-slate-500">اسحب الصور هنا أو اضغط للتحميل</p>
+                                    </div>
+                                </div>
+                                <button
+                                    class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                                    type="submit">
+                                    <span class="material-symbols-outlined">send</span>
+                                    إرسال التذكرة
+                                </button>
+                            </form>
+                        </section>
+                        <!-- Recent Tickets -->
+                        <section class="space-y-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">history</span>
+                                    <h2 class="text-xl font-bold">التذاكر الأخيرة</h2>
+                                </div>
+                                <a class="text-sm text-primary font-medium hover:underline" href="#">عرض الكل</a>
+                            </div>
+                            <div class="space-y-4">
+                                <!-- Ticket Card -->
+                                <div
+                                    class="p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-2xl flex items-start gap-4 hover:shadow-md transition-shadow">
+                                    <div
+                                        class="size-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
+                                        <span class="material-symbols-outlined">hourglass_empty</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h3 class="font-bold text-slate-800 dark:text-slate-200">فشل في الدفع عبر
+                                                تابي</h3>
+                                            <span
+                                                class="text-[10px] bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-1 rounded-full font-bold">قيد
+                                                الانتظار</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-2">رقم التذكرة: #QR-8842</p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">حاولت إتمام
+                                            عملية الشراء لمرتين ولكن يظهر خطأ...</p>
+                                    </div>
+                                </div>
+                                <!-- Ticket Card -->
+                                <div
+                                    class="p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-2xl flex items-start gap-4 hover:shadow-md transition-shadow">
+                                    <div
+                                        class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                                        <span class="material-symbols-outlined">check_circle</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h3 class="font-bold text-slate-800 dark:text-slate-200">تغيير البريد
+                                                الإلكتروني</h3>
+                                            <span
+                                                class="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-bold">تم
+                                                الحل</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-2">رقم التذكرة: #QR-8721</p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">تم تحديث
+                                            البريد الإلكتروني بنجاح كما طلبتم...</p>
+                                    </div>
+                                </div>
+                                <!-- Empty State or More Hint -->
+                                <div
+                                    class="p-8 border-2 border-dotted border-primary/10 rounded-2xl flex flex-col items-center justify-center text-center opacity-60">
+                                    <span
+                                        class="material-symbols-outlined text-4xl text-primary/40 mb-2">contact_support</span>
+                                    <p class="text-sm">لا توجد تذاكر أخرى للعرض</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Floating Live Chat Button -->
+        <div class="fixed bottom-6 left-6 z-[100] group flex flex-col items-end gap-3">
+            <div
+                class="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-xl border border-primary/10 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none">
+                <p class="text-sm font-medium text-primary">تحتاج مساعدة سريعة؟ تحدث معنا!</p>
+            </div>
+            <button
+                class="size-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-3xl">forum</span>
+            </button>
+        </div>
+        <!-- Footer -->
+        <footer class="mt-12 py-8 border-t border-primary/10 bg-background-light dark:bg-background-dark px-4">
+            <div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2 opacity-50">
+                    <div class="size-6 bg-primary rounded"></div>
+                    <span class="text-sm font-bold">قرين أونلاين © 2024</span>
+                </div>
+                <div class="flex gap-6 text-sm text-slate-500">
+                    <a class="hover:text-primary" href="#">سياسة الخصوصية</a>
+                    <a class="hover:text-primary" href="#">شروط الاستخدام</a>
+                    <a class="hover:text-primary" href="#">مركز المساعدة</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
+
+<!-- نافذة سحب الرصيد -->
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>سحب الرصيد - قرين أونلاين</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Noto+Sans+Arabic:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans Arabic", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <!-- Mock Background Content (Wallet Management Screen) -->
+    <div class="fixed inset-0 overflow-hidden opacity-40 pointer-events-none">
+        <header class="h-16 border-b border-slate-200 flex items-center px-8 bg-white">
+            <div class="w-32 h-8 bg-slate-200 rounded"></div>
+        </header>
+        <main class="p-8 max-w-5xl mx-auto space-y-6">
+            <div class="h-10 w-48 bg-slate-200 rounded"></div>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="h-32 bg-white rounded-xl border border-slate-200 p-4"></div>
+                <div class="h-32 bg-white rounded-xl border border-slate-200 p-4"></div>
+                <div class="h-32 bg-white rounded-xl border border-slate-200 p-4"></div>
+            </div>
+            <div class="h-96 bg-white rounded-xl border border-slate-200"></div>
+        </main>
+    </div>
+    <!-- Modal Overlay -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <!-- Modal Container -->
+        <div
+            class="bg-white dark:bg-background-dark w-full max-w-[540px] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
+            <!-- Modal Header -->
+            <div class="px-8 pt-8 pb-4 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">سحب رصيدك</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">قم بتحويل الأموال مباشرة إلى حسابك البنكي</p>
+                </div>
+                <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-slate-500">close</span>
+                </button>
+            </div>
+            <div class="px-8 py-4">
+                <!-- Balance Display Card -->
+                <div
+                    class="flex items-center justify-between p-4 rounded-xl bg-primary/10 border border-primary/20 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined text-slate-900">account_balance_wallet</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 font-medium">الرصيد المتاح</p>
+                            <p class="text-xl font-bold text-slate-900 dark:text-slate-100">2,450.00 د.ك</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Form -->
+                <form class="space-y-5">
+                    <!-- Amount Input -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">المبلغ المراد
+                            سحبه
+                            <div class="relative">
+                                <input
+                                    class="w-full h-12 pr-4 pl-12 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-primary focus:border-primary"
+                                    placeholder="0.00" type="text" />
+                                <span
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">د.ك</span>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Bank Select -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">اسم البنك
+                            <select
+                                class="w-full h-12 px-4 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-primary focus:border-primary appearance-none bg-[image:--select-button-svg]">
+                                <option value="">اختر البنك الخاص بك</option>
+                                <option value="nbk">بنك الكويت الوطني (NBK)</option>
+                                <option value="kfh">بيت التمويل الكويتي (KFH)</option>
+                                <option value="burgan">بنك برقان</option>
+                                <option value="boubyan">بنك بوبيان</option>
+                            </select>
+                        </label>
+                    </div>
+                    <!-- Account Holder Name -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">اسم صاحب
+                            الحساب
+                            <input
+                                class="w-full h-12 px-4 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-primary focus:border-primary"
+                                placeholder="الاسم كما يظهر في البنك" type="text" />
+                        </label>
+                    </div>
+                    <!-- IBAN Input -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">رقم الآيبان
+                            (IBAN)
+                            <div class="relative">
+                                <input
+                                    class="w-full h-12 px-4 rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-primary focus:border-primary text-right"
+                                    dir="ltr" placeholder="KW00 0000 0000 0000 0000 0000" type="text" />
+                                <span
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">payments</span>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Notice -->
+                    <div class="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="material-symbols-outlined text-slate-400 text-lg">info</span>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            يستغرق معالجة طلب السحب عادةً ما بين 3 إلى 5 أيام عمل ليظهر في حسابك البنكي.
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="px-8 py-6 bg-slate-50 dark:bg-slate-800/30 flex flex-col gap-3">
+                <button
+                    class="w-full bg-primary hover:bg-primary/90 text-slate-900 font-bold py-3.5 rounded-lg transition-all shadow-md active:scale-[0.98]">
+                    تأكيد طلب السحب
+                </button>
+                <button
+                    class="w-full text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium py-2">
+                    إلغاء العملية
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<!-- إدارة محفظة المعلم - بدون تحويل -->
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Cairo", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', 'Manrope', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- Top Navigation Bar -->
+            <header
+                class="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 bg-white/80 backdrop-blur-md px-6 md:px-20 py-4 sticky top-0 z-50">
+                <div class="flex items-center gap-4">
+                    <div class="size-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                    </div>
+                    <h2 class="text-slate-900 text-xl font-bold leading-tight tracking-tight">إدارة المحفظة</h2>
+                </div>
+                <div class="flex gap-3">
+                    <button
+                        class="flex size-10 cursor-pointer items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-primary/10 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button
+                        class="flex size-10 cursor-pointer items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-primary/10 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                    <div class="size-10 rounded-full border-2 border-primary/30 overflow-hidden">
+                        <img class="w-full h-full object-cover" data-alt="Teacher profile picture"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBged6jc4sHQqi3FWeSi_n3tTb0kczNEoqccYaaY0FA_gCXwZezvaAJDDSX--AwPXuW0cH3T9aQU_TgzjUL7gi5U3U-Ege6yw1OlhpOn82g0pWAm3QbfQcDOicFP1Zi20XzZBYe2h3pLzDLCEYn5wuS6Wl87J-RFf8HrRHHddkj8-jBob9znqJDwqSf5kEdUAfUN6Ux8B92DnK4g_sgu-UURPX2QGiM2iTz1Ph_iZpYCUD8_ABrQCq08E46_Z-_IrBSEYBUyeZ28jjV" />
+                    </div>
+                </div>
+            </header>
+            <main class="flex flex-1 justify-center py-8 px-4 md:px-10">
+                <div class="layout-content-container flex flex-col max-w-[1000px] flex-1 gap-8">
+                    <!-- Current Balance Header -->
+                    <div class="relative overflow-hidden bg-white rounded-3xl p-8 shadow-sm border border-primary/5">
+                        <div
+                            class="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2">
+                        </div>
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                            <div class="flex flex-col items-center md:items-start">
+                                <p class="text-slate-500 text-sm font-medium mb-1">إجمالي الأرباح</p>
+                                <h1
+                                    class="text-4xl md:text-5xl font-extrabold text-slate-900 flex items-baseline gap-2">
+                                    1,250.00 <span class="text-xl font-bold text-primary">د.ك</span>
+                                </h1>
+                            </div>
+                            <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                                <button
+                                    class="flex-1 md:flex-none min-w-[140px] px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">account_balance</span>
+                                    سحب رصيدي
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Quick Top-up Section -->
+                        <div class="flex flex-col gap-6 bg-white p-6 rounded-3xl shadow-sm border border-primary/5">
+                            <div class="flex items-center gap-2"><span
+                                    class="material-symbols-outlined text-primary">account_balance</span>
+                                <h3 class="text-lg font-bold">الحسابات البنكية لاستلام الأرباح</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div
+                                    class="p-4 border border-slate-100 rounded-2xl flex items-center justify-between bg-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="size-10 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+                                            <span
+                                                class="material-symbols-outlined text-slate-400">account_balance</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">بنك الكويت الوطني</p>
+                                            <p class="text-xs text-slate-500">**** 4582</p>
+                                        </div>
+                                    </div><span class="material-symbols-outlined text-green-500">check_circle</span>
+                                </div><button
+                                    class="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 font-bold flex items-center justify-center gap-2 hover:border-primary hover:text-primary transition-all"><span
+                                        class="material-symbols-outlined">add_circle</span>إضافة حساب بنكي جديد</button>
+                            </div>
+                        </div>
+                        <!-- Withdrawal Section (Teacher Specific) -->
+                        <div class="flex flex-col gap-6 bg-white p-6 rounded-3xl shadow-sm border border-primary/5">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">payments</span>
+                                <h3 class="text-lg font-bold">طلب سحب</h3>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs text-slate-500 font-medium">متاح للسحب</p>
+                                    <p class="text-xl font-bold text-slate-900">840.50 د.ك</p>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-400">info</span>
+                            </div>
+                            <div class="space-y-4">
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-600 mb-2 block">مبلغ السحب</span>
+                                    <input
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary text-base"
+                                        placeholder="0.00 د.ك" type="number" />
+                                </label>
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-600 mb-2 block">رقم الآيبان
+                                        (IBAN)</span>
+                                    <div class="relative">
+                                        <input
+                                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary text-left font-mono"
+                                            placeholder="KW00 0000 0000 0000 0000" type="text" />
+                                        <span
+                                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+                                    </div>
+                                </label>
+                                <button
+                                    class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors">تأكيد
+                                    طلب السحب</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Recent Transactions -->
+                    <div class="flex flex-col gap-4 bg-white p-6 rounded-3xl shadow-sm border border-primary/5">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold">سجل الأرباح والمدفوعات</h3>
+                            <button class="text-primary text-sm font-bold hover:underline">عرض الكل</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right">
+                                <thead>
+                                    <tr class="text-slate-400 text-sm border-b border-slate-100">
+                                        <th class="pb-4 font-medium">التاريخ</th>
+                                        <th class="pb-4 font-medium">النوع</th>
+                                        <th class="pb-4 font-medium">الحالة</th>
+                                        <th class="pb-4 font-medium">المبلغ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    <tr class="group hover:bg-slate-50 transition-colors">
+                                        <td class="py-4 text-sm font-medium">24 مايو 2024</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="material-symbols-outlined text-primary text-base">add_circle</span>
+                                                <span class="text-sm font-bold">شحن محفظة</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">مكتمل</span>
+                                        </td>
+                                        <td class="py-4 font-bold text-green-600">+50.00 د.ك</td>
+                                    </tr>
+                                    <tr class="group hover:bg-slate-50 transition-colors">
+                                        <td class="py-4 text-sm font-medium">22 مايو 2024</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="material-symbols-outlined text-slate-400 text-base">shopping_cart</span>
+                                                <span class="text-sm font-bold">شراء دورة</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">مكتمل</span>
+                                        </td>
+                                        <td class="py-4 font-bold text-slate-900">-25.00 د.ك</td>
+                                    </tr>
+                                    <tr class="group hover:bg-slate-50 transition-colors">
+                                        <td class="py-4 text-sm font-medium">20 مايو 2024</td>
+                                        <td class="py-4">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="material-symbols-outlined text-orange-400 text-base">account_balance</span>
+                                                <span class="text-sm font-bold">سحب رصيد</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-700">قيد
+                                                المعالجة</span>
+                                        </td>
+                                        <td class="py-4 font-bold text-slate-900">-100.00 د.ك</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Payment Settings -->
+                </div>
+            </main>
+            <!-- Bottom Navigation for Mobile -->
+            <footer
+                class="md:hidden flex justify-around items-center bg-white border-t border-slate-100 py-3 sticky bottom-0 z-50">
+                <button class="flex flex-col items-center gap-1 text-slate-400">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-[10px] font-bold">الرئيسية</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 text-primary">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span class="text-[10px] font-bold">الأرباح</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 text-slate-400">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    <span class="text-[10px] font-bold">دوراتي</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 text-slate-400">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="text-[10px] font-bold">حسابي</span>
+                </button>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>

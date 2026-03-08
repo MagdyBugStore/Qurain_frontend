@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { PROGRAMS } from "../jannat-alquran-data";
+import { UserProfile } from "../models/UserModel";
 
 interface PersonalInfoPageProps {
   addToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -51,7 +52,7 @@ export function PersonalInfoPage({ addToast }: PersonalInfoPageProps) {
 
     // Load existing profile if available
     if (userProfile) {
-      setForm(userProfile as UserProfileForm);
+      setForm(userProfile as unknown as UserProfileForm);
       // If profile is complete, redirect to profile page
       if (userProfile.firstName && userProfile.lastName && userProfile.phone) {
         if (user?.uid) {
@@ -110,7 +111,7 @@ export function PersonalInfoPage({ addToast }: PersonalInfoPageProps) {
       return;
     }
 
-    saveUserProfile(form);
+    saveUserProfile(form as unknown as Partial<UserProfile>);
     addToast(t("personalInfoPage.toastSubmitted"), "success");
     setTimeout(() => {
       if (user?.uid) {

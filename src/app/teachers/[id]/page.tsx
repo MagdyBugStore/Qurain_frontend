@@ -1,6 +1,7 @@
 import React from "react";
-// React Router component wrapper
-import TeacherDetailPageClient from './TeacherDetailPageClient'
-export default function TeacherDetailPage() {
-  return <TeacherDetailPageClient />
+// Use refactored TeacherDetailPage from features directory
+import { TeacherDetailPage } from '../../../features/teachers/pages/TeacherDetailPage';
+
+export default function TeacherDetailPageWrapper() {
+  return <TeacherDetailPage />;
 }

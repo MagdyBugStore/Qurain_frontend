@@ -34,6 +34,8 @@ import TeacherApplicationReviewPage from "./app/teacher-application/review/page"
 import ProfilePage from "./app/profile/[id]/page";
 import ProfileRedirect from "./app/profile/ProfileRedirect";
 import AdminDashboard from "./app/admin/page";
+import WalletPage from "./app/wallet/page";
+import SupportPage from "./app/support/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
@@ -203,6 +205,8 @@ function AppShell() {
         <Route path="/teacher-profile" element={<ProfileRedirect />} />
         <Route path="/teacher-application" element={<TeacherApplicationPage />} />
         <Route path="/teacher-application/review" element={<TeacherApplicationReviewPage />} />
+        <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/support" element={<SupportPage />} />
         
         {/* Fallback */}
         <Route path="*" element={<Home />} />

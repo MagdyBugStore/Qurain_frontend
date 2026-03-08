@@ -7,6 +7,7 @@ import Header from '../../components/layout/Header'
 import LoginModal from '../../components/modals/LoginModal'
 import Popup from '../../components/modals/Popup'
 import { useAuthGuard } from '../../hooks/useRequireAuth'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface Teacher {
   id: string
@@ -73,9 +74,11 @@ const getCurrencySymbol = (currency?: string): string => {
 
 export default function TeachersPage() {
   const { requireAuth } = useAuthGuard()
+  const { userProfile } = useAuth()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
+  const isTeacher = userProfile?.accountType === 'teacher'
   
   // Filter states
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
@@ -584,16 +587,18 @@ export default function TeachersPage() {
                           </span>
                         ))}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleBookTrial()
-                        }}
-                        className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto text-center"
-                      >
-                        احجز تجربة
-                      </button>
+                      {!isTeacher && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleBookTrial()
+                          }}
+                          className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto text-center"
+                        >
+                          احجز الان
+                        </button>
+                      )}
                     </div>
                   </Link>
                 ))}
