@@ -48,7 +48,7 @@ const countryCodes = [
 export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1Props) {
   const [localData, setLocalData] = useState({
     ...formData,
-    countryCode: formData.countryCode || '+966'
+    countryCode: formData.countryCode || '+20'
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 

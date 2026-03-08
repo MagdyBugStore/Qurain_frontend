@@ -11,7 +11,6 @@ import { useAppStore } from "./store/useAppStore";
 import { LandingPage } from "./legacy-pages/LandingPage";
 import { EvalPage } from "./legacy-pages/EvalPage";
 import { DashboardPage } from "./legacy-pages/DashboardPage";
-import { AdminPage } from "./legacy-pages/AdminPage";
 import { LoginPage } from "./legacy-pages/LoginPage";
 import { PersonalInfoPage } from "./legacy-pages/PersonalInfoPage";
 // Import new app pages
@@ -34,6 +33,7 @@ import TeacherApplicationPage from "./app/teacher-application/page";
 import TeacherApplicationReviewPage from "./app/teacher-application/review/page";
 import ProfilePage from "./app/profile/[id]/page";
 import ProfileRedirect from "./app/profile/ProfileRedirect";
+import AdminDashboard from "./app/admin/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
@@ -179,7 +179,7 @@ function AppShell() {
         <Route path="/personal-info" element={<PersonalInfoPageNew />} />
         <Route path="/personal-info-legacy" element={<PersonalInfoPage addToast={addToast} />} />
         <Route path="/dashboard" element={<DashboardPage addToast={addToast} />} />
-        <Route path="/admin" element={<AdminPage addToast={addToast} />} />
+        <Route path="/admin" element={<AdminDashboard addToast={addToast} />} />
         
         {/* New app routes */}
         <Route path="/" element={<Home />} />

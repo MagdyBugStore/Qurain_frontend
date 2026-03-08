@@ -120,7 +120,7 @@ export default function AccountTypeSelection({ onSelect }: AccountTypeSelectionP
               className="w-full md:w-auto min-w-[200px] py-3 px-8 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all flex items-center justify-center gap-2 shadow-md"
             >
               <span>التالي</span>
-              <span className="material-symbols-outlined">arrow_forward</span>
+              <span className="material-symbols-outlined">arrow_back</span>
             </button>
           )}
         </div>

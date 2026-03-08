@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { TEACHERS, SESSIONS, NOTIFICATIONS } from "../jannat-alquran-data";
 import { Stars } from "../components/common/Stars";
 import { StatusBadge } from "../components/common/StatusBadge";
@@ -13,7 +15,15 @@ interface DashboardPageProps {
 export function DashboardPage({ addToast }: DashboardPageProps) {
   const { i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
+  const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    if (userProfile?.accountType === "admin") {
+      navigate("/admin");
+    }
+  }, [userProfile, navigate]);
 
   const navItems = [
     { id: "overview", icon: "🏠", label: "Overview", badge: undefined },

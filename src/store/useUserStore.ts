@@ -51,13 +51,41 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       
       if (userDocSnap.exists()) {
         const data = userDocSnap.data() as UserProfile;
-        set({ 
-          userProfile: {
-            ...data,
-            uid: user.uid,
-          },
-          loading: false 
-        });
+        
+        // Update old accounts: sync photoURL and displayName from Firebase Auth if missing
+        // تحديث الحسابات القديمة: مزامنة photoURL و displayName من Firebase Auth إذا كانت مفقودة
+        const needsUpdate = 
+          (!data.photoURL && user.photoURL) || 
+          (!data.displayName && user.displayName) ||
+          (data.photoURL !== user.photoURL && user.photoURL) ||
+          (data.displayName !== user.displayName && user.displayName);
+        
+        if (needsUpdate) {
+          const updates: Partial<UserProfile> = {
+            ...(user.photoURL && { photoURL: user.photoURL }),
+            ...(user.displayName && { displayName: user.displayName }),
+            updatedAt: new Date(),
+          };
+          
+          await updateDoc(userDocRef, updates);
+          
+          set({ 
+            userProfile: {
+              ...data,
+              ...updates,
+              uid: user.uid,
+            },
+            loading: false 
+          });
+        } else {
+          set({ 
+            userProfile: {
+              ...data,
+              uid: user.uid,
+            },
+            loading: false 
+          });
+        }
       } else {
         // Create default profile if doesn't exist
         // إنشاء ملف افتراضي إذا لم يكن موجوداً
@@ -66,6 +94,12 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
           user.email || '',
           user.displayName || undefined
         );
+        
+        // Include photoURL from Firebase Auth
+        // تضمين photoURL من Firebase Auth
+        if (user.photoURL) {
+          defaultProfile.photoURL = user.photoURL;
+        }
         
         await setDoc(userDocRef, defaultProfile);
         set({ 
@@ -98,6 +132,10 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
         ...profile,
         uid: user.uid,
         email: user.email || profile.email || currentProfile?.email || '',
+        // Always sync photoURL and displayName from Firebase Auth if available
+        // دائماً مزامنة photoURL و displayName من Firebase Auth إذا كانت متاحة
+        ...(user.photoURL && { photoURL: user.photoURL }),
+        ...(user.displayName && { displayName: user.displayName }),
         updatedAt: new Date(),
       } as UserProfile;
       
@@ -167,12 +205,39 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       
       const unsubscribe = onSnapshot(
         userDocRef,
-        (docSnap) => {
+        async (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data() as UserProfile;
+            
+            // Update old accounts: sync photoURL and displayName from Firebase Auth if missing
+            // تحديث الحسابات القديمة: مزامنة photoURL و displayName من Firebase Auth إذا كانت مفقودة
+            const needsUpdate = 
+              (!data.photoURL && user.photoURL) || 
+              (!data.displayName && user.displayName) ||
+              (data.photoURL !== user.photoURL && user.photoURL) ||
+              (data.displayName !== user.displayName && user.displayName);
+            
+            if (needsUpdate) {
+              const updates: Partial<UserProfile> = {
+                ...(user.photoURL && { photoURL: user.photoURL }),
+                ...(user.displayName && { displayName: user.displayName }),
+                updatedAt: new Date(),
+              };
+              
+              try {
+                await updateDoc(userDocRef, updates);
+              } catch (updateError) {
+                console.error('Error updating profile in subscription:', updateError);
+              }
+            }
+            
             set({ 
               userProfile: {
                 ...data,
+                ...(needsUpdate && {
+                  ...(user.photoURL && { photoURL: user.photoURL }),
+                  ...(user.displayName && { displayName: user.displayName }),
+                }),
                 uid: user.uid,
               },
               loading: false 
@@ -185,6 +250,12 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
               user.email || '',
               user.displayName || undefined
             );
+            
+            // Include photoURL from Firebase Auth
+            // تضمين photoURL من Firebase Auth
+            if (user.photoURL) {
+              defaultProfile.photoURL = user.photoURL;
+            }
             
             setDoc(userDocRef, defaultProfile).then(() => {
               set({ 

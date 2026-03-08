@@ -3,7 +3,7 @@
  * يحتوي على جميع الحقول المطلوبة لملف المستخدم
  */
 
-export type AccountType = 'student' | 'teacher' | null;
+export type AccountType = 'student' | 'teacher' | 'admin' | null;
 
 export interface UserProfile {
   // Basic Information - المعلومات الأساسية
@@ -64,6 +64,10 @@ export function isProfileComplete(profile: UserProfile | null): boolean {
       profile.lastName &&
       profile.email
     );
+  }
+
+  if (profile.accountType === 'admin') {
+    return true;
   }
   
   return false;

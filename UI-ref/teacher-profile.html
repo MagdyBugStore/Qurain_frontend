@@ -1,428 +1,395 @@
 <!DOCTYPE html>
 
-<html dir="rtl" lang="ar">
+<html class="dark" dir="rtl" lang="ar">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Tutor Profile - Bio Tab</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800&amp;family=Manrope:wght@400;500;700&amp;display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <script id="tailwind-config">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#d5aa2a",
-                        "background-light": "#f8f7f6",
-                        "background-dark": "#201c12",
+                        primary: "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#181611",
+                        "surface-dark": "#221e10",
+                        "border-dark": "#393528",
+                        "text-secondary": "#bab29c",
                     },
                     fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
+                        display: ["Cairo", "Manrope", "sans-serif"],
+                        body: ["Cairo", "Manrope", "sans-serif"],
                     },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        lg: "1.5rem",
+                        xl: "2rem",
+                        full: "9999px"
+                    },
                 },
             },
         }
     </script>
     <style>
         body {
-            font-family: 'Manrope', 'Noto Sans Arabic', sans-serif;
+            font-family: 'Cairo', sans-serif;
         }
 
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .filled {
-            font-variation-settings: 'FILL' 1;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
-    <div class="relative flex min-h-screen flex-col overflow-x-hidden">
-        <!-- Top Navigation -->
-        <header
-            class="sticky top-0 z-50 flex items-center justify-between border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3 lg:px-20">
-            <div class="flex items-center gap-4">
-                <div class="text-primary">
-                    <span class="material-symbols-outlined text-3xl">auto_stories</span>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header
+        class="sticky top-0 z-50 w-full border-b border-border-dark bg-surface-dark/95 backdrop-blur supports-[backdrop-filter]:bg-surface-dark/60">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-primary">
+                        <span class="material-symbols-outlined text-4xl">menu_book</span>
+                    </div>
+                    <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">قرآن أونلاين</h2>
                 </div>
-                <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Qurain Online</h2>
-            </div>
-            <nav class="hidden md:flex items-center gap-8">
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">الرئيسية</a>
-                <a class="text-sm font-medium text-primary" href="#">ملفي الشخصي</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">الحلقات الجارية</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">التقارير</a>
-            </nav>
-            <div class="flex items-center gap-4">
-                <button
-                    class="flex items-center justify-center rounded-lg h-10 w-10 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined">notifications</span>
-                </button>
-                <div class="h-10 w-10 rounded-full border-2 border-primary bg-cover bg-center"
-                    data-alt="Teacher profile picture closeup"
-                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCnPiedHLWyLBris_a58nizxmvf2IPirbSmp6rLVOvhsNGKNCODiPYlBvmIgF2IBc22XN2lR5ppqAZuXrmKj-WGClPTIH7P3-gj4GZ1wPCHSZG_PAF27g_coTtnXoPUPdvsjpQrYZtYXI6TQt8p2c75GdRJj0IUpHvika7c5md93JBbeyo-y3117kDn6ZS6GvYaEOuZChRbx9W9OND4nrzE6Q-OpS0l9mq85PWH96Gf_qV4O0EsI3TQ2GPBwwHDuqhHBW4xjoyCklEZ')">
+                <nav class="hidden md:flex items-center gap-8">
+                    <a class="text-white hover:text-primary transition-colors text-sm font-medium" href="#">المعلمين</a>
+                    <a class="text-text-secondary hover:text-white transition-colors text-sm font-medium"
+                        href="#">المنهج</a>
+                    <a class="text-text-secondary hover:text-white transition-colors text-sm font-medium"
+                        href="#">الأسعار</a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <button
+                        class="hidden sm:flex h-10 items-center justify-center rounded-full px-6 text-sm font-bold bg-border-dark hover:bg-white/10 text-white transition-colors">
+                        انضم كمعلم
+                    </button>
+                    <button
+                        class="flex h-10 items-center justify-center rounded-full px-6 text-sm font-bold bg-primary hover:bg-primary/90 text-surface-dark transition-colors">
+                        تسجيل الدخول
+                    </button>
                 </div>
             </div>
-        </header>
-        <main class="flex-1 px-6 py-8 lg:px-20">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- Sidebar Column (Ebony Theme) -->
-                <aside class="lg:col-span-4 xl:col-span-3">
-                    <div class="sticky top-24 space-y-6">
-                        <div
-                            class="bg-slate-900 dark:bg-slate-950 text-white rounded-xl p-8 flex flex-col items-center text-center shadow-xl border border-white/5">
-                            <div class="relative group">
-                                <div
-                                    class="h-32 w-32 rounded-full border-4 border-primary/30 p-1 mb-4 overflow-hidden bg-slate-800">
-                                    <div class="h-full w-full rounded-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                                        data-alt="Main profile picture for the teacher"
-                                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqqAnnMYiTeh1bOaC_wrnnIHd_G3pAW6ep_q4-DV3z19A9XpgkXBPdWSVyHEOvVUg1HZpgkFMuSoRbCa3G-0GdGHxvsiQ9aK466b2_noFf0c5BQ_MJ-GQeDFY8y8_2uF4qAzgx5iSN3BabtCRwHL3_izjkchIjvw4BWo9US6wVQveOQQqjpDCG1bBx-YbR0G5yCfOZIulL9uM0pxyjX__p5sI6aNOVcN2JYiUjF0VChyJBLMY3m4TljjgNtiacjlE1sGLMcm5PVD3L')">
-                                    </div>
-                                </div>
+        </div>
+    </header>
+    <main class="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-sm text-text-secondary mb-8">
+            <a class="hover:text-primary transition-colors" href="#">الرئيسية</a>
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            <a class="hover:text-primary transition-colors" href="#">المعلمين</a>
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            <span class="text-white font-medium">الشيخ أحمد محمد</span>
+        </nav>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Main Content Column -->
+            <div class="lg:col-span-8 flex flex-col gap-8">
+                <!-- Profile Header -->
+                <div class="bg-surface-dark rounded-xl p-6 border border-border-dark">
+                    <div class="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                        <div class="relative shrink-0">
+                            <img alt="Portrait of Sheikh Ahmed Mohamed smiling warmly"
+                                class="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
+                                data-alt="Portrait of Sheikh Ahmed Mohamed smiling warmly"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBED3Rycb2Y392o2F5Rz_493I9-Uqvm22l2Cp_rMZPbF3ES9uLAo7GirLW-jsOIqK6APFHHBRKZUULO6BxGnV8hyjDKSmwKXol6wWPCOu33xbM7U1GAk7ZKLlXYjkwPviSLn3K6im6e0mLFqKOojc-C1pPF4rz1fq9GORh1frgCT7F_GyEO4IPos2yuY5xOzCV77-IuVSsZdiVyOK2pVt4T7ftE3mEUTrmNVN_s_h6MJS0ofrPFOOeAeqdclQtKHYNEliiUGAHQ4AF-" />
+                            <div
+                                class="absolute bottom-1 right-1 bg-green-500 rounded-full p-1 border-2 border-surface-dark">
+                                <span class="block w-3 h-3 bg-white rounded-full"></span>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h1 class="text-2xl sm:text-3xl font-bold text-white">الشيخ أحمد محمد</h1>
                                 <span
-                                    class="absolute bottom-6 right-2 bg-primary text-slate-900 p-1 rounded-full border-2 border-slate-900">
-                                    <span class="material-symbols-outlined text-xs filled">verified</span>
+                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                    <span class="material-symbols-outlined text-[14px]">verified</span>
+                                    تم التحقق
                                 </span>
                             </div>
-                            <h3 class="text-xl font-bold mb-1">د. أحمد القرني</h3>
-                            <p class="text-primary text-sm font-medium mb-4">مدرس معتمد - القراءات العشر</p>
-                            <div class="flex items-center gap-1 mb-6">
-                                <span class="material-symbols-outlined text-primary text-lg filled">star</span>
-                                <span class="text-lg font-bold">4.9</span>
-                                <span class="text-slate-400 text-xs mr-1">(١٢٨ تقييم)</span>
-                            </div>
-                            <div class="w-full space-y-3 pt-6 border-t border-white/10 text-right">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-400">التخصص:</span>
-                                    <span class="font-medium">التجويد والقراءات</span>
+                            <p class="text-text-secondary text-lg">مدرس قرآن كريم وتجويد بخبرة ١٥ عاماً</p>
+                            <div class="flex flex-wrap gap-2 pt-2">
+                                <div
+                                    class="flex items-center gap-1 text-primary text-sm font-bold bg-primary/10 px-3 py-1 rounded-lg">
+                                    <span class="material-symbols-outlined text-[18px] fill-1">star</span>
+                                    5.0 (١٢٠ تقييم)
                                 </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-400">سعر الجلسة:</span>
-                                    <span class="text-primary font-bold">٧٥ ر.س/ساعة</span>
+                                <div
+                                    class="flex items-center gap-1 text-text-secondary text-sm bg-border-dark/50 px-3 py-1 rounded-lg">
+                                    <span class="material-symbols-outlined text-[18px]">translate</span>
+                                    يتحدث العربية والإنجليزية
                                 </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-slate-400">إجمالي الساعات:</span>
-                                    <span class="font-medium">١,٢٤٠ ساعة</span>
+                                <div
+                                    class="flex items-center gap-1 text-text-secondary text-sm bg-border-dark/50 px-3 py-1 rounded-lg">
+                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    القاهرة، مصر
                                 </div>
                             </div>
-                            <button
-                                class="w-full mt-8 bg-primary text-slate-900 font-bold py-3 rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined text-sm">edit</span>
-                                تعديل الملف العام
-                            </button>
-                        </div>
-                        <div class="bg-white dark:bg-background-dark border border-primary/10 rounded-xl p-6 space-y-4">
-                            <h4 class="font-bold text-sm text-slate-500 uppercase tracking-wider">روابط سريعة</h4>
-                            <nav class="space-y-1">
-                                <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary"
-                                    href="#">
-                                    <span class="material-symbols-outlined filled">account_circle</span>
-                                    <span class="text-sm font-medium">البيانات الشخصية</span>
-                                </a>
-                                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                                    href="#">
-                                    <span class="material-symbols-outlined">description</span>
-                                    <span class="text-sm font-medium">إدارة المحفظة</span>
-                                </a>
-                                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                                    href="#">
-                                    <span class="material-symbols-outlined">support_agent</span>
-                                    <span class="text-sm font-medium">الدعم الفني</span>
-                                </a>
-                            </nav>
                         </div>
                     </div>
-                </aside>
-                <!-- Main Area -->
-                <div class="lg:col-span-8 xl:col-span-9 space-y-6">
-                    <!-- Navigation Tabs -->
+                </div>
+                <!-- Video Intro -->
+                <div
+                    class="relative w-full aspect-video rounded-xl overflow-hidden bg-black group cursor-pointer border border-border-dark">
+                    <img alt="Background of an open Quran on a wooden stand with warm lighting"
+                        class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
+                        data-alt="Background of an open Quran on a wooden stand with warm lighting"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7uzSSUomCsUi2pkRUyXDQHL46gs1XfAk7Kqvt5ZTp2AafRLaqaqRz1aoNovdVjNEx5Wd-rVia6p5YilT3XTpWnRiZBnA_Zbr1SRbEE8lwjMlHM52oTMOBtr7mG7lQQvNdqQOaarmy8OtL6xOBKO806hcr8JvNieN_wbrp6M3a1DCC5TCr2jSI9yG516NlpIOtey-lODnoMuODAG_QjMm9LivE1luRkr0tOVOBIDkbJ990tGjBdebwmlBJYeuTOe9guDRh0mEMRg8O" />
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <button
+                            class="w-16 h-16 sm:w-20 sm:h-20 bg-primary/90 text-surface-dark rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-primary/20 pl-1">
+                            <span class="material-symbols-outlined text-4xl sm:text-5xl">play_arrow</span>
+                        </button>
+                    </div>
                     <div
-                        class="bg-white dark:bg-background-dark rounded-xl p-2 flex overflow-x-auto border border-primary/10 shadow-sm whitespace-nowrap scrollbar-hide">
-                        <button class="px-6 py-2.5 text-sm font-bold bg-primary text-slate-900 rounded-lg">البيانات
-                            الشخصية</button>
-                        <button
-                            class="px-6 py-2.5 text-sm font-medium text-slate-500 hover:text-primary transition-colors">المؤهلات
-                            والإجازات</button>
-                        <button
-                            class="px-6 py-2.5 text-sm font-medium text-slate-500 hover:text-primary transition-colors">جدول
-                            التوفر</button>
-                        <button
-                            class="px-6 py-2.5 text-sm font-medium text-slate-500 hover:text-primary transition-colors">التقييمات</button>
+                        class="absolute bottom-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-white text-sm font-medium">
+                        02:15 دقيقة
                     </div>
-                    <!-- Content Section: Qualifications (Example active) -->
-                    <section class="space-y-8">
-                        <!-- Education -->
-                        <div class="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                            <div class="flex items-center gap-3 mb-6">
-                                <span
-                                    class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">school</span>
-                                <h3 class="text-xl font-bold">المؤهلات العلمية</h3>
-                            </div>
-                            <div class="space-y-6">
-                                <div class="flex gap-4 items-start">
-                                    <div
-                                        class="h-12 w-12 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-primary">
-                                        <span class="material-symbols-outlined">history_edu</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-lg">دكتوراة في التفسير وعلوم القرآن</h4>
-                                        <p class="text-slate-500 text-sm">جامعة أم القرى - ٢٠١٨</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-4 items-start">
-                                    <div
-                                        class="h-12 w-12 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-primary">
-                                        <span class="material-symbols-outlined">history_edu</span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-lg">ماجستير الدراسات الإسلامية</h4>
-                                        <p class="text-slate-500 text-sm">الجامعة الإسلامية بالمدينة المنورة - ٢٠١٤</p>
-                                    </div>
-                                </div>
-                            </div>
+                </div>
+                <!-- Tabs Navigation -->
+                <div class="border-b border-border-dark">
+                    <nav aria-label="Tabs" class="-mb-px flex space-x-8 space-x-reverse">
+                        <a class="border-primary text-primary whitespace-nowrap py-4 px-1 border-b-2 font-bold text-base flex items-center gap-2"
+                            href="#">
+                            <span class="material-symbols-outlined">person</span>
+                            نبذة عني
+                        </a>
+                        <a class="border-transparent text-text-secondary hover:text-white hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-base flex items-center gap-2 transition-colors"
+                            href="#">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            الأوقات المتاحة
+                        </a>
+                        <a class="border-transparent text-text-secondary hover:text-white hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-base flex items-center gap-2 transition-colors"
+                            href="#">
+                            <span class="material-symbols-outlined">reviews</span>
+                            التقييمات
+                        </a>
+                    </nav>
+                </div>
+                <!-- Tab Content: About -->
+                <div class="bg-surface-dark rounded-xl p-6 sm:p-8 border border-border-dark space-y-8">
+                    <!-- Bio Section -->
+                    <section>
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-primary rounded-full"></span>
+                            مرحباً بكم
+                        </h3>
+                        <div class="prose prose-invert prose-lg max-w-none text-text-secondary leading-relaxed">
+                            <p class="mb-4">
+                                السلام عليكم ورحمة الله وبركاته، أنا الشيخ أحمد محمد، مدرس قرآن كريم وتجويد وقراءات
+                                معتمد من الأزهر الشريف. لدي شغف كبير بتعليم كتاب الله للطلاب من جميع الأعمار والمستويات.
+                            </p>
+                            <p>
+                                بفضل الله، قمت بتدريس مئات الطلاب حول العالم عبر الإنترنت، وأتميز بأسلوب تعليمي مرن
+                                يتناسب مع قدرات كل طالب. سواء كنت مبتدئاً في تعلم القراءة العربية أو ترغب في إتقان أحكام
+                                التجويد المتقدمة والحصول على إجازة، فأنا هنا لمساعدتك في رحلتك المباركة.
+                            </p>
                         </div>
-                        <!-- Ijazahs -->
-                        <div class="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                            <div class="flex items-center justify-between mb-8">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">workspace_premium</span>
-                                    <h3 class="text-xl font-bold">الإجازات والسند</h3>
-                                </div>
-                                <button class="text-sm font-bold text-primary flex items-center gap-1 hover:underline">
-                                    <span class="material-symbols-outlined text-sm">add</span> إضافة إجازة
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </section>
+                    <!-- Teaching Style -->
+                    <section>
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-primary rounded-full"></span>
+                            أسلوب التدريس
+                        </h3>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="bg-background-dark p-4 rounded-lg border border-border-dark/50">
                                 <div
-                                    class="group border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden hover:border-primary/40 transition-all">
-                                    <div class="h-40 bg-cover bg-center"
-                                        data-alt="Traditional Arabic calligraphy certificate scroll"
-                                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBm5-D6gTc0GHuzEn1ne94oOHpAAu15U-TrVkUo0OOMsukVS5Sivu8_vZpGr-XmXwDIT3MyLgC28b2wu-6y4BkvIQvHVdEn7z_CK_6tay78_yibIIhno-Zi_1HQ4Lvth7vTfg0hjvLIQyNgbOaP_cgGIa9fHpxzGiSG-Z8IL6bcchVdPDs7ECEYiIiNHoAWEHZedZ25OjSSCJLf1zeoZU1f8ZZZ7gzQPlbvDjHkukWddyLirNl_8j6sw4DzEL4vgnKt_E__P3VVt8CL')">
-                                    </div>
-                                    <div class="p-4">
-                                        <h4 class="font-bold">إجازة برواية حفص عن عاصم</h4>
-                                        <p class="text-sm text-slate-500">متصلة بالسند إلى رسول الله ﷺ</p>
-                                    </div>
+                                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                    <span class="material-symbols-outlined">school</span>
                                 </div>
+                                <h4 class="text-white font-bold mb-1">القرآن والتجويد</h4>
+                                <p class="text-sm text-text-secondary">تصحيح التلاوة وشرح أحكام التجويد بشكل مبسط وعملي.
+                                </p>
+                            </div>
+                            <div class="bg-background-dark p-4 rounded-lg border border-border-dark/50">
                                 <div
-                                    class="group border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden hover:border-primary/40 transition-all">
-                                    <div class="h-40 bg-cover bg-center"
-                                        data-alt="Close up of an open Quranic manuscript"
-                                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCk14FlomTrLPwR-3URSd098vbHhzGi41MDbRBWC1OSfgqet84Lnv9V6tjQ4eR5jBGBJeTYPap9Nishv8K_6_QFkFvCKEB5YXnnH4f-wYWZlGYyi_B876tJweTOXN35jSaJBarKjpafCmtLwIWcdCHYhbT2OUmZ9vjSQjYUQMf_6A_jo_xieoYoDddvdjC2RQfJr9afciGuLC92YAtw1AaxnQokj9fT3sLiwe1_CrajyZNUxGG0gE2mr5zE4iNDA9aYxE9iXigETe6v')">
-                                    </div>
-                                    <div class="p-4">
-                                        <h4 class="font-bold">إجازة في متن الجزرية</h4>
-                                        <p class="text-sm text-slate-500">إجازة في مخارج الحروف وصفاتها</p>
-                                    </div>
+                                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                    <span class="material-symbols-outlined">child_care</span>
                                 </div>
+                                <h4 class="text-white font-bold mb-1">تعليم الأطفال</h4>
+                                <p class="text-sm text-text-secondary">أساليب تفاعلية وجذابة لتحبيب الأطفال في القرآن
+                                    الكريم.</p>
                             </div>
-                        </div>
-                        <!-- Availability (Simplified View) -->
-                        <div class="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                            <div class="flex items-center justify-between mb-8">
-                                <div class="flex items-center gap-3">
-                                    <span
-                                        class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">event_available</span>
-                                    <h3 class="text-xl font-bold">جدول التوفر الأسبوعي</h3>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold">الأسبوع
-                                        الحالي</button>
-                                    <button class="px-3 py-1 text-xs font-bold text-slate-400">التالي</button>
-                                </div>
-                            </div>
-                            <div class="overflow-x-auto">
+                            <div class="bg-background-dark p-4 rounded-lg border border-border-dark/50">
                                 <div
-                                    class="min-w-[600px] grid grid-cols-8 border-t border-slate-100 dark:border-slate-800">
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs text-slate-400">
-                                        الوقت</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        السبت</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الأحد</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الاثنين</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الثلاثاء</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الأربعاء</div>
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الخميس</div>
-                                    <div
-                                        class="p-4 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center">
-                                        الجمعة</div>
-                                    <!-- Row 1 -->
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500">
-                                        ٠٩:٠٠ ص</div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[40px] flex items-center justify-center">
-                                            <span class="text-[10px] font-bold text-primary">متاح</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="h-full w-full bg-slate-900/10 rounded border border-slate-900/20 min-h-[40px] flex items-center justify-center">
-                                            <span class="text-[10px] font-bold text-slate-500">محجوز</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[40px] flex items-center justify-center">
-                                            <span class="text-[10px] font-bold text-primary">متاح</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-b border-slate-100 dark:border-slate-800"></div>
-                                    <!-- Row 2 -->
-                                    <div
-                                        class="p-4 border-l border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500">
-                                        ١٠:٠٠ ص</div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="h-full w-full bg-slate-900/10 rounded border border-slate-900/20 min-h-[40px] flex items-center justify-center">
-                                            <span class="text-[10px] font-bold text-slate-500">محجوز</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[40px] flex items-center justify-center">
-                                            <span class="text-[10px] font-bold text-primary">متاح</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-l border-b border-slate-100 dark:border-slate-800"></div>
-                                    <div class="p-1 border-b border-slate-100 dark:border-slate-800"></div>
+                                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                    <span class="material-symbols-outlined">menu_book</span>
                                 </div>
+                                <h4 class="text-white font-bold mb-1">القاعدة النورانية</h4>
+                                <p class="text-sm text-text-secondary">تأسيس القراءة العربية الصحيحة للمبتدئين وغير
+                                    الناطقين بالعربية.</p>
                             </div>
-                        </div>
-                        <!-- Reviews Section -->
-                        <div class="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                            <div class="flex items-center gap-3 mb-8">
-                                <span
-                                    class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">reviews</span>
-                                <h3 class="text-xl font-bold">آخر التقييمات</h3>
-                            </div>
-                            <div class="space-y-6">
-                                <div class="p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-10 w-10 rounded-full bg-slate-200"
-                                                data-alt="Student avatar placeholder"
-                                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAqR32u1hY7LX4IdVqqSVCzRsckr5Tpd-ubbFOEahgGBpXlGZIiBBWdnToWsAS4Nj3xlGt3-0CIVInGch9IcZjnbHxwGPFw8mk1dAUjEX0tLEj_Yr3PT0kfhZV983nFSwVhpYjeSpNac94V0R0jXzPekFstM5xAE7hXW2qYSKT0bj-6ddD-xLqVvMC9K9CqhaoFOkGD0K6ziJ7oUWHpRcwO42GqjtoVVK6OdXzQaIcuPJq3AkygWhbBlEw7qSXlo5oxvM3lqU17YOCo')">
-                                            </div>
-                                            <div>
-                                                <h5 class="text-sm font-bold">محمد علي</h5>
-                                                <p class="text-xs text-slate-400">قبل يومين</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex text-primary">
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-slate-600 leading-relaxed">ما شاء الله تبارك الله، أسلوب
-                                        الدكتور أحمد متميز جداً في تصحيح التلاوة. يهتم بدقائق التجويد ويربطها بمعاني
-                                        الآيات. جزاكم الله خيراً.</p>
+                            <div class="bg-background-dark p-4 rounded-lg border border-border-dark/50">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                    <span class="material-symbols-outlined">workspace_premium</span>
                                 </div>
-                                <div class="p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-10 w-10 rounded-full bg-slate-200"
-                                                data-alt="Student avatar placeholder"
-                                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAEimIImSLgw0XsDxrT1crt0NFg8Fs_vVPLV__RobSTEk8F9Vic0Vwokcx5p9d6e9n01WqncOetVqniX6pz5Ul97-Whs_0FlxHE_OwPFiWN7vZFQ_OsoBVgMCyJsLY_D52YxA1ZvmOLxge_AqBLu_eQ8IXrnj-G6jDUVOm9kRt8u5z4PzFeROve6MdrLRAtikMKP5Z6WfAgC4ISOMM12jPOjhJBwAYqFP11cKL-xYeoi_2ysCJjOFJSb5Ee8kUpuYYvIYiobfsLlwic')">
-                                            </div>
-                                            <div>
-                                                <h5 class="text-sm font-bold">عبد الله عمر</h5>
-                                                <p class="text-xs text-slate-400">قبل أسبوع</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex text-primary">
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                            <span class="material-symbols-outlined text-sm filled">star</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-slate-600 leading-relaxed">استفدت كثيراً من دورة مخارج
-                                        الحروف. الشرح وافي والتطبيق العملي مفيد جداً. أنصح بالدراسة معه لكل طالب علم.
-                                    </p>
-                                </div>
-                                <button
-                                    class="w-full text-center py-2 text-primary font-bold text-sm hover:underline">مشاهدة
-                                    جميع التقييمات</button>
+                                <h4 class="text-white font-bold mb-1">الإجازات</h4>
+                                <p class="text-sm text-text-secondary">منح الإجازة بالسند المتصل إلى رسول الله صلى الله
+                                    عليه وسلم.</p>
                             </div>
                         </div>
                     </section>
+                    <!-- Resume / Certifications -->
+                    <section>
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <span class="w-1 h-6 bg-primary rounded-full"></span>
+                            المؤهلات والشهادات
+                        </h3>
+                        <ul class="space-y-4">
+                            <li class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-3 h-3 bg-primary rounded-full mt-2"></div>
+                                    <div class="w-0.5 bg-border-dark flex-1 h-full mt-1"></div>
+                                </div>
+                                <div class="pb-4">
+                                    <h4 class="text-white font-bold text-lg">إجازة في قراءة حفص عن عاصم</h4>
+                                    <p class="text-text-secondary text-sm">الأزهر الشريف • ٢٠١٠</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-3 h-3 bg-primary rounded-full mt-2"></div>
+                                    <div class="w-0.5 bg-border-dark flex-1 h-full mt-1"></div>
+                                </div>
+                                <div class="pb-4">
+                                    <h4 class="text-white font-bold text-lg">بكالوريوس الدراسات الإسلامية والعربية</h4>
+                                    <p class="text-text-secondary text-sm">جامعة الأزهر • ٢٠٠٨</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-3 h-3 bg-primary rounded-full mt-2"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-white font-bold text-lg">دورة في طرق تدريس اللغة العربية لغير
+                                        الناطقين بها</h4>
+                                    <p class="text-text-secondary text-sm">معهد تعليم اللغة العربية • ٢٠١٢</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </section>
                 </div>
             </div>
-        </main>
-        <footer class="bg-slate-900 text-slate-400 py-12 px-6 lg:px-20 mt-12">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-white/5 pb-12">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-4 text-white">
-                        <span class="material-symbols-outlined text-primary text-2xl">auto_stories</span>
-                        <h2 class="text-lg font-bold">Qurain Online</h2>
+            <!-- Sidebar Column (Sticky) -->
+            <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+                <!-- Pricing Card -->
+                <div
+                    class="bg-surface-dark rounded-xl border border-border-dark overflow-hidden shadow-xl shadow-black/20">
+                    <div class="p-6 border-b border-border-dark">
+                        <div class="flex justify-between items-baseline mb-2">
+                            <span class="text-text-secondary font-medium">سعر الحصة</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-bold text-white">١٥٠</span>
+                                <span class="text-sm text-text-secondary">ج.م</span>
+                                <span class="text-sm text-text-secondary">/ ساعة</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-green-400 text-sm mb-6">
+                            <span class="material-symbols-outlined text-[18px]">bolt</span>
+                            <span>رد سريع (خلال ساعة)</span>
+                        </div>
+                        <button
+                            class="w-full bg-primary hover:bg-primary/90 text-surface-dark font-bold text-lg py-3 rounded-lg shadow-lg shadow-primary/10 transition-all transform active:scale-[0.98] mb-3">
+                            احجز حصة تجريبية
+                        </button>
+                        <button
+                            class="w-full bg-transparent hover:bg-white/5 text-white border border-border-dark font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">chat</span>
+                            أرسل رسالة
+                        </button>
                     </div>
-                    <p class="text-sm leading-relaxed">منصة تعليمية متخصصة في علوم القرآن الكريم والقراءات، تهدف لربط
-                        المسلمين بنخبة من المعلمين المعتمدين حول العالم.</p>
+                    <div class="p-6 bg-background-dark/50">
+                        <h4 class="text-white font-bold mb-4 text-sm uppercase tracking-wider">ماذا تتضمن الحصة؟</h4>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3 text-text-secondary text-sm">
+                                <span
+                                    class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                                <span>خطة دراسية مخصصة</span>
+                            </li>
+                            <li class="flex items-start gap-3 text-text-secondary text-sm">
+                                <span
+                                    class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                                <span>مواد تعليمية مجانية</span>
+                            </li>
+                            <li class="flex items-start gap-3 text-text-secondary text-sm">
+                                <span
+                                    class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                                <span>تسجيل صوتي للحصة للمراجعة</span>
+                            </li>
+                            <li class="flex items-start gap-3 text-text-secondary text-sm">
+                                <span
+                                    class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                                <span>شهادة إتمام المستوى</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6">روابط هامة</h4>
-                    <ul class="space-y-3 text-sm">
-                        <li><a class="hover:text-primary transition-colors" href="#">سياسة الخصوصية</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="#">الشروط والأحكام</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="#">الأسئلة الشائعة</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="#">تواصل معنا</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6">تواصل معنا</h4>
-                    <div class="flex gap-4">
-                        <a class="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-all"
-                            href="#">
-                            <span class="material-symbols-outlined text-lg">mail</span>
-                        </a>
-                        <a class="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-primary hover:text-slate-900 transition-all"
-                            href="#">
-                            <span class="material-symbols-outlined text-lg">language</span>
-                        </a>
+                <!-- Similar Tutors -->
+                <div class="bg-surface-dark rounded-xl border border-border-dark p-6 hidden lg:block">
+                    <h4 class="text-white font-bold mb-4">معلمون مشابهون</h4>
+                    <div class="space-y-4">
+                        <!-- Tutor 1 -->
+                        <div class="flex gap-3 items-center group cursor-pointer">
+                            <img alt="Profile picture of tutor Sheikh Mahmoud"
+                                class="w-12 h-12 rounded-full object-cover group-hover:ring-2 ring-primary transition-all"
+                                data-alt="Profile picture of tutor Sheikh Mahmoud"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2_fuCAcX99uPwiNfaJRgQrfgYXWnbLiT-Kqv6XMNSwFsluumi57plpFJY7YXU-Z8DKEDB_oKmZDfyACamFM_hozamNeII4oS-We-HqJNeGCNcj91zveK2Ev9gCM8mWP-WRxTqn6TdOEd5ecb5vX9MKLNymiCplR1KSnerG7e2ZvE-ayRAmocCUIyYaMflG_S4cFDxadiwsl69t0dmlQw1saRVlMSWRikjR_Z5CtWySpiUnrbISgASV_JSG87kg21GfeTDqNSlFC78" />
+                            <div>
+                                <h5 class="text-white font-bold text-sm group-hover:text-primary transition-colors">
+                                    الشيخ محمود علي</h5>
+                                <div class="flex items-center gap-1 text-xs text-text-secondary">
+                                    <span class="material-symbols-outlined text-[14px] text-primary fill-1">star</span>
+                                    4.9
+                                    <span>•</span>
+                                    <span>١٢٠ ج.م/ساعة</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tutor 2 -->
+                        <div class="flex gap-3 items-center group cursor-pointer">
+                            <img alt="Profile picture of tutor Sheikh Hassan"
+                                class="w-12 h-12 rounded-full object-cover group-hover:ring-2 ring-primary transition-all"
+                                data-alt="Profile picture of tutor Sheikh Hassan"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHSA9zpjWC6uQHq2hA0Eb9I-w7kPtlF4CIeqjs-zq-T9a4B3vTafGg9vBmDqEMPBhRhJA1Bx5I5Psj6jaupiu8fzl0sLuhVXLf1R6aiUlphZzldA5ZvpT7np7vnXxMTc9HUtLUOYRmyH82lqx-0_7tByKonF4GwXqJFwI4inOuWb1t2r0o1hY9uCNpFNyYJX4wZaDdU3WDmZEF0tIvQ-8liqogJ2d8PHi54vn6tnLKJ7mJaPM4sT0d8-J3OCYHvyWlBECH9PsZosqQ" />
+                            <div>
+                                <h5 class="text-white font-bold text-sm group-hover:text-primary transition-colors">
+                                    الشيخ حسن إبراهيم</h5>
+                                <div class="flex items-center gap-1 text-xs text-text-secondary">
+                                    <span class="material-symbols-outlined text-[14px] text-primary fill-1">star</span>
+                                    5.0
+                                    <span>•</span>
+                                    <span>١٨٠ ج.م/ساعة</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="pt-8 text-center text-xs">
-                © ٢٠٢٤ Qurain Online. جميع الحقوق محفوظة.
-            </div>
-        </footer>
-    </div>
+        </div>
+    </main>
+    <!-- Footer Simple -->
+    <footer class="mt-auto border-t border-border-dark bg-surface-dark py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-text-secondary text-sm">
+                © ٢٠٢٣ قرآن أونلاين. جميع الحقوق محفوظة.
+            </p>
+        </div>
+    </footer>
 </body>
 
 </html>

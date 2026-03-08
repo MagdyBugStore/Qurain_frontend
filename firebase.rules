@@ -14,14 +14,22 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
+
+    // Helper function to check if user is admin
+    // دالة مساعدة للتحقق من أن المستخدم مشرف
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == 'admin';
+    }
     
     // Users collection - مجموعة المستخدمين
     // Each user can only read and write their own profile
     // كل مستخدم يمكنه قراءة وكتابة ملفه الشخصي فقط
     match /users/{userId} {
-      // Allow read if user is authenticated and owns the document
-      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك المستند
-      allow read: if isOwner(userId);
+      // Allow read if user is authenticated and owns the document OR is admin OR is a teacher
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك المستند أو مشرفاً أو معلماً
+      allow read: if isOwner(userId) || isAdmin() || resource.data.accountType == 'teacher';
       
       // Allow create if user is authenticated and creating their own document
       // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ مستنده الخاص
@@ -30,24 +38,24 @@ service cloud.firestore {
                     && request.resource.data.uid == userId
                     && request.resource.data.email == request.auth.token.email;
       
-      // Allow update if user is authenticated and owns the document
-      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك المستند
-      allow update: if isOwner(userId)
+      // Allow update if user is authenticated and owns the document OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك المستند أو مشرفاً
+      allow update: if (isOwner(userId)
                     && request.resource.data.uid == userId
-                    && request.resource.data.email == resource.data.email;
+                    && request.resource.data.email == resource.data.email) || isAdmin();
       
-      // Allow delete if user is authenticated and owns the document
-      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك المستند
-      allow delete: if isOwner(userId);
+      // Allow delete if user is authenticated and owns the document OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك المستند أو مشرفاً
+      allow delete: if isOwner(userId) || isAdmin();
     }
     
     // Teacher Applications collection - مجموعة طلبات المعلمين
     // Allow authenticated users to create their own teacher applications
     // السماح للمستخدمين المسجلين بإنشاء طلبات المعلمين الخاصة بهم
     match /teacherApplications/{applicationId} {
-      // Allow read if user is authenticated and owns the application
-      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك الطلب
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Allow read if user is authenticated and owns the application OR is admin OR application is approved
+      // السماح بالقراءة إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً أو الطلب مقبول
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin() || resource.data.status == 'approved';
       
       // Allow create if user is authenticated and creating their own application
       // السماح بالإنشاء إذا كان المستخدم مسجلاً وينشئ طلبه الخاص
@@ -55,15 +63,57 @@ service cloud.firestore {
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.userEmail == request.auth.token.email;
       
-      // Allow update if user is authenticated and owns the application
-      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك الطلب
-      allow update: if isAuthenticated() 
+      // Allow update if user is authenticated and owns the application OR is admin
+      // السماح بالتحديث إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً
+      allow update: if (isAuthenticated() 
                     && resource.data.userId == request.auth.uid
-                    && request.resource.data.userId == resource.data.userId;
+                    && request.resource.data.userId == resource.data.userId) || isAdmin();
       
-      // Allow delete if user is authenticated and owns the application
-      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك الطلب
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Allow delete if user is authenticated and owns the application OR is admin
+      // السماح بالحذف إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً
+      allow delete: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+    }
+    
+    // Reviews collection - مجموعة التقييمات
+    // Allow authenticated users to read reviews for teachers
+    // السماح للمستخدمين المسجلين بقراءة تقييمات المعلمين
+    match /reviews/{reviewId} {
+      // Allow read for all authenticated users (to display teacher ratings)
+      // السماح بالقراءة لجميع المستخدمين المسجلين (لعرض تقييمات المعلمين)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated (students can review teachers)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً (الطلاب يمكنهم تقييم المعلمين)
+      allow create: if isAuthenticated();
+      
+      // Allow update/delete if user owns the review OR is admin
+      // السماح بالتحديث/الحذف إذا كان المستخدم يملك التقييم أو مشرفاً
+      allow update, delete: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+    }
+    
+    // Sessions collection - مجموعة الجلسات
+    // Allow authenticated users to read sessions
+    // السماح للمستخدمين المسجلين بقراءة الجلسات
+    match /sessions/{sessionId} {
+      // Allow read if user is authenticated (to display session counts on teacher profiles)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (لعرض عدد الجلسات في ملفات المعلمين)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً
+      allow create: if isAuthenticated();
+      
+      // Allow update if user owns the session (student or teacher) OR is admin
+      // السماح بالتحديث إذا كان المستخدم يملك الجلسة (طالب أو معلم) أو مشرفاً
+      allow update: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow delete if user owns the session OR is admin
+      // السماح بالحذف إذا كان المستخدم يملك الجلسة أو مشرفاً
+      allow delete: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
     }
     
     // Default deny rule for all other collections

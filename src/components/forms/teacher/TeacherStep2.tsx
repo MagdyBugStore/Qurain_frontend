@@ -193,7 +193,7 @@ export default function TeacherStep2({ formData, onNext, onBack }: TeacherStep2P
           onClick={onBack}
           className="flex items-center gap-2 px-8 py-3 rounded-lg font-bold border-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
         >
-          <span className="material-symbols-outlined rotate-180">arrow_forward</span>
+          <span className="material-symbols-outlined rotate-180">arrow_back</span>
           السابق
         </button>
         <button
@@ -203,7 +203,7 @@ export default function TeacherStep2({ formData, onNext, onBack }: TeacherStep2P
           className="flex items-center gap-2 px-12 py-3 rounded-lg font-bold bg-primary text-white shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           التالي
-          <span className="material-symbols-outlined rotate-180">arrow_back</span>
+          <span className="material-symbols-outlined rotate-180">arrow_forward</span>
         </button>
       </div>
     </>

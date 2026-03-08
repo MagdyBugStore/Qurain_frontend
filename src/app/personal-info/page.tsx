@@ -53,10 +53,14 @@ export default function PersonalInfoPage() {
     setAccountType(type)
     if (type === 'student') {
       setCurrentStep('step1')
-      // Save account type to profile
+      // Save account type and photo URL to profile
       if (user) {
         try {
-          await saveUserProfile({ accountType: type })
+          await saveUserProfile({ 
+            accountType: type,
+            photoURL: user.photoURL || '', // Save image URL from user account
+            displayName: user.displayName || '', // Save display name as well
+          })
         } catch (error) {
           console.error('Error saving account type:', error)
         }
@@ -88,6 +92,8 @@ export default function PersonalInfoPage() {
       firstName: user?.displayName?.split(' ')[0] || '',
       lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
       email: user?.email || '',
+      photoURL: user?.photoURL || '', // Save image URL from user account
+      displayName: user?.displayName || '', // Save display name as well
     }
     
     await saveUserProfile(profileData)

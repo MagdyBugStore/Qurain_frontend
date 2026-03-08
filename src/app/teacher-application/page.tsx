@@ -18,7 +18,7 @@ export default function TeacherApplicationPage() {
     fullName: '',
     email: '',
     phone: '',
-    countryCode: '+966',
+    countryCode: '+20',
     gender: '',
     nationality: '',
     yearsOfExperience: 0,
