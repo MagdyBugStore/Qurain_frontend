@@ -677,7 +677,7 @@ export default function TeacherProfilePage() {
     <>
       <Header />
       <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
-        <main className="flex-1 px-6 py-8 lg:px-20">
+        <main className="flex-1 container py-8 ">
           {/* Save Message */}
           {saveMessage && (
             <div className={`mb-6 rounded-xl p-4 flex items-center gap-3 ${
