@@ -14,6 +14,9 @@ export const COLLECTIONS = {
   AVAILABILITY: 'availability',
   REVIEWS: 'reviews',
   RATINGS: 'ratings',
+  STUDENT_TASKS: 'studentTasks',
+  MEMORIZATION_LOGS: 'memorizationLogs',
+  STUDENT_ACTIVITIES: 'studentActivities',
 } as const;
 
 export type CollectionName = typeof COLLECTIONS[keyof typeof COLLECTIONS];
