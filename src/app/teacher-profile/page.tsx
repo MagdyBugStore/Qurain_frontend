@@ -11,6 +11,7 @@ import { TeacherService } from '../../services/teacherService'
 import { PersonalInfoSection } from './components/PersonalInfoSection'
 import { WalletSection } from './components/WalletSection'
 import { SupportSection } from './components/SupportSection'
+import { TEACHER_APPLICATION_STATUS } from '../../constants/status'
 import type { Currency } from '../../shared/types/teacher.types'
 
 type TabType = 'personal' | 'qualifications' | 'availability' | 'reviews' | 'wallet' | 'support'
@@ -120,8 +121,8 @@ export default function TeacherProfilePage() {
   const sessionPrice = teacherApplication?.hourlyRate || 0
   const currency = getCurrencySymbol(teacherApplication?.currency)
   
-  const isPending = teacherApplication?.status === 'pending'
-  const isApproved = teacherApplication?.status === 'approved'
+  const isPending = teacherApplication?.status === TEACHER_APPLICATION_STATUS.PENDING
+  const isApproved = teacherApplication?.status === TEACHER_APPLICATION_STATUS.APPROVED
 
   // Helper function to show save message
   const showSaveMessage = (message: { type: 'success' | 'error'; text: string }) => {

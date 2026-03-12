@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { StatusBadge } from '../../components/common/StatusBadge'
 import { AdminService } from '../../services/adminService'
+import { TEACHER_APPLICATION_STATUS } from '../../constants/status'
 
 interface TeacherApplication {
   id: string

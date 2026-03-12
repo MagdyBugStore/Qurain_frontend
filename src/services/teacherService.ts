@@ -4,6 +4,7 @@
  */
 
 import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
+import { TEACHER_APPLICATION_STATUS } from '../constants/status';
 import type {
   TeacherApplication,
   TeacherProfile,
@@ -199,7 +200,7 @@ export class TeacherService {
     try {
       return await this.repository.createApplication({
         ...data,
-        status: 'pending',
+        status: TEACHER_APPLICATION_STATUS.PENDING,
       } as any);
     } catch (error) {
       console.error('Error creating teacher application:', error);

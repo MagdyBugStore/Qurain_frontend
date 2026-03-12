@@ -4,6 +4,7 @@
  */
 
 import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
+import { SUPPORT_TICKET_STATUS } from '../constants/status';
 import type { SupportTicket, TicketReply } from '../features/teachers/domain/entities/SupportTicket';
 import type { Unsubscribe } from 'firebase/firestore';
 
@@ -84,7 +85,7 @@ export class SupportService {
         message: data.message,
         category: data.category,
         priority: data.priority,
-        status: 'open',
+        status: SUPPORT_TICKET_STATUS.OPEN,
       });
     } catch (error) {
       console.error('Error creating support ticket:', error);

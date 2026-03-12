@@ -4,6 +4,7 @@
  */
 
 import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
+import { WITHDRAWAL_STATUS } from '../constants/status';
 import type { Wallet, WithdrawalRequest } from '../features/teachers/domain/entities/Wallet';
 import type { Currency } from '../shared/types/teacher.types';
 
@@ -75,7 +76,7 @@ export class WalletService {
         bankName: data.bankName,
         accountNumber: data.accountNumber,
         iban: data.iban || '',
-        status: 'pending',
+        status: WITHDRAWAL_STATUS.PENDING,
       });
 
       return requestId;

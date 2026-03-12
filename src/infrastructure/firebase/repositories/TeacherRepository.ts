@@ -21,6 +21,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { COLLECTIONS } from '../../../constants/firebaseCollections';
 import type { TeacherApplication, TeacherProfile, Review } from '../../../shared/types/teacher.types';
 import type { ITeacherRepository } from '../../../features/teachers/domain/interfaces/ITeacherRepository';
 import type { Qualification } from '../../../features/teachers/domain/entities/Qualification';
@@ -35,7 +36,7 @@ export class TeacherRepository implements ITeacherRepository {
   async findApplicationByUserId(userId: string): Promise<TeacherApplication | null> {
     try {
       const applicationsQuery = query(
-        collection(db, 'teacherApplications'),
+        collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
         where('userId', '==', userId)
       );
       
@@ -59,7 +60,7 @@ export class TeacherRepository implements ITeacherRepository {
   async findApprovedByUserId(userId: string): Promise<TeacherApplication | null> {
     try {
       const applicationsQuery = query(
-        collection(db, 'teacherApplications'),
+        collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
         where('userId', '==', userId),
         where('status', '==', 'approved')
       );
@@ -87,7 +88,7 @@ export class TeacherRepository implements ITeacherRepository {
   async findAllApproved(): Promise<TeacherApplication[]> {
     try {
       const q = query(
-        collection(db, 'teacherApplications'),
+        collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
         where('status', '==', 'approved')
       );
       
@@ -177,7 +178,7 @@ export class TeacherRepository implements ITeacherRepository {
 
   async createApplication(data: Omit<TeacherApplication, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'teacherApplications'), {
+      const docRef = await addDoc(collection(db, COLLECTIONS.TEACHER_APPLICATIONS), {
         ...data,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -315,7 +316,7 @@ export class TeacherRepository implements ITeacherRepository {
   async getWallet(teacherId: string): Promise<Wallet | null> {
     try {
       const walletQuery = query(
-        collection(db, 'teacherWallets'),
+        collection(db, COLLECTIONS.TEACHER_WALLETS),
         where('teacherId', '==', teacherId)
       );
       const snapshot = await getDocs(walletQuery);
@@ -391,13 +392,13 @@ export class TeacherRepository implements ITeacherRepository {
   async updateWalletBalance(teacherId: string, newBalance: number): Promise<void> {
     try {
       const walletQuery = query(
-        collection(db, 'teacherWallets'),
+        collection(db, COLLECTIONS.TEACHER_WALLETS),
         where('teacherId', '==', teacherId)
       );
       const snapshot = await getDocs(walletQuery);
       if (snapshot.empty) {
         // Create wallet if it doesn't exist
-        await addDoc(collection(db, 'teacherWallets'), {
+        await addDoc(collection(db, COLLECTIONS.TEACHER_WALLETS), {
           teacherId,
           balance: newBalance,
           currency: 'SAR',
@@ -421,7 +422,7 @@ export class TeacherRepository implements ITeacherRepository {
   async getSupportTickets(userId: string, limitCount: number = 10): Promise<SupportTicket[]> {
     try {
       const ticketsQuery = query(
-        collection(db, 'supportTickets'),
+        collection(db, COLLECTIONS.SUPPORT_TICKETS),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc'),
         limit(limitCount)
@@ -434,7 +435,7 @@ export class TeacherRepository implements ITeacherRepository {
           
           // Fetch replies
           const repliesQuery = query(
-            collection(db, 'supportTickets', docSnapshot.id, 'replies'),
+            collection(db, COLLECTIONS.SUPPORT_TICKETS, docSnapshot.id, 'replies'),
             orderBy('createdAt', 'asc')
           );
           const repliesSnapshot = await getDocs(repliesQuery);
@@ -465,7 +466,7 @@ export class TeacherRepository implements ITeacherRepository {
       
       // Fetch replies
       const repliesQuery = query(
-        collection(db, 'supportTickets', ticketId, 'replies'),
+        collection(db, COLLECTIONS.SUPPORT_TICKETS, ticketId, 'replies'),
         orderBy('createdAt', 'asc')
       );
       const repliesSnapshot = await getDocs(repliesQuery);
@@ -483,7 +484,7 @@ export class TeacherRepository implements ITeacherRepository {
 
   async createSupportTicket(ticket: Omit<SupportTicket, 'id' | 'replies' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'supportTickets'), {
+      const docRef = await addDoc(collection(db, COLLECTIONS.SUPPORT_TICKETS), {
         ...ticket,
         status: 'open',
         replies: [],
@@ -500,7 +501,7 @@ export class TeacherRepository implements ITeacherRepository {
   async addTicketReply(ticketId: string, reply: Omit<TicketReply, 'id' | 'createdAt'>): Promise<void> {
     try {
       await addDoc(
-        collection(db, 'supportTickets', ticketId, 'replies'),
+        collection(db, COLLECTIONS.SUPPORT_TICKETS, ticketId, 'replies'),
         {
           ...reply,
           createdAt: serverTimestamp(),
@@ -536,7 +537,7 @@ export class TeacherRepository implements ITeacherRepository {
   async getCompletedSessionsCount(teacherId: string): Promise<number> {
     try {
       const sessionsQuery = query(
-        collection(db, 'sessions'),
+        collection(db, COLLECTIONS.SESSIONS),
         where('teacherId', '==', teacherId),
         where('status', '==', 'completed')
       );
@@ -571,7 +572,7 @@ export class TeacherRepository implements ITeacherRepository {
           
           // Fetch replies for each ticket
           const repliesQuery = query(
-            collection(db, 'supportTickets', docSnapshot.id, 'replies'),
+            collection(db, COLLECTIONS.SUPPORT_TICKETS, docSnapshot.id, 'replies'),
             orderBy('createdAt', 'asc')
           );
           const repliesSnapshot = await getDocs(repliesQuery);

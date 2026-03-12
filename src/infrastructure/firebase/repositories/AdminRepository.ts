@@ -14,6 +14,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { COLLECTIONS } from '../../../constants/firebaseCollections';
 import type { TeacherApplication } from '../../../shared/types/teacher.types';
 
 export interface UserData {
@@ -33,7 +34,7 @@ export class AdminRepository {
    */
   async getAllTeacherApplications(): Promise<TeacherApplication[]> {
     try {
-      const allAppsQuery = query(collection(db, 'teacherApplications'));
+      const allAppsQuery = query(collection(db, COLLECTIONS.TEACHER_APPLICATIONS));
       const allAppsSnapshot = await getDocs(allAppsQuery);
       return allAppsSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -51,7 +52,7 @@ export class AdminRepository {
   async getTeacherUsers(): Promise<UserData[]> {
     try {
       const usersQuery = query(
-        collection(db, 'users'),
+        collection(db, COLLECTIONS.USERS),
         where('accountType', '==', 'teacher')
       );
       const usersSnapshot = await getDocs(usersQuery);
@@ -105,13 +106,13 @@ export class AdminRepository {
         bio: '',
         hourlyRate: 0,
         currency: 'USD',
-        status: 'pending',
+        status: TEACHER_APPLICATION_STATUS.PENDING,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         isManuallyCreated: true,
       };
 
-      const docRef = await addDoc(collection(db, 'teacherApplications'), applicationDoc);
+      const docRef = await addDoc(collection(db, COLLECTIONS.TEACHER_APPLICATIONS), applicationDoc);
       return docRef.id;
     } catch (error) {
       console.error('Error creating teacher application:', error);

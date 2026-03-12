@@ -5,6 +5,7 @@
 
 import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
 import { TeacherService } from './teacherService';
+import { TEACHER_APPLICATION_STATUS } from '../constants/status';
 
 export class BookingService {
   private teacherRepository: TeacherRepository;
@@ -33,7 +34,7 @@ export class BookingService {
   async checkTeacherAvailability(teacherId: string): Promise<boolean> {
     try {
       const application = await this.teacherRepository.findApprovedByUserId(teacherId);
-      return application?.status === 'approved';
+      return application?.status === TEACHER_APPLICATION_STATUS.APPROVED;
     } catch (error) {
       console.error('Error checking teacher availability:', error);
       return false;

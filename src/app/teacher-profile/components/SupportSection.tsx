@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { useSupport } from '../hooks/useSupport';
+import { SUPPORT_TICKET_STATUS } from '../../../constants/status';
 
 interface SupportSectionProps {
   userId: string | null;
@@ -181,23 +182,23 @@ export function SupportSection({ userId, userName, onSave }: SupportSectionProps
                   className="p-3 sm:p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-xl sm:rounded-2xl flex items-start gap-3 sm:gap-4 hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className={`size-8 sm:size-10 rounded-full flex items-center justify-center shrink-0 ${
-                    ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
-                    ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
-                    'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
-                  }`}>
-                    <span className="material-symbols-outlined text-sm sm:text-base">
-                      {ticket.status === 'open' ? 'hourglass_empty' : ticket.status === 'resolved' ? 'check_circle' : 'schedule'}
-                    </span>
+                                  ticket.status === SUPPORT_TICKET_STATUS.OPEN ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
+                                  ticket.status === SUPPORT_TICKET_STATUS.RESOLVED ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
+                                  'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
+                                }`}>
+                                  <span className="material-symbols-outlined text-sm sm:text-base">
+                                    {ticket.status === SUPPORT_TICKET_STATUS.OPEN ? 'hourglass_empty' : ticket.status === SUPPORT_TICKET_STATUS.RESOLVED ? 'check_circle' : 'schedule'}
+                                  </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-1 sm:gap-0 mb-1">
                       <h3 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-words">{ticket.subject}</h3>
                       <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold whitespace-nowrap shrink-0 ${
-                        ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
-                        ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                      }`}>
-                        {ticket.status === 'open' ? 'قيد الانتظار' : ticket.status === 'resolved' ? 'تم الحل' : 'قيد المعالجة'}
+                                      ticket.status === SUPPORT_TICKET_STATUS.OPEN ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                                      ticket.status === SUPPORT_TICKET_STATUS.RESOLVED ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                                      'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                                    }`}>
+                                      {ticket.status === SUPPORT_TICKET_STATUS.OPEN ? 'قيد الانتظار' : ticket.status === SUPPORT_TICKET_STATUS.RESOLVED ? 'تم الحل' : 'قيد المعالجة'}
                       </span>
                     </div>
                     <p className="text-[10px] sm:text-xs text-slate-500 mb-1 sm:mb-2">رقم التذكرة: #{ticket.id.slice(0, 8)}</p>
@@ -254,7 +255,7 @@ export function SupportSection({ userId, userName, onSave }: SupportSectionProps
                   ))}
                 </div>
               )}
-              {selectedTicket.status !== 'closed' && (
+                            {selectedTicket.status !== SUPPORT_TICKET_STATUS.CLOSED && (
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-3 sm:pt-4 mt-3 sm:mt-4">
                   <textarea
                     value={replyMessage}

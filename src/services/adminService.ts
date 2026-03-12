@@ -4,6 +4,8 @@
  */
 
 import { AdminRepository } from '../infrastructure/firebase/repositories/AdminRepository';
+import { TEACHER_APPLICATION_STATUS } from '../constants/status';
+import { ErrorHandler } from '../shared/utils/errorHandler';
 import type { TeacherApplication } from '../shared/types/teacher.types';
 
 export interface IncompleteApplication {
@@ -47,7 +49,7 @@ export class AdminService {
       }
 
       // Add incomplete applications if requested
-      if (filter.includeIncomplete && (filter.status === 'all' || filter.status === 'pending' || !filter.status)) {
+      if (filter.includeIncomplete && (filter.status === 'all' || filter.status === TEACHER_APPLICATION_STATUS.PENDING || !filter.status)) {
         const incompleteApps = await this.getIncompleteApplications(allApps);
         filteredApps = [...filteredApps, ...incompleteApps];
       }
@@ -61,8 +63,8 @@ export class AdminService {
 
       return filteredApps;
     } catch (error) {
-      console.error('Error getting teacher applications:', error);
-      throw error;
+      const appError = ErrorHandler.handleFirebaseError(error, 'AdminService.getTeacherApplications');
+      throw appError;
     }
   }
 
@@ -88,7 +90,7 @@ export class AdminService {
             email: userData.email,
             phone: userData.phone,
             subjects: [],
-            status: 'pending',
+            status: TEACHER_APPLICATION_STATUS.PENDING,
             createdAt: userData.createdAt,
             isIncomplete: true,
           });
@@ -107,7 +109,7 @@ export class AdminService {
    */
   async updateApplicationStatus(
     applicationId: string,
-    newStatus: 'approved' | 'rejected',
+    newStatus: typeof TEACHER_APPLICATION_STATUS.APPROVED | typeof TEACHER_APPLICATION_STATUS.REJECTED,
     userApp?: TeacherApplication
   ): Promise<string> {
     try {
