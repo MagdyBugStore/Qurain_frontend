@@ -80,8 +80,6 @@ export default function TeacherStep3({ formData, allFormData, onComplete, onBack
       // Save to Firestore
       const docRef = await addDoc(collection(db, 'teacherApplications'), teacherApplicationData)
       
-      console.log('Teacher application submitted successfully with ID:', docRef.id)
-      
       // Update user profile with accountType
       // تحديث ملف المستخدم بنوع الحساب
       try {
@@ -91,7 +89,6 @@ export default function TeacherStep3({ formData, allFormData, onComplete, onBack
           lastName: allFormData?.fullName?.split(' ').slice(1).join(' ') || user.displayName?.split(' ').slice(1).join(' ') || '',
           email: user.email || allFormData?.email || '',
         })
-        console.log('User profile updated with accountType: teacher')
       } catch (profileError) {
         console.error('Error updating user profile:', profileError)
         // Don't fail the whole submission if profile update fails

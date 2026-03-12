@@ -11,7 +11,6 @@ import { useAppStore } from "./store/useAppStore";
 import { LandingPage } from "./legacy-pages/LandingPage";
 import { EvalPage } from "./legacy-pages/EvalPage";
 import { DashboardPage } from "./legacy-pages/DashboardPage";
-import { LoginPage } from "./legacy-pages/LoginPage";
 import { PersonalInfoPage } from "./legacy-pages/PersonalInfoPage";
 // Import new app pages
 import Home from "./app/page";
@@ -53,7 +52,7 @@ function AppShell() {
   // Combine both toast systems (legacy and store-based)
   const allToasts = [...toasts, ...storeToasts];
 
-  const publicPaths = ["/", "/programs", "/teachers", "/eval", "/login"];
+  const publicPaths = ["/", "/programs", "/teachers", "/eval"];
   const isPublicPage = publicPaths.includes(location.pathname);
 
   // SEO configuration per page
@@ -115,13 +114,6 @@ function AppShell() {
           noindex: true,
           geoLocation
         };
-      case "/login":
-        return {
-          title: "تسجيل الدخول - منصة القرآن | Login",
-          description: "سجل الدخول إلى حسابك باستخدام Google أو Apple.",
-          type: "website",
-          geoLocation
-        };
       case "/personal-info":
         return {
           title: "المعلومات الشخصية - منصة القرآن | Personal Information",
@@ -177,7 +169,6 @@ function AppShell() {
         {/* Legacy routes */}
         <Route path="/legacy" element={<LandingPage />} />
         <Route path="/eval" element={<EvalPage addToast={addToast} />} />
-        <Route path="/login" element={<LoginPage addToast={addToast} />} />
         <Route path="/personal-info" element={<PersonalInfoPageNew />} />
         <Route path="/personal-info-legacy" element={<PersonalInfoPage addToast={addToast} />} />
         <Route path="/dashboard" element={<DashboardPage addToast={addToast} />} />

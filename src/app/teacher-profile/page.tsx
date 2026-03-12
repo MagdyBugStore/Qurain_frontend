@@ -13,8 +13,23 @@ import { TeacherRepository } from '../../infrastructure/firebase/repositories/Te
 type TabType = 'personal' | 'qualifications' | 'availability' | 'reviews' | 'wallet' | 'support'
 
 export default function TeacherProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const [activeQuickTab, setActiveQuickTab] = useState<'wallet' | 'support' | null>(null)
+  const [editingStates, setEditingStates] = useState({
+    personalInfo: false, // للبيانات الشخصية في aside
+    about: false, // لقسم "نبذة عني وفلسفتي في التعليم"
+    benefits: false,
+    sessionContent: false,
+    qualifications: false,
+    ijazahs: false,
+    availability: false,
+    reviews: false
+  })
+  const [activeQuickTab, setActiveQuickTab] = useState<'personal' | 'wallet' | 'support' | null>('personal')
+  const [activeSubTab, setActiveSubTab] = useState<'content' | 'qualifications' | 'availability' | 'reviews' | null>('content')
+  
+  // Helper function to toggle edit state for a specific section
+  const toggleEdit = (section: keyof typeof editingStates) => {
+    setEditingStates(prev => ({ ...prev, [section]: !prev[section] }))
+  }
   const { user, userProfile } = useAuth()
   const [teacherApplication, setTeacherApplication] = useState<TeacherApplication | null>(null)
   const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null)
@@ -677,20 +692,20 @@ export default function TeacherProfilePage() {
     <>
       <Header />
       <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
-        <main className="flex-1 px-6 py-8 lg:px-20">
+        <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 lg:px-20">
           {/* Save Message */}
           {saveMessage && (
-            <div className={`mb-6 rounded-xl p-4 flex items-center gap-3 ${
+            <div className={`mb-4 sm:mb-6 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 ${
               saveMessage.type === 'success' 
                 ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
                 : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
             }`}>
-              <span className={`material-symbols-outlined ${
+              <span className={`material-symbols-outlined text-lg sm:text-xl ${
                 saveMessage.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}>
                 {saveMessage.type === 'success' ? 'check_circle' : 'error'}
               </span>
-              <p className={`font-bold ${
+              <p className={`font-bold text-sm sm:text-base ${
                 saveMessage.type === 'success' 
                   ? 'text-green-900 dark:text-green-200' 
                   : 'text-red-900 dark:text-red-200'
@@ -702,11 +717,11 @@ export default function TeacherProfilePage() {
 
           {/* Pending Status Banner */}
           {isPending && (
-            <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
-              <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">schedule</span>
+            <div className="mb-4 sm:mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+              <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 shrink-0">schedule</span>
               <div className="flex-1">
-                <p className="font-bold text-amber-900 dark:text-amber-200">طلبك قيد المراجعة</p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">سيتم مراجعة طلبك خلال 48 ساعة. سيتم إشعارك عند الموافقة على طلبك.</p>
+                <p className="font-bold text-sm sm:text-base text-amber-900 dark:text-amber-200">طلبك قيد المراجعة</p>
+                <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300">سيتم مراجعة طلبك خلال 48 ساعة. سيتم إشعارك عند الموافقة على طلبك.</p>
               </div>
             </div>
           )}
@@ -715,114 +730,288 @@ export default function TeacherProfilePage() {
             {/* Sidebar Column */}
             <aside className="lg:col-span-4 xl:col-span-3">
               <div className="sticky top-24 space-y-6">
-                {/* Profile Card - Matching TeacherDetailHeader style */}
-                <div className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
-                  <div className="flex flex-col sm:flex-row gap-6 items-start ">
-                    <div className="relative shrink-0">
+                {/* Profile Card - New Design */}
+                <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl shadow-gray-200/50 dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center">
+                  {/* Avatar Section */}
+                  <div className="relative mb-6">
+                    <div className="w-40 h-40 rounded-full border-4 border-primary dark:border-primary/80 p-1 shadow-inner">
                       <img
                         alt={`صورة ${teacherName}`}
-                        className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
+                        className="w-full h-full rounded-full object-cover"
                         src={profileImage}
                       />
-                      {isApproved && (
-                        <div className="absolute bottom-1 right-1 bg-green-500 rounded-full p-1 border-2 border-white dark:border-slate-800">
-                          <span className="block w-3 h-3 bg-white rounded-full"></span>
-                        </div>
-                      )}
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">{teacherName}</h3>
-                        {isApproved && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            <span className="material-symbols-outlined text-[14px]">verified</span>
-                            تم التحقق
-                          </span>
-                        )}
+                    {isApproved && (
+                      <div className="absolute bottom-2 right-4 w-6 h-6 bg-green-500 dark:bg-green-600 border-4 border-white dark:border-slate-800 rounded-full flex items-center justify-center shadow-lg">
+                        <span className="material-symbols-outlined text-white text-xs font-bold leading-none">verified</span>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-400 text-lg">{teacherTitle}</p>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {rating > 0 && (
-                          <div className="flex items-center gap-1 text-primary text-sm font-bold bg-primary/10 px-3 py-1 rounded-lg">
-                            <span className="material-symbols-outlined text-[18px] filled">star</span>
-                            {rating.toFixed(1)} ({reviewsCount} تقييم)
-                          </div>
-                        )}
-                        {!rating && isApproved && (
-                          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-lg">
-                            <span className="material-symbols-outlined text-[18px] filled">star</span>
-                            <span>لا توجد تقييمات بعد</span>
-                          </div>
-                        )}
-                        {teacherApplication?.nationality && (
-                          <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-lg">
-                            <span className="material-symbols-outlined text-[18px]">location_on</span>
-                            {teacherApplication.nationality}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-3 py-1 rounded-lg">
-                          <span className="material-symbols-outlined text-[18px]">translate</span>
-                          يتحدث العربية والإنجليزية
-                        </div>
-                      </div>
-                      {specialization && (
-                        <div className="pt-2 text-sm">
-                          <span className="text-slate-500 dark:text-slate-400">التخصص: </span>
-                          <span className="font-medium text-slate-900 dark:text-white">{specialization}</span>
-                        </div>
-                      )}
-                      {sessionPrice > 0 && (
-                        <div className="pt-2 text-sm">
-                          <span className="text-slate-500 dark:text-slate-400">سعر الجلسة: </span>
-                          <span className="text-primary font-bold">{sessionPrice} {currency}/ساعة</span>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
+
+                  {/* Name & Verification */}
+                  <h1 className="text-2xl font-bold mb-1 flex items-center justify-center gap-2">
+                    {teacherName}
+                    {isApproved && (
+                      <svg className="w-6 h-6 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                      </svg>
+                    )}
+                  </h1>
+                  <p className="text-gray-500 dark:text-slate-400 font-medium mb-4">{teacherTitle}</p>
+
+                  {/* Badges & Ratings */}
+                  <div className="flex flex-wrap justify-center gap-2 mb-6">
+                    {teacherApplication?.yearsOfExperience && (
+                      <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary rounded-full text-sm font-semibold border border-primary/20 dark:border-primary/30">
+                        خبرة {teacherApplication.yearsOfExperience} سنوات
+                      </span>
+                    )}
+                    {rating > 0 ? (
+                      <div className="flex items-center gap-1 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-full text-sm font-semibold border border-yellow-100 dark:border-yellow-800">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span>{rating.toFixed(1)} ({reviewsCount} تقييم)</span>
+                      </div>
+                    ) : isApproved && (
+                      <div className="flex items-center gap-1 px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full text-sm font-semibold border border-slate-200 dark:border-slate-600">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span>لا توجد تقييمات بعد</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Language & Location */}
+                  <div className="w-full space-y-3 mb-8 text-sm text-gray-600 dark:text-slate-400">
+                    <div className="flex items-center justify-between border-b border-gray-50 dark:border-slate-700 pb-2">
+                      <span className="font-medium text-gray-400 dark:text-slate-500">اللغات:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">العربية، الإنجليزية</span>
+                    </div>
+                    {teacherApplication?.nationality && (
+                      <div className="flex items-center justify-between border-b border-gray-50 dark:border-slate-700 pb-2">
+                        <span className="font-medium text-gray-400 dark:text-slate-500">الموقع:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{teacherApplication.nationality}</span>
+                      </div>
+                    )}
+                    {sessionPrice > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-400 dark:text-slate-500">سعر الجلسة:</span>
+                        <span className="font-bold text-primary dark:text-primary text-lg">{sessionPrice} {currency}/ساعة</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Personal Information Section */}
+                  <div className="w-full mt-6 pt-6 border-t border-gray-100 dark:border-slate-700">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-base font-bold">البيانات الشخصية</h3>
+                      {isApproved && !isPending && (
+                        <button
+                          onClick={() => toggleEdit('personalInfo')}
+                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
+                        >
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 text-sm">edit</span>
+                        </button>
+                      )}
+                    </div>
+                    {editingStates.personalInfo ? (
+                      <div className="space-y-4 text-right">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الاسم الكامل</label>
+                            {editingStates.personalInfo && !isPending ? (
+                              <input
+                                type="text"
+                                defaultValue={teacherName}
+                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                              />
+                            ) : (
+                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
+                                {teacherName}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">البريد الإلكتروني</label>
+                            {editingStates.personalInfo && !isPending ? (
+                              <input
+                                type="email"
+                                defaultValue={userProfile?.email || teacherApplication?.email || user?.email || ''}
+                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                              />
+                            ) : (
+                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
+                                {userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">رقم الهاتف</label>
+                            {editingStates.personalInfo && !isPending ? (
+                              <input
+                                type="tel"
+                                defaultValue={`${teacherApplication?.countryCode || '+966'} ${teacherApplication?.phone || ''}`}
+                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                              />
+                            ) : (
+                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
+                                {teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الجنسية</label>
+                            {editingStates.personalInfo && !isPending ? (
+                              <input
+                                type="text"
+                                defaultValue={teacherApplication?.nationality || ''}
+                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                              />
+                            ) : (
+                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
+                                {teacherApplication?.nationality || 'غير متوفر'}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">نبذة عني</label>
+                          {editingStates.personalInfo && !isPending ? (
+                            <textarea
+                              rows={4}
+                              defaultValue={teacherApplication?.bio || ''}
+                              className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                            />
+                          ) : (
+                            <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[80px]">
+                              {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
+                            </div>
+                          )}
+                        </div>
+                        {editingStates.personalInfo && !isPending && (
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={handleSavePersonalInfo}
+                              disabled={saving}
+                              className="w-full bg-primary text-slate-900 font-bold py-2 px-4 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                              {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                            </button>
+                            <button
+                              onClick={() => toggleEdit('personalInfo')}
+                              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm"
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-3 text-sm text-gray-600 dark:text-slate-400">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-400 dark:text-slate-500">الاسم:</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{teacherName}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-400 dark:text-slate-500">البريد:</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-400 dark:text-slate-500">الهاتف:</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}</span>
+                        </div>
+                        {teacherApplication?.nationality && (
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-400 dark:text-slate-500">الجنسية:</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">{teacherApplication.nationality}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Button */}
                   {isApproved && (
                     <button
-                      onClick={() => setIsEditing(!isEditing)}
-                      className={`w-full mt-6 font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 ${
-                        isEditing
-                          ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
-                          : 'bg-primary text-slate-900 hover:brightness-110'
-                      }`}
+                      onClick={() => {
+                        setActiveQuickTab('personal')
+                        setActiveSubTab('content')
+                        toggleEdit('about')
+                      }}
+                      className="w-full bg-primary hover:bg-[#e0b320] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 mt-6"
                     >
-                      <span className="material-symbols-outlined text-sm">{isEditing ? 'close' : 'edit'}</span>
-                      {isEditing ? 'إلغاء التعديل' : 'تعديل الملف العام'}
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                      تعديل الملف العام
                     </button>
                   )}
                 </div>
 
                 {/* Quick Links */}
                 <div className="bg-white dark:bg-background-dark border border-primary/10 rounded-xl p-6 space-y-4">
-                  <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider">روابط سريعة</h4>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-500 uppercase tracking-wider">روابط سريعة</h4>
                   <nav className="space-y-1">
-                    <a href="#personal" className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                      <span className="material-symbols-outlined filled">account_circle</span>
-                      <span className="text-sm font-medium">البيانات الشخصية</span>
-                    </a>
                     <button
-                      onClick={() => setActiveQuickTab(activeQuickTab === 'wallet' ? null : 'wallet')}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                      onClick={() => {
+                        setActiveQuickTab('personal')
+                        setActiveSubTab('content')
+                        setTimeout(() => {
+                          const element = document.getElementById('content')
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }
+                        }, 100)
+                      }}
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
+                        activeQuickTab === 'personal'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined filled text-lg sm:text-xl">account_circle</span>
+                      <span className="text-xs sm:text-sm font-medium">الملف الشخصي</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveQuickTab('wallet')
+                        setTimeout(() => {
+                          const element = document.getElementById('wallet')
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }
+                        }, 100)
+                      }}
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
                         activeQuickTab === 'wallet'
                           ? 'bg-primary/10 text-primary'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <span className="material-symbols-outlined">account_balance_wallet</span>
-                      <span className="text-sm font-medium">إدارة المحفظة</span>
+                      <span className="material-symbols-outlined text-lg sm:text-xl">account_balance_wallet</span>
+                      <span className="text-xs sm:text-sm font-medium">إدارة المحفظة</span>
                     </button>
                     <button
-                      onClick={() => setActiveQuickTab(activeQuickTab === 'support' ? null : 'support')}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                      onClick={() => {
+                        setActiveQuickTab('support')
+                        setTimeout(() => {
+                          const element = document.getElementById('support')
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }
+                        }, 100)
+                      }}
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
                         activeQuickTab === 'support'
                           ? 'bg-primary/10 text-primary'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <span className="material-symbols-outlined">support_agent</span>
-                      <span className="text-sm font-medium">الدعم الفني</span>
+                      <span className="material-symbols-outlined text-lg sm:text-xl">support_agent</span>
+                      <span className="text-xs sm:text-sm font-medium">الدعم الفني</span>
                     </button>
                   </nav>
                 </div>
@@ -830,219 +1019,275 @@ export default function TeacherProfilePage() {
             </aside>
 
             {/* Main Area */}
-            <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+            <div className="lg:col-span-8 xl:col-span-9 space-y-4 sm:space-y-6">
               {/* Content Section - All sections displayed without tabs */}
-              <section className="space-y-8">
-                {/* Personal Information Section */}
-                <div id="personal" className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">البيانات الشخصية</h3>
-                  </div>
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الاسم الكامل</label>
-                        {isEditing && !isPending ? (
-                          <input
-                            type="text"
-                            defaultValue={teacherName}
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                        ) : (
-                          <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">
-                            {teacherName}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">البريد الإلكتروني</label>
-                        {isEditing && !isPending ? (
-                          <input
-                            type="email"
-                            defaultValue={userProfile?.email || teacherApplication?.email || user?.email || ''}
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                        ) : (
-                          <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">
-                            {userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">رقم الهاتف</label>
-                        {isEditing && !isPending ? (
-                          <input
-                            type="tel"
-                            defaultValue={`${teacherApplication?.countryCode || '+966'} ${teacherApplication?.phone || ''}`}
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                        ) : (
-                          <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">
-                            {teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">الجنسية</label>
-                        {isEditing && !isPending ? (
-                          <input
-                            type="text"
-                            defaultValue={teacherApplication?.nationality || ''}
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                        ) : (
-                          <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">
-                            {teacherApplication?.nationality || 'غير متوفر'}
-                          </div>
-                        )}
-                      </div>
+              <section className="space-y-6 sm:space-y-8">
+                {/* Sub Tabs for Personal Tab */}
+                {activeQuickTab === 'personal' && (
+                  <div className="bg-white dark:bg-background-dark rounded-xl p-4 border border-primary/10 shadow-sm">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                      <button
+                        onClick={() => {
+                          setActiveSubTab('content')
+                          setTimeout(() => {
+                            const element = document.getElementById('content')
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                          }, 100)
+                        }}
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
+                          activeSubTab === 'content'
+                            ? 'bg-primary text-slate-900'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        المنهج
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSubTab('availability')
+                          setTimeout(() => {
+                            const element = document.getElementById('availability')
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                          }, 100)
+                        }}
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
+                          activeSubTab === 'availability'
+                            ? 'bg-primary text-slate-900'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        جدول التوفر
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSubTab('reviews')
+                          setTimeout(() => {
+                            const element = document.getElementById('reviews')
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                          }, 100)
+                        }}
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
+                          activeSubTab === 'reviews'
+                            ? 'bg-primary text-slate-900'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        التقييمات
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">نبذة عني</label>
-                      {isEditing && !isPending ? (
+                  </div>
+                )}
+
+                {/* About Me & Philosophy Section */}
+                {activeQuickTab === 'personal' && activeSubTab === 'content' && (
+                <div id="content" className="space-y-6 sm:space-y-8">
+                  {/* About Me Section */}
+                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('about')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">نبذة عني وفلسفتي في التعليم</h2>
+                    <div className="space-y-3 sm:space-y-4">
+                      {editingStates.about && !isPending ? (
                         <textarea
-                          rows={6}
+                          rows={4}
                           defaultValue={teacherApplication?.bio || ''}
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed"
+                          placeholder="اكتب نبذة عنك وفلسفتك في التعليم..."
                         />
                       ) : (
-                        <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[120px]">
+                        <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
                           {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
                         </div>
                       )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">ما الثمار التي سيجنيها الطالب؟</label>
-                      {isEditing && !isPending ? (
-                        <>
-                          <textarea
-                            rows={5}
-                            value={personalInfo.teachingStyle}
-                            onChange={(e) => setPersonalInfo({ ...personalInfo, teachingStyle: e.target.value })}
-                            placeholder="اكتب وصفاً للفوائد والنتائج التي سيحصل عليها الطالب من دراسته معك..."
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            اشرح الفوائد والنتائج التي سيحصل عليها الطالب مثل: إتقان التلاوة، فهم المعاني، بناء الثقة، الحصول على الإجازة، وغيرها
-                          </p>
-                        </>
-                      ) : (
-                        <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[100px]">
-                          {personalInfo.teachingStyle || 'لا يوجد وصف متاح'}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">ماذا تتضمن الحصة</label>
-                      {isEditing && !isPending ? (
-                        <>
-                          <textarea
-                            rows={5}
-                            value={personalInfo.sessionContent}
-                            onChange={(e) => setPersonalInfo({ ...personalInfo, sessionContent: e.target.value })}
-                            placeholder="اكتب وصفاً لما تتضمنه الحصة..."
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            اشرح محتوى الحصة والأنشطة التي ستقوم بها مع الطالب
-                          </p>
-                        </>
-                      ) : (
-                        <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[100px]">
-                          {personalInfo.sessionContent || 'لا يوجد وصف متاح'}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">فيديو عني</label>
-                      {isEditing && !isPending ? (
-                        <>
-                          <input
-                            type="url"
-                            value={personalInfo.introVideo}
-                            onChange={(e) => setPersonalInfo({ ...personalInfo, introVideo: e.target.value })}
-                            placeholder="رابط الفيديو (YouTube, Vimeo, إلخ)"
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                          />
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            أدخل رابط فيديو تعريفي عنك (YouTube, Vimeo, أو أي منصة أخرى)
-                          </p>
-                        </>
-                      ) : (
-                        <div className="w-full rounded-lg bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
+                      
+                      {/* Intro Video - In same row with title */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="md:col-span-1">
                           {personalInfo.introVideo ? (
-                            <a href={personalInfo.introVideo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                              {personalInfo.introVideo}
-                            </a>
+                            <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700" style={{ aspectRatio: '16/9' }}>
+                              {personalInfo.introVideo.includes('youtube.com') || personalInfo.introVideo.includes('youtu.be') ? (
+                                <iframe
+                                  src={personalInfo.introVideo.includes('youtu.be') 
+                                    ? `https://www.youtube.com/embed/${personalInfo.introVideo.split('/').pop()}`
+                                    : `https://www.youtube.com/embed/${personalInfo.introVideo.split('v=')[1]?.split('&')[0]}`
+                                  }
+                                  className="absolute top-0 left-0 w-full h-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              ) : personalInfo.introVideo.includes('vimeo.com') ? (
+                                <iframe
+                                  src={`https://player.vimeo.com/video/${personalInfo.introVideo.split('/').pop()}`}
+                                  className="absolute top-0 left-0 w-full h-full"
+                                  allow="autoplay; fullscreen; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <a href={personalInfo.introVideo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    فتح رابط الفيديو
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                           ) : (
-                            <span className="text-slate-500 dark:text-slate-400">لا يوجد رابط فيديو</span>
-                          )}
-                        </div>
-                      )}
-                      {personalInfo.introVideo && (
-                        <div className="mt-3 rounded-lg overflow-hidden">
-                          {personalInfo.introVideo.includes('youtube.com') || personalInfo.introVideo.includes('youtu.be') ? (
-                            <iframe
-                              src={personalInfo.introVideo.includes('youtu.be') 
-                                ? `https://www.youtube.com/embed/${personalInfo.introVideo.split('/').pop()}`
-                                : `https://www.youtube.com/embed/${personalInfo.introVideo.split('v=')[1]?.split('&')[0]}`
-                              }
-                              className="w-full h-64 rounded-lg"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : personalInfo.introVideo.includes('vimeo.com') ? (
-                            <iframe
-                              src={`https://player.vimeo.com/video/${personalInfo.introVideo.split('/').pop()}`}
-                              className="w-full h-64 rounded-lg"
-                              allow="autoplay; fullscreen; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (
-                            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 text-center">
-                              <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">videocam</span>
-                              <p className="text-sm text-slate-500">معاينة الفيديو غير متاحة لهذا الرابط</p>
-                              <a href={personalInfo.introVideo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm mt-2 inline-block">
-                                فتح الرابط
-                              </a>
+                            <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center" style={{ aspectRatio: '16/9', minHeight: '200px' }}>
+                              <div className="text-center">
+                                <span className="material-symbols-outlined text-5xl text-slate-400 mb-2">play_circle</span>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">لا يوجد فيديو</p>
+                              </div>
                             </div>
                           )}
+                          {editingStates.about && !isPending && (
+                            <input
+                              type="url"
+                              value={personalInfo.introVideo}
+                              onChange={(e) => setPersonalInfo({ ...personalInfo, introVideo: e.target.value })}
+                              placeholder="رابط الفيديو"
+                              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 mt-2"
+                            />
+                          )}
                         </div>
-                      )}
+                        <div className="md:col-span-3">
+                          <h3 className="text-base font-semibold mb-2">فيديو تعريفي</h3>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            شاهد الفيديو التعريفي للتعرف على أسلوب التدريس والنهج المتبع في تعليم القرآن الكريم والتجويد
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    {isEditing && !isPending && (
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setIsEditing(false)}
-                          className="px-6 py-3 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                        >
-                          إلغاء
-                        </button>
-                        <button
-                          onClick={handleSavePersonalInfo}
-                          disabled={saving}
-                          className="bg-primary text-slate-900 font-bold py-3 px-6 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                        </button>
+                  </div>
+
+                  {/* Benefits Section */}
+                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('benefits')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ما الثمار التي سيجنيها الطالب؟</h2>
+                    {editingStates.benefits && !isPending ? (
+                      <textarea
+                        rows={5}
+                        value={personalInfo.teachingStyle}
+                        onChange={(e) => setPersonalInfo({ ...personalInfo, teachingStyle: e.target.value })}
+                        placeholder="اكتب وصفاً للفوائد والنتائج التي سيحصل عليها الطالب..."
+                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-slate-900 dark:text-slate-100"
+                      />
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                        {['ارتباط روحي بالقرآن', 'إتقان التلاوة والتجويد', 'تقدم ملحوظ في الحفظ'].map((benefit, index) => (
+                          <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
+                            <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{benefit}</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                              {personalInfo.teachingStyle || 'وصف الفائدة والنتائج المتوقعة...'}
+                            </p>
+                            <button className="text-primary hover:underline text-sm font-semibold">استعراض التفاصيل</button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
+
+                  {/* Session Content Section */}
+                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('sessionContent')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ماذا تتضمن الحصة؟</h2>
+                    {editingStates.sessionContent && !isPending ? (
+                      <textarea
+                        rows={5}
+                        value={personalInfo.sessionContent}
+                        onChange={(e) => setPersonalInfo({ ...personalInfo, sessionContent: e.target.value })}
+                        placeholder="اكتب وصفاً لما تتضمنه الحصة..."
+                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-slate-900 dark:text-slate-100"
+                      />
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                        {['مراجعة الحفظ السابق', 'تلقي الدرس الجديد', 'تطبيق عملي وتصحيح'].map((item, index) => (
+                          <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
+                            <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{item}</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                              {personalInfo.sessionContent || 'وصف محتوى الحصة والأنشطة...'}
+                            </p>
+                            <button className="text-primary hover:underline text-sm font-semibold">استعراض التفاصيل</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {(editingStates.about || editingStates.benefits || editingStates.sessionContent) && !isPending && (
+                    <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                      <button
+                        onClick={() => {
+                          if (editingStates.about) toggleEdit('about')
+                          if (editingStates.benefits) toggleEdit('benefits')
+                          if (editingStates.sessionContent) toggleEdit('sessionContent')
+                        }}
+                        className="px-6 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        إلغاء
+                      </button>
+                      <button
+                        onClick={handleSavePersonalInfo}
+                        disabled={saving}
+                        className="px-6 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                      >
+                        {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                      </button>
+                    </div>
+                  )}
                 </div>
+                )}
 
                 {/* Qualifications Section */}
+                {activeQuickTab === 'personal' && activeSubTab === 'qualifications' && (
                 <>
                   {/* Education */}
-                  <div id="qualifications" className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">school</span>
-                        <h3 className="text-xl font-bold">المؤهلات العلمية</h3>
+                  <div id="qualifications" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('qualifications')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">school</span>
+                        <h3 className="text-lg sm:text-xl font-bold">المؤهلات العلمية</h3>
                       </div>
-                      {isEditing && !isPending && (
+                      {editingStates.qualifications && !isPending && (
                         <button
                           onClick={handleAddQualification}
-                          className="text-sm font-bold text-primary flex items-center gap-1 hover:underline"
+                          className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
                         >
                           <span className="material-symbols-outlined text-sm">add</span> إضافة مؤهل
                         </button>
@@ -1056,7 +1301,7 @@ export default function TeacherProfilePage() {
                               <span className="material-symbols-outlined">history_edu</span>
                             </div>
                             <div className="flex-1 space-y-3">
-                              {isEditing && !isPending ? (
+                              {editingStates.qualifications && !isPending ? (
                                 <>
                                   <input
                                     type="text"
@@ -1065,20 +1310,20 @@ export default function TeacherProfilePage() {
                                     placeholder="اسم المؤهل"
                                     className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
                                   />
-                                  <div className="grid grid-cols-2 gap-3">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <input
                                       type="text"
                                       value={qual.institution || ''}
                                       onChange={(e) => handleUpdateQualification(index, 'institution', e.target.value)}
                                       placeholder="المؤسسة"
-                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
                                     />
                                     <input
                                       type="text"
                                       value={qual.year || ''}
                                       onChange={(e) => handleUpdateQualification(index, 'year', e.target.value)}
                                       placeholder="السنة"
-                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
                                     />
                                   </div>
                                   <button
@@ -1104,7 +1349,7 @@ export default function TeacherProfilePage() {
                         <p className="text-slate-500 text-sm">لا توجد مؤهلات مسجلة</p>
                       )}
                     </div>
-                    {isEditing && !isPending && editableQualifications.length > 0 && (
+                    {editingStates.qualifications && !isPending && editableQualifications.length > 0 && (
                       <div className="mt-6 flex justify-end">
                         <button
                           onClick={handleSaveQualifications}
@@ -1118,22 +1363,31 @@ export default function TeacherProfilePage() {
                   </div>
 
                   {/* Ijazahs */}
-                  <div className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">workspace_premium</span>
-                        <h3 className="text-xl font-bold">الإجازات والسند</h3>
+                  <div className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('ijazahs')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">workspace_premium</span>
+                        <h3 className="text-lg sm:text-xl font-bold">الإجازات والسند</h3>
                       </div>
-                      {isEditing && !isPending && (
+                      {editingStates.ijazahs && !isPending && (
                         <button
                           onClick={handleAddIjazah}
-                          className="text-sm font-bold text-primary flex items-center gap-1 hover:underline"
+                          className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
                         >
                           <span className="material-symbols-outlined text-sm">add</span> إضافة إجازة
                         </button>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       {editableIjazahs.length > 0 ? (
                         editableIjazahs.map((ijazah, index) => (
                           <div
@@ -1145,7 +1399,7 @@ export default function TeacherProfilePage() {
                               style={{ backgroundImage: ijazah.image ? `url('${ijazah.image}')` : 'none', backgroundColor: '#f3f4f6' }}
                             />
                             <div className="p-4 space-y-3">
-                              {isEditing && !isPending ? (
+                              {editingStates.ijazahs && !isPending ? (
                                 <>
                                   <input
                                     type="text"
@@ -1189,7 +1443,7 @@ export default function TeacherProfilePage() {
                         <p className="text-slate-500 text-sm">لا توجد إجازات مسجلة</p>
                       )}
                     </div>
-                    {isEditing && !isPending && editableIjazahs.length > 0 && (
+                    {editingStates.ijazahs && !isPending && editableIjazahs.length > 0 && (
                       <div className="mt-6 flex justify-end">
                         <button
                           onClick={handleSaveIjazahs}
@@ -1202,20 +1456,31 @@ export default function TeacherProfilePage() {
                     )}
                   </div>
                 </>
+                )}
 
                 {/* Availability Section */}
-                <div id="availability" className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">event_available</span>
-                      <h3 className="text-xl font-bold">جدول التوفر الأسبوعي</h3>
+                {activeQuickTab === 'personal' && activeSubTab === 'availability' && (
+                <div id="availability" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                  {isApproved && !isPending && (
+                    <button
+                      onClick={() => toggleEdit('availability')}
+                      className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      title="تعديل"
+                    >
+                      <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                    </button>
+                  )}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">event_available</span>
+                      <h3 className="text-lg sm:text-xl font-bold">جدول التوفر الأسبوعي</h3>
                     </div>
                     <div className="flex gap-2">
-                      <button className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-bold">الأسبوع الحالي</button>
-                      <button className="px-3 py-1 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">التالي</button>
+                      <button className="px-2 sm:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">الأسبوع الحالي</button>
+                      <button className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors whitespace-nowrap">التالي</button>
                     </div>
                   </div>
-                  <div className="mb-4 flex items-center gap-4 text-sm">
+                  <div className="mb-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 bg-primary/20 rounded border border-primary/30"></div>
                       <span className="text-slate-600 dark:text-slate-400">متاح</span>
@@ -1229,14 +1494,14 @@ export default function TeacherProfilePage() {
                       <span className="text-slate-600 dark:text-slate-400">غير متاح</span>
                     </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[800px] grid grid-cols-8 border-t border-slate-100 dark:border-slate-800">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="min-w-[600px] sm:min-w-[800px] grid grid-cols-8 border-t border-slate-100 dark:border-slate-800">
                       {/* Header Row */}
-                      <div className="p-3 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">الوقت</div>
+                      <div className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">الوقت</div>
                       {days.map((day) => (
                         <div
                           key={day}
-                          className="p-3 border-l border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-center bg-slate-50 dark:bg-slate-800/50"
+                          className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-center bg-slate-50 dark:bg-slate-800/50"
                         >
                           {day}
                         </div>
@@ -1244,7 +1509,7 @@ export default function TeacherProfilePage() {
                       {/* Time Rows */}
                       {timeSlots.map((time, timeIndex) => (
                         <React.Fragment key={timeIndex}>
-                          <div className="p-2 border-l border-b border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                          <div className="p-1.5 sm:p-2 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
                             {time}
                           </div>
                           {days.map((day, dayIndex) => {
@@ -1253,9 +1518,9 @@ export default function TeacherProfilePage() {
                               <div key={`${dayIndex}-${timeIndex}`} className="p-1 border-l border-b border-slate-100 dark:border-slate-800">
                                 {status === 'available' && (
                                   <div
-                                    onClick={() => isEditing && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
+                                    onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
                                     className={`h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[35px] flex items-center justify-center transition-colors ${
-                                      isEditing && !isPending ? 'cursor-pointer hover:bg-primary/30' : ''
+                                      editingStates.availability && !isPending ? 'cursor-pointer hover:bg-primary/30' : ''
                                     }`}
                                   >
                                     <span className="text-[10px] font-bold text-primary">متاح</span>
@@ -1268,9 +1533,9 @@ export default function TeacherProfilePage() {
                                 )}
                                 {!status && (
                                   <div
-                                    onClick={() => isEditing && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
+                                    onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
                                     className={`h-full w-full min-h-[35px] ${
-                                      isEditing && !isPending ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded' : ''
+                                      editingStates.availability && !isPending ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded' : ''
                                     }`}
                                   />
                                 )}
@@ -1281,7 +1546,7 @@ export default function TeacherProfilePage() {
                       ))}
                     </div>
                   </div>
-                  {isEditing && !isPending && (
+                  {editingStates.availability && !isPending && (
                     <div className="mt-6 flex justify-end">
                       <button
                         onClick={handleSaveAvailability}
@@ -1300,74 +1565,86 @@ export default function TeacherProfilePage() {
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* Reviews Section */}
-                <div id="reviews" className="bg-white dark:bg-background-dark rounded-xl p-8 border border-primary/10 shadow-sm">
-                    <div className="flex items-center gap-3 mb-8">
-                      <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">reviews</span>
-                      <h3 className="text-xl font-bold">آخر التقييمات</h3>
+                {activeQuickTab === 'personal' && activeSubTab === 'reviews' && (
+                <div id="reviews" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                    {isApproved && !isPending && (
+                      <button
+                        onClick={() => toggleEdit('reviews')}
+                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        title="تعديل"
+                      >
+                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                      </button>
+                    )}
+                    <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+                      <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">reviews</span>
+                      <h3 className="text-lg sm:text-xl font-bold">آخر التقييمات</h3>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {reviews.length > 0 ? (
                         <>
                           {reviews.map((review, index) => (
-                            <div key={index} className="p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                            <div key={index} className="p-4 sm:p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
                                   <div
-                                    className="h-10 w-10 rounded-full bg-slate-200 bg-cover bg-center"
+                                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-slate-200 bg-cover bg-center shrink-0"
                                     style={{ backgroundImage: `url('${review.avatar}')` }}
                                   />
-                                  <div>
-                                    <h5 className="text-sm font-bold">{review.name}</h5>
-                                    <p className="text-xs text-slate-400">{review.time}</p>
+                                  <div className="min-w-0 flex-1">
+                                    <h5 className="text-xs sm:text-sm font-bold truncate">{review.name}</h5>
+                                    <p className="text-[10px] sm:text-xs text-slate-400">{review.time}</p>
                                   </div>
                                 </div>
-                                <div className="flex text-primary">
+                                <div className="flex text-primary shrink-0">
                                   {Array.from({ length: review.rating }).map((_, i) => (
-                                    <span key={i} className="material-symbols-outlined text-sm filled">star</span>
+                                    <span key={i} className="material-symbols-outlined text-xs sm:text-sm filled">star</span>
                                   ))}
                                 </div>
                               </div>
-                              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{review.comment}</p>
+                              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{review.comment}</p>
                             </div>
                           ))}
-                          <button className="w-full text-center py-2 text-primary font-bold text-sm hover:underline">
+                          <button className="w-full text-center py-2 text-primary font-bold text-xs sm:text-sm hover:underline">
                             مشاهدة جميع التقييمات
                           </button>
                         </>
                       ) : (
-                        <p className="text-slate-500 text-sm text-center py-8">لا توجد تقييمات بعد</p>
+                        <p className="text-slate-500 text-xs sm:text-sm text-center py-6 sm:py-8">لا توجد تقييمات بعد</p>
                       )}
                     </div>
                 </div>
+                )}
 
                 {/* Wallet Section - Only show when activeQuickTab is 'wallet' */}
                 {activeQuickTab === 'wallet' && (
                   <div id="wallet" className="space-y-6">
                     {/* Balance Card */}
-                    <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-primary/5">
-                      <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                      <div className="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                    <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-primary/5">
+                      <div className="absolute top-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                      <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 relative z-10">
                         <div className="flex flex-col items-center md:items-start">
-                          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">إجمالي الأرباح</p>
-                          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white flex items-baseline gap-2">
-                            {walletBalance.toFixed(2)} <span className="text-xl font-bold text-primary">{walletCurrency === 'SAR' ? 'ر.س' : walletCurrency === 'USD' ? '$' : 'ج.م'}</span>
+                          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium mb-1">إجمالي الأرباح</p>
+                          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white flex flex-wrap items-baseline gap-2 justify-center md:justify-start">
+                            <span className="break-all">{walletBalance.toFixed(2)}</span> <span className="text-lg sm:text-xl font-bold text-primary">{walletCurrency === 'SAR' ? 'ر.س' : walletCurrency === 'USD' ? '$' : 'ج.م'}</span>
                           </h1>
                         </div>
                         <button
                           onClick={() => setShowWithdrawalForm(true)}
-                          className="flex-1 md:flex-none min-w-[140px] px-6 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2"
+                          className="w-full md:w-auto flex-1 md:flex-none min-w-[140px] px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
                         >
-                          <span className="material-symbols-outlined text-lg">account_balance</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">account_balance</span>
                           سحب رصيدي
                         </button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                       {/* Bank Accounts */}
-                      <div className="flex flex-col gap-6 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-primary/5">
+                      <div className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
                         <div className="flex items-center gap-2">
                           <span className="material-symbols-outlined text-primary">account_balance</span>
                           <h3 className="text-lg font-bold">الحسابات البنكية لاستلام الأرباح</h3>
@@ -1393,10 +1670,10 @@ export default function TeacherProfilePage() {
                       </div>
 
                       {/* Withdrawal Form */}
-                      <div className="flex flex-col gap-6 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-primary/5">
+                      <div className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
                         <div className="flex items-center gap-2">
                           <span className="material-symbols-outlined text-primary">payments</span>
-                          <h3 className="text-lg font-bold">طلب سحب</h3>
+                          <h3 className="text-lg font-bold text-center">طلب سحب</h3>
                         </div>
                         <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl flex justify-between items-center">
                           <div>
@@ -1470,7 +1747,7 @@ export default function TeacherProfilePage() {
                         ) : (
                           <button
                             onClick={() => setShowWithdrawalForm(true)}
-                            className="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors"
+                            className="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors text-center"
                           >
                             طلب سحب جديد
                           </button>
@@ -1479,61 +1756,63 @@ export default function TeacherProfilePage() {
                     </div>
 
                     {/* Transactions Table */}
-                    <div className="flex flex-col gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-primary/5">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-lg font-bold">سجل الأرباح والمدفوعات</h3>
-                        <button className="text-primary text-sm font-bold hover:underline">عرض الكل</button>
+                    <div className="flex flex-col gap-4 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                        <h3 className="text-base sm:text-lg font-bold">سجل الأرباح والمدفوعات</h3>
+                        <button className="text-primary text-xs sm:text-sm font-bold hover:underline">عرض الكل</button>
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-right">
-                          <thead>
-                            <tr className="text-slate-400 dark:text-slate-500 text-sm border-b border-slate-100 dark:border-slate-700">
-                              <th className="pb-4 font-medium">التاريخ</th>
-                              <th className="pb-4 font-medium">النوع</th>
-                              <th className="pb-4 font-medium">الحالة</th>
-                              <th className="pb-4 font-medium">المبلغ</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
-                            {walletTransactions.length > 0 ? (
-                              walletTransactions.map((transaction) => (
-                                <tr key={transaction.id} className="group hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                  <td className="py-4 text-sm font-medium">{new Date(transaction.createdAt?.toDate?.() || transaction.createdAt).toLocaleDateString('ar-SA')}</td>
-                                  <td className="py-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`material-symbols-outlined text-base ${
-                                        transaction.type === 'earning' ? 'text-green-500' : 'text-slate-400'
+                      <div className="overflow-x-auto -mx-4 sm:mx-0">
+                        <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                          <table className="w-full text-right min-w-[600px]">
+                            <thead>
+                              <tr className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm border-b border-slate-100 dark:border-slate-700">
+                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">التاريخ</th>
+                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">النوع</th>
+                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">الحالة</th>
+                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">المبلغ</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
+                              {walletTransactions.length > 0 ? (
+                                walletTransactions.map((transaction) => (
+                                  <tr key={transaction.id} className="group hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm font-medium whitespace-nowrap">{new Date(transaction.createdAt?.toDate?.() || transaction.createdAt).toLocaleDateString('ar-SA')}</td>
+                                    <td className="py-3 sm:py-4 px-2 sm:px-4">
+                                      <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <span className={`material-symbols-outlined text-sm sm:text-base ${
+                                          transaction.type === 'earning' ? 'text-green-500' : 'text-slate-400'
+                                        }`}>
+                                          {transaction.type === 'earning' ? 'add_circle' : 'remove_circle'}
+                                        </span>
+                                        <span className="text-xs sm:text-sm font-bold truncate max-w-[120px] sm:max-w-none">{transaction.description}</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 sm:py-4 px-2 sm:px-4">
+                                      <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap ${
+                                        transaction.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                                        transaction.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                       }`}>
-                                        {transaction.type === 'earning' ? 'add_circle' : 'remove_circle'}
+                                        {transaction.status === 'completed' ? 'مكتمل' : transaction.status === 'pending' ? 'قيد المعالجة' : 'مرفوض'}
                                       </span>
-                                      <span className="text-sm font-bold">{transaction.description}</span>
-                                    </div>
-                                  </td>
-                                  <td className="py-4">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                      transaction.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                                      transaction.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                                      'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                    </td>
+                                    <td className={`py-3 sm:py-4 px-2 sm:px-4 font-bold text-xs sm:text-sm whitespace-nowrap ${
+                                      transaction.type === 'earning' ? 'text-green-600 dark:text-green-400' : 'text-slate-900 dark:text-white'
                                     }`}>
-                                      {transaction.status === 'completed' ? 'مكتمل' : transaction.status === 'pending' ? 'قيد المعالجة' : 'مرفوض'}
-                                    </span>
-                                  </td>
-                                  <td className={`py-4 font-bold ${
-                                    transaction.type === 'earning' ? 'text-green-600 dark:text-green-400' : 'text-slate-900 dark:text-white'
-                                  }`}>
-                                    {transaction.type === 'earning' ? '+' : '-'}{transaction.amount.toFixed(2)} {transaction.currency === 'SAR' ? 'ر.س' : transaction.currency === 'USD' ? '$' : 'ج.م'}
+                                      {transaction.type === 'earning' ? '+' : '-'}{transaction.amount.toFixed(2)} {transaction.currency === 'SAR' ? 'ر.س' : transaction.currency === 'USD' ? '$' : 'ج.م'}
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan={4} className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                                    لا توجد معاملات بعد
                                   </td>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={4} className="py-8 text-center text-slate-500 dark:text-slate-400">
-                                  لا توجد معاملات بعد
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1543,14 +1822,14 @@ export default function TeacherProfilePage() {
                 {activeQuickTab === 'support' && (
                   <div id="support" className="space-y-8">
                     {/* Search Section */}
-                    <section className="relative rounded-3xl overflow-hidden bg-primary/10 p-8 md:p-12 text-center border border-primary/10">
+                    <section className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-primary/10 p-6 sm:p-8 md:p-12 text-center border border-primary/10">
                       <div className="relative z-10 max-w-xl mx-auto">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-slate-900 dark:text-slate-100">كيف يمكننا مساعدتك اليوم؟</h2>
-                        <p className="text-slate-600 dark:text-slate-400 mb-8">ابحث في مقالات المساعدة أو تصفح المواضيع الشائعة</p>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-slate-900 dark:text-slate-100">كيف يمكننا مساعدتك اليوم؟</h2>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-6 sm:mb-8">ابحث في مقالات المساعدة أو تصفح المواضيع الشائعة</p>
                         <div className="relative group">
-                          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary group-focus-within:text-primary">search</span>
+                          <span className="material-symbols-outlined absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-primary group-focus-within:text-primary text-lg sm:text-xl">search</span>
                           <input
-                            className="w-full h-14 pr-12 pl-4 rounded-2xl border-none ring-1 ring-primary/20 focus:ring-2 focus:ring-primary bg-background-light dark:bg-background-dark shadow-sm"
+                            className="w-full h-12 sm:h-14 pr-10 sm:pr-12 pl-3 sm:pl-4 rounded-xl sm:rounded-2xl border-none ring-1 ring-primary/20 focus:ring-2 focus:ring-primary bg-background-light dark:bg-background-dark shadow-sm text-sm sm:text-base"
                             placeholder="ابحث عن دروس، فواتير، أو مشاكل تقنية..."
                             type="text"
                           />
@@ -1558,12 +1837,12 @@ export default function TeacherProfilePage() {
                       </div>
                     </section>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                       {/* New Ticket Form */}
-                      <section className="space-y-6">
+                      <section className="space-y-4 sm:space-y-6">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="material-symbols-outlined text-primary">confirmation_number</span>
-                          <h2 className="text-xl font-bold">فتح تذكرة دعم جديدة</h2>
+                          <span className="material-symbols-outlined text-primary text-lg sm:text-xl">confirmation_number</span>
+                          <h2 className="text-lg sm:text-xl font-bold">فتح تذكرة دعم جديدة</h2>
                         </div>
                         {showNewTicketForm ? (
                           <form onSubmit={handleCreateTicket} className="space-y-4 bg-background-light dark:bg-background-dark p-6 rounded-2xl border border-primary/10 shadow-sm">
@@ -1642,35 +1921,35 @@ export default function TeacherProfilePage() {
                       </section>
 
                       {/* Recent Tickets */}
-                      <section className="space-y-6">
-                        <div className="flex items-center justify-between mb-2">
+                      <section className="space-y-4 sm:space-y-6">
+                        <div className="flex items-center justify-between mb-2 gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">history</span>
-                            <h2 className="text-xl font-bold">التذاكر الأخيرة</h2>
+                            <span className="material-symbols-outlined text-primary text-lg sm:text-xl">history</span>
+                            <h2 className="text-lg sm:text-xl font-bold">التذاكر الأخيرة</h2>
                           </div>
-                          <a className="text-sm text-primary font-medium hover:underline" href="#">عرض الكل</a>
+                          <a className="text-xs sm:text-sm text-primary font-medium hover:underline whitespace-nowrap" href="#">عرض الكل</a>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {supportTickets.length > 0 ? (
                             supportTickets.map((ticket) => (
                               <div
                                 key={ticket.id}
                                 onClick={() => setSelectedTicket(ticket)}
-                                className="p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-2xl flex items-start gap-4 hover:shadow-md transition-shadow cursor-pointer"
+                                className="p-3 sm:p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-xl sm:rounded-2xl flex items-start gap-3 sm:gap-4 hover:shadow-md transition-shadow cursor-pointer"
                               >
-                                <div className={`size-10 rounded-full flex items-center justify-center ${
+                                <div className={`size-8 sm:size-10 rounded-full flex items-center justify-center shrink-0 ${
                                   ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
                                   ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
                                   'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
                                 }`}>
-                                  <span className="material-symbols-outlined">
+                                  <span className="material-symbols-outlined text-sm sm:text-base">
                                     {ticket.status === 'open' ? 'hourglass_empty' : ticket.status === 'resolved' ? 'check_circle' : 'schedule'}
                                   </span>
                                 </div>
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-start mb-1">
-                                    <h3 className="font-bold text-slate-800 dark:text-slate-200">{ticket.subject}</h3>
-                                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start gap-1 sm:gap-0 mb-1">
+                                    <h3 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-words">{ticket.subject}</h3>
+                                    <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold whitespace-nowrap shrink-0 ${
                                       ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
                                       ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
                                       'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
@@ -1678,15 +1957,15 @@ export default function TeacherProfilePage() {
                                       {ticket.status === 'open' ? 'قيد الانتظار' : ticket.status === 'resolved' ? 'تم الحل' : 'قيد المعالجة'}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-slate-500 mb-2">رقم التذكرة: #{ticket.id.slice(0, 8)}</p>
-                                  <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-1">{ticket.message}</p>
+                                  <p className="text-[10px] sm:text-xs text-slate-500 mb-1 sm:mb-2">رقم التذكرة: #{ticket.id.slice(0, 8)}</p>
+                                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 sm:line-clamp-1">{ticket.message}</p>
                                 </div>
                               </div>
                             ))
                           ) : (
-                            <div className="p-8 border-2 border-dotted border-primary/10 rounded-2xl flex flex-col items-center justify-center text-center opacity-60">
-                              <span className="material-symbols-outlined text-4xl text-primary/40 mb-2">contact_support</span>
-                              <p className="text-sm">لا توجد تذاكر للعرض</p>
+                            <div className="p-6 sm:p-8 border-2 border-dotted border-primary/10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center text-center opacity-60">
+                              <span className="material-symbols-outlined text-3xl sm:text-4xl text-primary/40 mb-2">contact_support</span>
+                              <p className="text-xs sm:text-sm">لا توجد تذاكر للعرض</p>
                             </div>
                           )}
                         </div>
@@ -1695,21 +1974,21 @@ export default function TeacherProfilePage() {
 
                     {/* Ticket Details Modal */}
                     {selectedTicket && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                        <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-                          <div className="px-8 pt-8 pb-4 flex justify-between items-start">
-                            <div>
-                              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">{selectedTicket.subject}</h2>
-                              <p className="text-slate-500 dark:text-slate-400 text-sm">{selectedTicket.category}</p>
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700 max-h-[90vh]">
+                          <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-3 sm:pb-4 flex justify-between items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1 break-words">{selectedTicket.subject}</h2>
+                              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">{selectedTicket.category}</p>
                             </div>
                             <button
                               onClick={() => setSelectedTicket(null)}
-                              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+                              className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors shrink-0"
                             >
-                              <span className="material-symbols-outlined text-slate-500">close</span>
+                              <span className="material-symbols-outlined text-slate-500 text-lg sm:text-xl">close</span>
                             </button>
                           </div>
-                          <div className="px-8 py-4 max-h-[400px] overflow-y-auto">
+                          <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 max-h-[calc(90vh-120px)] overflow-y-auto">
                             <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
                               <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedTicket.message}</p>
                             </div>
@@ -1719,8 +1998,8 @@ export default function TeacherProfilePage() {
                                 {selectedTicket.replies.map((reply: any) => (
                                   <div
                                     key={reply.id}
-                                    className={`p-4 rounded-lg ${
-                                      reply.sender === 'user' ? 'bg-primary/10 ml-8' : 'bg-slate-100 dark:bg-slate-700 mr-8'
+                                    className={`p-3 sm:p-4 rounded-lg ${
+                                      reply.sender === 'user' ? 'bg-primary/10 ml-4 sm:ml-8' : 'bg-slate-100 dark:bg-slate-700 mr-4 sm:mr-8'
                                     }`}
                                   >
                                     <div className="flex items-center justify-between mb-2">
@@ -1733,18 +2012,18 @@ export default function TeacherProfilePage() {
                               </div>
                             )}
                             {selectedTicket.status !== 'closed' && (
-                              <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                              <div className="border-t border-slate-200 dark:border-slate-700 pt-3 sm:pt-4 mt-3 sm:mt-4">
                                 <textarea
                                   value={replyMessage}
                                   onChange={(e) => setReplyMessage(e.target.value)}
                                   placeholder="اكتب ردك هنا..."
                                   rows={3}
-                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 mb-3"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-3"
                                 />
                                 <button
                                   onClick={handleSendReply}
                                   disabled={!replyMessage.trim() || saving}
-                                  className="bg-primary text-slate-900 font-bold py-2 px-6 rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                                  className="w-full sm:w-auto bg-primary text-slate-900 font-bold py-2 px-4 sm:px-6 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 text-sm sm:text-base"
                                 >
                                   {saving ? 'جاري الإرسال...' : 'إرسال الرد'}
                                 </button>

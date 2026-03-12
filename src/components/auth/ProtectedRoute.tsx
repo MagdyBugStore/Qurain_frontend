@@ -31,11 +31,10 @@ export default function ProtectedRoute({
     if (authLoading || profileLoading) {
       return;
     }
-
-    // If user is not authenticated, redirect to login
-    // إذا لم يكن المستخدم مسجلاً، إعادة التوجيه إلى صفحة تسجيل الدخول
+    // If user is not authenticated, redirect to personal-info page
+    // إذا لم يكن المستخدم مسجلاً، إعادة التوجيه إلى صفحة المعلومات الشخصية
     if (!user) {
-      navigate('/login', { 
+      navigate('/personal-info', { 
         state: { from: location.pathname },
         replace: true 
       });

@@ -31,7 +31,10 @@ export default function AccountTypeSelection({ onSelect }: AccountTypeSelectionP
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark font-body">
       <header className="flex items-center justify-between whitespace-nowrap bg-transparent px-6 md:px-20 py-6 sticky top-0 z-50">
-        <div className="flex items-center gap-3">
+        <div 
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <div className="size-10 flex items-center justify-center rounded-lg bg-primary text-white">
             <span className="material-symbols-outlined text-2xl">school</span>
           </div>

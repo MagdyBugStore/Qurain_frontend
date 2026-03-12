@@ -68,6 +68,7 @@ export default function TeacherApplicationPage() {
     } else if (currentStep === 'step2') {
       setCurrentStep('step1')
     } else if (currentStep === 'step1') {
+      console.log('redirecting to personal-info');
       navigate('/personal-info')
     }
   }

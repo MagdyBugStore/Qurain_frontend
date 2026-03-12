@@ -14,10 +14,38 @@ export default function ProfilePageClient() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login')
+      navigate('/personal-info')
       return
     }
   }, [user, loading, navigate])
+
+  // Check if account type is missing and redirect
+  // التحقق من وجود accountType وإعادة التوجيه إذا لم يكن موجوداً
+  useEffect(() => {
+    // Wait for loading to complete
+    if (loading) return;
+    
+    // If no user, redirect already handled in first useEffect
+    if (!user) return;
+    
+    const targetUserId = id || user?.uid
+    const isCurrentUser = targetUserId === user?.uid
+    
+    // Only redirect if viewing own profile and accountType is missing
+    // إعادة التوجيه فقط إذا كان المستخدم يشاهد ملفه الشخصي و accountType غير موجود
+    if (isCurrentUser) {
+      // If userProfile exists but accountType is null/undefined, redirect
+      // إذا كان userProfile موجوداً ولكن accountType null أو undefined، إعادة التوجيه
+      if (userProfile && userProfile.accountType === null) {
+        navigate('/personal-info', { replace: true })
+        return
+      }
+      
+      // If userProfile doesn't exist yet, wait for it to load
+      // إذا لم يكن userProfile موجوداً بعد، انتظر تحميله
+      // (This will be handled by the render logic below)
+    }
+  }, [user, userProfile, loading, id, navigate])
 
   // Show loading state
   if (loading) {
@@ -42,6 +70,11 @@ export default function ProfilePageClient() {
 
   // If viewing own profile, check account type
   if (isCurrentUser) {
+    // If account type is not set, show loading (redirect will happen in useEffect)
+    if (!userProfile?.accountType) {
+      return null
+    }
+
     // Check user account type and render appropriate profile
     if (userProfile?.accountType === 'teacher') {
       return <TeacherProfilePage />
@@ -49,12 +82,6 @@ export default function ProfilePageClient() {
 
     if (userProfile?.accountType === 'student') {
       return <StudentProfilePage />
-    }
-
-    // If account type is not set, redirect to personal-info
-    if (!userProfile?.accountType) {
-      navigate('/personal-info')
-      return null
     }
   } else {
     // Viewing another user's profile - show teacher detail page
