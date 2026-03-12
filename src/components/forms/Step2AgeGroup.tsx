@@ -65,7 +65,7 @@ export default function Step2AgeGroup({ onNext, onBack: _onBack }: Step2AgeGroup
       <div className="pt-4">
         <button
           onClick={onNext}
-          className="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"
+          className="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-[0.98] text-center"
         >
           الاستمرار للخطوة التالية
         </button>

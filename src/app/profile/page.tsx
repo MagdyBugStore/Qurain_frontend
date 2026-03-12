@@ -3,17 +3,26 @@
 import React, { useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import TeacherProfilePage from '../teacher-profile/page'
-import StudentProfilePage from '../student-profile/page'
 
+/**
+ * Profile Page (without ID)
+ * Redirects to /profile/:id using current user's ID
+ * This eliminates code duplication - all profile logic is in ProfilePageClient
+ */
 export default function ProfilePage() {
-  const { user, userProfile, loading } = useAuth()
+  const { user, loading } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login')
+      navigate('/login', { replace: true })
       return
+    }
+
+    // If user exists, redirect to profile with user ID
+    // إذا كان المستخدم موجوداً، إعادة التوجيه إلى الملف الشخصي مع معرف المستخدم
+    if (user?.uid) {
+      navigate(`/profile/${user.uid}`, { replace: true })
     }
   }, [user, loading, navigate])
 
@@ -34,33 +43,7 @@ export default function ProfilePage() {
     return null
   }
 
-  // Check user account type and render appropriate profile
-  if (userProfile?.accountType === 'teacher') {
-    return <TeacherProfilePage />
-  }
-
-  if (userProfile?.accountType === 'student') {
-    return <StudentProfilePage />
-  }
-
-  // If account type is not set, redirect to personal-info
-  if (!userProfile?.accountType) {
-    navigate('/personal-info')
-    return null
-  }
-
-  // Fallback: show message if account type is unknown
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <p className="text-slate-600 dark:text-slate-400">يرجى إكمال ملفك الشخصي أولاً</p>
-        <button
-          onClick={() => navigate('/personal-info')}
-          className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
-        >
-          إكمال الملف الشخصي
-        </button>
-      </div>
-    </div>
-  )
+  // This should not render - redirect happens in useEffect
+  // هذا لا يجب أن يظهر - إعادة التوجيه تحدث في useEffect
+  return null
 }

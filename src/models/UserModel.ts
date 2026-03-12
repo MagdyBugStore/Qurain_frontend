@@ -21,8 +21,7 @@ export interface UserProfile {
   goals?: string[]; // الأهداف التعليمية
   ageGroup?: string | null; // الفئة العمرية
   level?: string | null; // المستوى
-  budget?: number; // الميزانية
-  learningGoal?: string | null; // الهدف التعليمي
+  learningGoal?: string[]; // الأهداف التعليمية (يمكن اختيار أكثر من هدف)
   
   // Profile Completion Status - حالة اكتمال الملف
   completed?: boolean; // هل تم اكتمال الملف
@@ -53,8 +52,7 @@ export function isProfileComplete(profile: UserProfile | null): boolean {
       profile.goals &&
       profile.goals.length > 0 &&
       profile.ageGroup &&
-      profile.level &&
-      profile.budget !== undefined
+      profile.level
     );
   }
   

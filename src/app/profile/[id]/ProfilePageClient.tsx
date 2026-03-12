@@ -14,7 +14,7 @@ export default function ProfilePageClient() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/personal-info')
+      navigate('/login', { replace: true })
       return
     }
   }, [user, loading, navigate])
@@ -36,7 +36,7 @@ export default function ProfilePageClient() {
     if (isCurrentUser) {
       // If userProfile exists but accountType is null/undefined, redirect
       // إذا كان userProfile موجوداً ولكن accountType null أو undefined، إعادة التوجيه
-      if (userProfile && userProfile.accountType === null) {
+      if (userProfile && (userProfile.accountType === null || userProfile.accountType === undefined)) {
         navigate('/personal-info', { replace: true })
         return
       }
@@ -67,6 +67,7 @@ export default function ProfilePageClient() {
   // If ID is provided and doesn't match current user, fetch that user's profile
   const targetUserId = id || user?.uid
   const isCurrentUser = targetUserId === user?.uid
+
 
   // If viewing own profile, check account type
   if (isCurrentUser) {

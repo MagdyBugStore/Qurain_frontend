@@ -90,15 +90,7 @@ export default function Step3Level({ onNext, onBack }: Step3LevelProps) {
           المتابعة للخطوة التالية
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors font-bold py-2 flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            رجوع للخطوة السابقة
-          </button>
-        )}
+        
       </div>
     </div>
   )

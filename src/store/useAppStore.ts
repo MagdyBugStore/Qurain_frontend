@@ -39,8 +39,7 @@ interface AppState {
     goals: string[]
     ageGroup: string | null
     level: string | null
-    budget: number
-    learningGoal: string | null
+    learningGoal: string[]
   }
   updateFormData: (data: Partial<AppState['formData']>) => void
   resetFormData: () => void
@@ -89,8 +88,7 @@ export const useAppStore = create<AppState>((set) => ({
     goals: [],
     ageGroup: null,
     level: null,
-    budget: 250,
-    learningGoal: null,
+    learningGoal: [],
   },
   updateFormData: (data) => set((state) => ({
     formData: { ...state.formData, ...data }
@@ -100,8 +98,7 @@ export const useAppStore = create<AppState>((set) => ({
       goals: [],
       ageGroup: null,
       level: null,
-      budget: 250,
-      learningGoal: null,
+      learningGoal: [],
     }
   }),
   

@@ -23,28 +23,41 @@ export default function PersonalInfoPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login')
+      navigate('/login', { replace: true })
+      return
+    }
+
+    // If accountType is missing, stay on this page to let user select it
+    // إذا كان accountType مفقوداً، ابق في هذه الصفحة للسماح للمستخدم باختياره
+    if (!userProfile?.accountType) {
       return
     }
 
     // If profile is already complete, redirect to profile page
+    // إذا كان الملف مكتملاً بالفعل، إعادة التوجيه إلى صفحة الملف الشخصي
     if (userProfile && isProfileComplete(userProfile)) {
-      if (user?.uid) {
-        navigate(`/profile/${user.uid}`)
-      } else {
-        navigate('/profile')
-      }
-      return
+      // Use setTimeout to avoid redirect loop
+      // استخدام setTimeout لتجنب حلقة إعادة التوجيه
+      const timer = setTimeout(() => {
+        if (user?.uid) {
+          navigate(`/profile/${user.uid}`, { replace: true })
+        } else {
+          navigate('/profile', { replace: true })
+        }
+      }, 100)
+      return () => clearTimeout(timer)
     }
 
     // Check if user has already selected account type
-    if (userProfile?.accountType) {
+    // التحقق من أن المستخدم قد اختار نوع الحساب بالفعل
+    if (userProfile.accountType) {
       setAccountType(userProfile.accountType as AccountType)
       if (userProfile.accountType === 'student') {
         setCurrentStep('step1')
       } else {
         // Teacher flow - redirect to teacher application
-        navigate('/teacher-application')
+        // تدفق المعلم - إعادة التوجيه إلى صفحة طلب المعلم
+        navigate('/teacher-application', { replace: true })
       }
     }
   }, [user, userProfile, navigate])
@@ -126,13 +139,13 @@ export default function PersonalInfoPage() {
   const getStepNumber = () => {
     if (currentStep === 'step1') return 1
     if (currentStep === 'step2') return 2
-    if (currentStep === 'step3') return 2
-    if (currentStep === 'step4') return 3
+    if (currentStep === 'step3') return 3
+    if (currentStep === 'step4') return 4
     return 0
   }
 
   const getTotalSteps = () => {
-    return 3
+    return 4
   }
 
   const getProgressPercentage = () => {

@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { COLLECTIONS } from '../../../constants/firebaseCollections';
+import { TEACHER_APPLICATION_STATUS } from '../../../constants/status';
 import type { TeacherApplication } from '../../../shared/types/teacher.types';
 
 export interface UserData {

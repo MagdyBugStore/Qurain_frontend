@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f4c025",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#221e10",
+                    },
+                    fontFamily: {
+                        "display": ["Cairo", "Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <!-- Main Container -->
+    <div class="layout-container flex flex-col min-h-screen">
+        <!-- Top Navigation -->
+        <header
+            class="sticky top-0 z-50 bg-white dark:bg-background-dark border-b border-primary/10 px-4 md:px-20 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-background-dark">
+                        <span class="material-symbols-outlined text-3xl font-bold">menu_book</span>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-tight">رتّل</h1>
+                </div>
+                <nav class="hidden md:flex gap-6">
+                    <a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">جدول حصصي</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors" href="#">المعلمون</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors" href="#">التقارير</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="flex items-center gap-3 border-r border-slate-200 dark:border-slate-700 pr-4 mr-2">
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-bold leading-none">أحمد محمد</p>
+                        <p class="text-xs text-slate-500">طالب مجتهد</p>
+                    </div>
+                    <div class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary"
+                        data-alt="Student profile avatar placeholder">
+                        <img alt="Avatar" data-alt="Clear profile photo of a young student"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCM4YPQxyjpHbNzHlBfycLwDTtinAz1WV5Vv_Fnc1tP6DvzfElvfxBraW0Wo9Vebfa94cmKyzx9qPGh9afCsVVqHsTDg2-3n9YVCoxHPO5NMRMrHj94WBeQ5wvyPokJPZXMyWtAUjCPcqP9l7opZJuONnMwDipBLtifl-owBiVqpFXOgsqLpQbkX1w9hnzPjm4r-HA4jFzb9fnhClq3du0r_XqKLWxC10NnUaWHY_tT-NDzvSJ7sP4CYQnZMFJbGcOXfN_TU_G7mbfY" />
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 px-4 md:px-20 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Sidebar: Stats & Next Session -->
+            <aside class="lg:col-span-3 space-y-6">
+                <!-- Book New Session CTA -->
+                <button
+                    class="w-full py-4 bg-primary text-background-dark font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:brightness-105 transition-all">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>حجز حصة جديدة</span>
+                </button>
+                <!-- Next Session Highlight -->
+                <div
+                    class="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-primary/20 shadow-sm relative overflow-hidden">
+                    <div class="absolute -top-4 -left-4 size-20 bg-primary/10 rounded-full blur-2xl"></div>
+                    <h3 class="text-slate-500 text-sm font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">event_upcoming</span>
+                        الجلسة القادمة
+                    </h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="size-14 rounded-full bg-slate-100 overflow-hidden border-2 border-primary"
+                            data-alt="Tutor avatar for next session">
+                            <img alt="Tutor" data-alt="Professional portrait of a Quran teacher"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0H2QhKjCtwLk6Q3Wf8WYbXlxyFO26HtU6LcHw5kWhXDAq_QPyI1udZwVGGAF6eTuHtHUpusNLOY6habaPYG9P4y9R834rxlkqlbJB5RjtzkrsTAXogG5lczdTcBaaWlfjx87efFll5fu_RoyKZZyjWijWyuAr6CZPnEM8REoXXBoGEnTJB28_om5bxFxzSC8zf8ZaLE35JB7-dBK2G9V_ioikgmtybdwZ4Cjiu1RiVs58UrDWSyeaHAOiD0KrCpiSuiZQ6dWWa1Aa" />
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg">الشيخ عبدالله عمر</p>
+                            <span
+                                class="text-xs bg-primary/20 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded">حفظ
+                                القرآن</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3 border-t border-slate-100 dark:border-slate-700 pt-4">
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-lg">calendar_today</span>
+                            <span class="text-sm">اليوم، 14 نوفمبر</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                            <span class="text-sm">04:30 مساءً (45 دقيقة)</span>
+                        </div>
+                    </div>
+                    <button
+                        class="w-full mt-6 py-2 border border-primary text-primary font-bold rounded-lg hover:bg-primary hover:text-background-dark transition-all">
+                        دخول الجلسة
+                    </button>
+                </div>
+                <!-- Progress Stats -->
+                <div
+                    class="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <h3 class="font-bold mb-4">إحصائيات الشهر</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-background-light dark:bg-background-dark rounded-xl">
+                            <p class="text-2xl font-bold text-primary">12</p>
+                            <p class="text-xs text-slate-500">حصة مكتملة</p>
+                        </div>
+                        <div class="p-3 bg-background-light dark:bg-background-dark rounded-xl">
+                            <p class="text-2xl font-bold text-primary">4</p>
+                            <p class="text-xs text-slate-500">قيد الانتظار</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <!-- Main Schedule Area -->
+            <section class="lg:col-span-9">
+                <!-- Month Selection & Filter -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div
+                        class="flex items-center bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <button class="px-6 py-2 rounded-lg text-slate-500 hover:bg-slate-50">أكتوبر</button>
+                        <button
+                            class="px-8 py-2 rounded-lg bg-primary text-background-dark font-bold shadow-sm">نوفمبر</button>
+                        <button class="px-6 py-2 rounded-lg text-slate-500 hover:bg-slate-50">ديسمبر</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+                            <span class="material-symbols-outlined text-lg">filter_list</span>
+                            تصفية
+                        </button>
+                        <button
+                            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+                            <span class="material-symbols-outlined text-lg">print</span>
+                            طباعة
+                        </button>
+                    </div>
+                </div>
+                <!-- Calendar View -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <!-- Week Header -->
+                    <div
+                        class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الأحد</div>
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الأثنين</div>
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الثلاثاء</div>
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الأربعاء</div>
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الخميس</div>
+                        <div
+                            class="py-4 text-center font-bold text-sm text-slate-600 border-l border-slate-200 dark:border-slate-700">
+                            الجمعة</div>
+                        <div class="py-4 text-center font-bold text-sm text-slate-600">السبت</div>
+                    </div>
+                    <!-- Calendar Grid -->
+                    <div class="grid grid-cols-7 auto-rows-[160px]">
+                        <!-- Days (Mocking some sessions) -->
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            10</div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            11</div>
+                        <!-- Booked Session Card -->
+                        <div class="p-1 border-b border-l border-slate-100 dark:border-slate-700 relative group">
+                            <span class="absolute top-2 right-2 text-slate-400 text-xs">12</span>
+                            <div
+                                class="mt-6 bg-primary/10 border-r-4 border-primary p-2 rounded-lg cursor-pointer hover:bg-primary/20 transition-all">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img class="size-6 rounded-full border border-primary/30"
+                                        data-alt="Small tutor headshot"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVODR98Y43--A6Z7tgN20lDZ5a6YY34nIhDtbZER9JnaPrw6kf5UYg7MikkFhpvzLElr1-guvbciOoRgJMi5pHI5gGyul5WuvDkIt3R7FXojG3ZniVNjJwnKjjinu4PYKvOzLBz1AWfzs7W_tIDfkSH0_4FSK06Hb_ZXNJjBLMCFLrEvFZ_KUA21XW_85-G3ilFZh0cGSq5rdK42dPR0qkmhlSTUG8tH9-RB2KOh6pipJV2ChW7TVznmSKDBhsawktic6W7v-nPNI6" />
+                                    <p class="text-[10px] font-bold truncate">الشيخ أحمد م.</p>
+                                </div>
+                                <p class="text-[10px] text-slate-600 dark:text-slate-300">حفظ - 04:00 م</p>
+                            </div>
+                        </div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            13</div>
+                        <!-- Today -->
+                        <div class="p-1 border-b border-l border-slate-100 dark:border-slate-700 bg-primary/5 relative">
+                            <span class="absolute top-2 right-2 text-primary font-bold text-xs">14</span>
+                            <div
+                                class="mt-6 bg-primary border-r-4 border-background-dark p-2 rounded-lg cursor-pointer shadow-md">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img class="size-6 rounded-full border border-background-dark/20"
+                                        data-alt="Small tutor headshot"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWDMEjH0HpF9e16mYRnDAUs7CxFNyPY5noRNemszVJh4_-oHyAbbtTRzO3eWOEO0CTFwwMm7-LOs_Mw7nnMT8POQPZrnuNS2pDa-RXjgPgU7iPYyPs8F0VRflFYtKLls8996CWsOVdtf3okgzFExAqRsvzL5AnZSFfrZmIV2sxnt2YhRbwN6BM-7DlD8wUkau7wiDITAttESfxMgdxpGDVHeIHAwUwq1_Na81_4dkFoUq7I6FNx-viCuDzxnnlUGXlyInwT5mPAyTq" />
+                                    <p class="text-[10px] font-bold text-background-dark truncate">الشيخ عبدالله ع.</p>
+                                </div>
+                                <p class="text-[10px] text-background-dark/80 font-medium">حفظ - 04:30 م</p>
+                            </div>
+                        </div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            15</div>
+                        <div class="p-2 border-b border-slate-100 dark:border-slate-700 text-slate-400 text-xs">16</div>
+                        <!-- Second Row -->
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            17</div>
+                        <div class="p-1 border-b border-l border-slate-100 dark:border-slate-700">
+                            <span class="absolute top-2 right-2 text-slate-400 text-xs">18</span>
+                            <div
+                                class="mt-6 bg-slate-100 dark:bg-slate-700 border-r-4 border-slate-400 p-2 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img class="size-6 rounded-full" data-alt="Tutor avatar small"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl6BPUXT-O5JwRzWIKfoDzQMOVsGZ6Mptgr1I6KJ4Cwlxshc-LvBNsejLGg04KCUGgXYPD2nNVLAV5bxhku8vZaRugWfk9MEClEXuT-AmsnePYLqes1uaLoFDuhB5fW7uISxzIKD6RWutzeiQEP2ZSsv-IA2rFg4Ygc-gb_bYoKueCGLaSIJyYzX2kl1dzZkCd2hjhgCZYuxXHdNWLSWTa7SZ0qXYAeqtxYCe97naPvUifbF_O2z_npD53fb_2nDG1IfBcrCEhyXtg" />
+                                    <p class="text-[10px] font-bold truncate">أ. هدى خالد</p>
+                                </div>
+                                <p class="text-[10px] text-slate-500">تلاوة - 05:00 م</p>
+                            </div>
+                        </div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            19</div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            20</div>
+                        <div class="p-1 border-b border-l border-slate-100 dark:border-slate-700">
+                            <span class="absolute top-2 right-2 text-slate-400 text-xs">21</span>
+                            <div class="mt-6 bg-primary/10 border-r-4 border-primary p-2 rounded-lg cursor-pointer">
+                                <p class="text-[10px] font-bold">الشيخ أحمد م.</p>
+                                <p class="text-[10px] text-slate-600">حفظ - 04:00 م</p>
+                            </div>
+                        </div>
+                        <div
+                            class="p-2 border-b border-l border-slate-100 dark:border-slate-700 text-slate-400 text-xs">
+                            22</div>
+                        <div class="p-2 border-b border-slate-100 dark:border-slate-700 text-slate-400 text-xs">23</div>
+                    </div>
+                </div>
+                <!-- Legend -->
+                <div class="mt-4 flex gap-6 text-sm text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <span class="size-3 bg-primary rounded-full"></span>
+                        <span>حصة اليوم</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="size-3 bg-primary/20 rounded-full border border-primary"></span>
+                        <span>حصص مجدولة</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="size-3 bg-slate-200 rounded-full"></span>
+                        <span>حصص سابقة</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- Footer -->
+        <footer
+            class="mt-auto border-t border-slate-200 dark:border-slate-700 py-6 px-4 md:px-20 text-center text-slate-500 text-sm">
+            <p>© 2023 منصة رتّل لتعليم القرآن الكريم. جميع الحقوق محفوظة.</p>
+        </footer>
+    </div>
+</body>
+
+</html>
