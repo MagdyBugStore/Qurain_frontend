@@ -1,10 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { StatusBadge } from '../../components/common/StatusBadge'
+import { AdminService } from '../../services/adminService'
 
 interface TeacherApplication {
   id: string
@@ -47,63 +46,11 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
     const fetchApplications = async () => {
       setLoading(true)
       try {
-        // Fetch all applications
-
-        const allAppsQuery = query(collection(db, 'teacherApplications'))
-        const allAppsSnapshot = await getDocs(allAppsQuery)
-        const allApps = allAppsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as TeacherApplication[]
+        const adminService = new AdminService()
         
-        // Filter in memory based on selected tab
-        let filteredApps = allApps
-        if (teacherFilter !== 'all') {
-          filteredApps = allApps.filter(app => {
-            const status = app.status || 'pending'
-            return status === teacherFilter
-          })
-        }
-        
-        // If 'pending' or 'all', add incomplete users
-        if (teacherFilter === 'all' || teacherFilter === 'pending') {
-           const usersQuery = query(
-            collection(db, 'users'),
-            where('accountType', '==', 'teacher')
-          )
-          const usersSnapshot = await getDocs(usersQuery)
-          
-          const incompleteApps: TeacherApplication[] = []
-          usersSnapshot.docs.forEach(userDoc => {
-             const userData = userDoc.data()
-             const userId = userDoc.id // uid is the doc id
-             
-             // Check if this user has ANY application in allApps
-             const hasApp = allApps.some(a => a.userId === userId)
-             
-             if (!hasApp) {
-               incompleteApps.push({
-                 id: `temp_${userId}`,
-                 userId: userId,
-                 fullName: userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Unknown',
-                 email: userData.email,
-                 phone: userData.phone,
-                 subjects: [],
-                 status: 'pending', // Show in pending list
-                 createdAt: userData.createdAt,
-                 isIncomplete: true
-               })
-             }
-          })
-          
-          filteredApps = [...filteredApps, ...incompleteApps]
-        }
-        
-        // Sort
-        filteredApps.sort((a, b) => {
-          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0)
-          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0)
-          return dateB.getTime() - dateA.getTime()
+        const filteredApps = await adminService.getTeacherApplications({
+          status: teacherFilter,
+          includeIncomplete: teacherFilter === 'all' || teacherFilter === 'pending',
         })
         
         setApplications(filteredApps)
@@ -121,47 +68,21 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
 
   const handleStatusUpdate = async (appId: string, newStatus: 'approved' | 'rejected') => {
     try {
-      // Check if it's an incomplete application
-      const isTemp = appId.startsWith('temp_')
+      const adminService = new AdminService()
       
-      if (isTemp) {
-        // We need to create a new application document
-        // Extract userId from appId (temp_USERID)
-        const userId = appId.replace('temp_', '')
-        
-        // Find user data from current applications list
-        const userApp = applications.find(app => app.id === appId)
-        
-        if (!userApp) {
-          console.error('User application not found in local state')
-          return
-        }
-
-        const applicationData = {
-          userId: userId,
-          fullName: userApp.fullName || '',
-          email: userApp.email || '',
-          phone: userApp.phone || '',
-          subjects: [], // Empty as they haven't selected any
-          bio: '', // Empty as they haven't written any
-          hourlyRate: 0,
-          currency: 'USD',
-          status: newStatus,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          isManuallyCreated: true
-        }
-
-        // Create new application document
-        const docRef = await addDoc(collection(db, 'teacherApplications'), applicationData)
-        
-        // Update local state with the new real ID
-        setApplications(prev => {
-          // Remove the temp item and add the real one (or just update if we want to keep it simple)
-          // Better to replace it
+      // Find user data from current applications list (needed for incomplete apps)
+      const userApp = applications.find(app => app.id === appId)
+      
+      // Update application status (service handles both complete and incomplete apps)
+      const updatedAppId = await adminService.updateApplicationStatus(appId, newStatus, userApp)
+      
+      // Update local state
+      setApplications(prev => {
+        if (appId.startsWith('temp_')) {
+          // For incomplete apps, replace temp ID with real ID
           const updatedApp = {
-            ...userApp,
-            id: docRef.id,
+            ...userApp!,
+            id: updatedAppId,
             status: newStatus,
             isIncomplete: false
           }
@@ -169,29 +90,14 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
           if (teacherFilter === 'all') {
             return prev.map(app => app.id === appId ? updatedApp : app)
           }
-          // If filtering by specific status (e.g. pending), remove the item as it no longer matches
           return prev.filter(app => app.id !== appId)
-        })
-
-        if (addToast) {
-          addToast(`Teacher application created and ${newStatus} successfully`, 'success')
+        } else {
+          // For existing apps, just update status
+          if (teacherFilter === 'all') {
+            return prev.map(app => app.id === appId ? { ...app, status: newStatus } : app)
+          }
+          return prev.filter(app => app.id !== appId)
         }
-        return
-      }
-
-      await updateDoc(doc(db, 'teacherApplications', appId), {
-        status: newStatus,
-        updatedAt: new Date()
-      })
-      
-      // Update local state
-      setApplications(prev => {
-        // If viewing all, just update the status
-        if (teacherFilter === 'all') {
-          return prev.map(app => app.id === appId ? { ...app, status: newStatus } : app)
-        }
-        // If filtering by specific status (e.g. pending), remove the item as it no longer matches
-        return prev.filter(app => app.id !== appId)
       })
       
       // Show toast notification

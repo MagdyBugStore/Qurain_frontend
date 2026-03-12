@@ -6,8 +6,8 @@ import {
   onAuthStateChanged,
   type User
 } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, googleProvider, appleProvider, db } from '../config/firebase';
+import { auth, googleProvider, appleProvider } from '../config/firebase';
+import { TeacherService } from '../services/teacherService';
 import { useUserStore } from '../store/useUserStore';
 import type { UserProfile } from '../models/UserModel';
 import { isProfileComplete } from '../models/UserModel';
@@ -98,13 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
               // Check if user has submitted a teacher application
               // التحقق من أن المستخدم قد أرسل طلب معلم
-              const applicationsQuery = query(
-                collection(db, 'teacherApplications'),
-                where('userId', '==', user.uid)
-              );
-              const querySnapshot = await getDocs(applicationsQuery);
+              const teacherService = new TeacherService();
+              const application = await teacherService.getTeacherApplication(user.uid);
               
-              if (querySnapshot.empty) {
+              if (!application) {
                 // No application found, redirect to teacher application
                 // لم يتم العثور على طلب، إعادة التوجيه إلى صفحة طلب المعلم
                 window.location.href = '/teacher-application';

@@ -1,12 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, addDoc, updateDoc, serverTimestamp, orderBy, limit, onSnapshot } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import { useNavigate } from 'react-router-dom'
-import { doc as firestoreDoc } from 'firebase/firestore'
+import { SupportService } from '../../services/supportService'
 
 interface SupportTicket {
   id: string
@@ -53,36 +51,14 @@ export default function SupportPage() {
     fetchTickets()
   }, [user])
 
-  const fetchTickets = async () => {
+  const fetchTickets = () => {
     if (!user) return
 
     setLoading(true)
     try {
-      const ticketsQuery = query(
-        collection(db, 'supportTickets'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc')
-      )
+      const supportService = new SupportService()
       
-      const unsubscribe = onSnapshot(ticketsQuery, async (snapshot) => {
-        const ticketsData = await Promise.all(
-          snapshot.docs.map(async (docSnapshot) => {
-            const ticketData = { id: docSnapshot.id, ...docSnapshot.data() } as SupportTicket
-            
-            // Fetch replies for each ticket
-            const repliesQuery = query(
-              collection(db, 'supportTickets', docSnapshot.id, 'replies'),
-              orderBy('createdAt', 'asc')
-            )
-            const repliesSnapshot = await getDocs(repliesQuery)
-            ticketData.replies = repliesSnapshot.docs.map(replyDoc => ({
-              id: replyDoc.id,
-              ...replyDoc.data()
-            })) as TicketReply[]
-            
-            return ticketData
-          })
-        )
+      const unsubscribe = supportService.subscribeToSupportTickets(user.uid, (ticketsData) => {
         setTickets(ticketsData)
         setLoading(false)
       })
@@ -105,23 +81,20 @@ export default function SupportPage() {
 
     setSubmitting(true)
     try {
-      const ticketData = {
+      const supportService = new SupportService()
+      
+      const ticketId = await supportService.createTicket({
         userId: user.uid,
         userName: userProfile?.displayName || user.email || 'مستخدم',
         subject: newTicket.subject,
         message: newTicket.message,
-        category: newTicket.category,
+        category: newTicket.category as 'technical' | 'billing' | 'account' | 'other',
         priority: newTicket.priority,
-        status: 'open',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-
-      const docRef = await addDoc(collection(db, 'supportTickets'), ticketData)
+      })
       
       setShowNewTicketForm(false)
       setNewTicket({ subject: '', message: '', category: 'technical', priority: 'medium' })
-      setSelectedTicket({ id: docRef.id, ...ticketData, replies: [] } as SupportTicket)
+      setSelectedTicket({ id: ticketId, userId: user.uid, userName: userProfile?.displayName || user.email || 'مستخدم', subject: newTicket.subject, message: newTicket.message, category: newTicket.category, priority: newTicket.priority, status: 'open', replies: [] } as SupportTicket)
       alert('تم إنشاء التذكرة بنجاح')
     } catch (error) {
       console.error('Error creating ticket:', error)
@@ -136,22 +109,12 @@ export default function SupportPage() {
 
     setSubmitting(true)
     try {
-      const replyData = {
+      const supportService = new SupportService()
+      
+      await supportService.addReply(selectedTicket.id, {
         message: replyMessage,
         sender: 'user',
-        senderName: userProfile?.displayName || user.email || 'مستخدم',
-        createdAt: serverTimestamp()
-      }
-
-      await addDoc(
-        collection(db, 'supportTickets', selectedTicket.id, 'replies'),
-        replyData
-      )
-
-      // Update ticket status and timestamp
-      await updateDoc(firestoreDoc(db, 'supportTickets', selectedTicket.id), {
-        status: 'in_progress',
-        updatedAt: serverTimestamp()
+        senderName: userProfile?.displayName || user.email || 'مستخدم'
       })
 
       setReplyMessage('')

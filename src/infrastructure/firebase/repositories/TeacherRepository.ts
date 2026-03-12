@@ -17,6 +17,8 @@ import {
   serverTimestamp,
   orderBy,
   limit,
+  onSnapshot,
+  type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import type { TeacherApplication, TeacherProfile, Review } from '../../../shared/types/teacher.types';
@@ -170,6 +172,20 @@ export class TeacherRepository implements ITeacherRepository {
     } catch (error) {
       console.error('Error calculating teacher rating:', error);
       return { rating: 0, count: 0 };
+    }
+  }
+
+  async createApplication(data: Omit<TeacherApplication, 'id'>): Promise<string> {
+    try {
+      const docRef = await addDoc(collection(db, 'teacherApplications'), {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating teacher application:', error);
+      throw error;
     }
   }
 
@@ -512,5 +528,63 @@ export class TeacherRepository implements ITeacherRepository {
       console.error('Error updating ticket status:', error);
       throw error;
     }
+  }
+
+  /**
+   * Get completed sessions count for a teacher
+   */
+  async getCompletedSessionsCount(teacherId: string): Promise<number> {
+    try {
+      const sessionsQuery = query(
+        collection(db, 'sessions'),
+        where('teacherId', '==', teacherId),
+        where('status', '==', 'completed')
+      );
+      const sessionsSnapshot = await getDocs(sessionsQuery);
+      return sessionsSnapshot.size;
+    } catch (error) {
+      // Sessions collection might not exist or use different field names
+      // Silently fail - this is expected if sessions haven't been implemented yet
+      console.warn('Error getting completed sessions count:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Subscribe to real-time updates of support tickets for a user
+   * Returns unsubscribe function and calls callback with tickets data
+   */
+  subscribeToSupportTickets(
+    userId: string,
+    callback: (tickets: SupportTicket[]) => void
+  ): Unsubscribe {
+    const ticketsQuery = query(
+      collection(db, 'supportTickets'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(ticketsQuery, async (snapshot) => {
+      const tickets = await Promise.all(
+        snapshot.docs.map(async (docSnapshot) => {
+          const ticketData: any = { id: docSnapshot.id, ...docSnapshot.data() };
+          
+          // Fetch replies for each ticket
+          const repliesQuery = query(
+            collection(db, 'supportTickets', docSnapshot.id, 'replies'),
+            orderBy('createdAt', 'asc')
+          );
+          const repliesSnapshot = await getDocs(repliesQuery);
+          ticketData.replies = repliesSnapshot.docs.map(replyDoc => ({
+            id: replyDoc.id,
+            ...replyDoc.data(),
+          }));
+          
+          return ticketData as SupportTicket;
+        })
+      );
+      
+      callback(tickets);
+    });
   }
 }

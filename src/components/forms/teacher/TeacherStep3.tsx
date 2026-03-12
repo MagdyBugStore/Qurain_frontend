@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState } from "react";
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { TeacherService } from '../../../services/teacherService';
 
 interface TeacherStep3Props {
   formData: {
@@ -72,13 +71,12 @@ export default function TeacherStep3({ formData, allFormData, onComplete, onBack
         // Metadata
         userId: user.uid,
         userEmail: user.email,
-        status: 'pending', // pending, approved, rejected
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        status: 'pending' as const, // pending, approved, rejected
       }
 
       // Save to Firestore
-      const docRef = await addDoc(collection(db, 'teacherApplications'), teacherApplicationData)
+      const teacherService = new TeacherService()
+      await teacherService.createApplication(teacherApplicationData as any)
       
       // Update user profile with accountType
       // تحديث ملف المستخدم بنوع الحساب

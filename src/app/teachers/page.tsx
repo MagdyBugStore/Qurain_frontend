@@ -1,13 +1,14 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import Header from '../../components/layout/Header'
 import LoginModal from '../../components/modals/LoginModal'
 import Popup from '../../components/modals/Popup'
 import { useAuthGuard } from '../../hooks/useRequireAuth'
 import { useAuth } from '../../contexts/AuthContext'
+import { TeacherService } from '../../services/teacherService'
+import { getCurrencySymbol } from '../../shared/utils/currency'
+import { getTeacherDisplayName, getTeacherImageUrl, getTeacherSpecialization } from '../../shared/utils/teacher'
 
 interface Teacher {
   id: string
@@ -57,21 +58,6 @@ interface UserProfile {
   email?: string
 }
 
-// Helper function to get currency symbol
-const getCurrencySymbol = (currency?: string): string => {
-  if (!currency) return '$'
-  switch (currency.toUpperCase()) {
-    case 'SAR':
-      return 'ر.س'
-    case 'USD':
-      return '$'
-    case 'EGP':
-      return 'ج.م'
-    default:
-      return '$'
-  }
-}
-
 export default function TeachersPage() {
   const { requireAuth } = useAuthGuard()
   const { userProfile } = useAuth()
@@ -94,80 +80,48 @@ export default function TeachersPage() {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const q = query(
-          collection(db, 'teacherApplications'), 
-          where('status', '==', 'approved')
-        )
-        const querySnapshot = await getDocs(q)
+        const teacherService = new TeacherService()
+        
+        // Fetch all approved teachers with profiles
+        const applications = await teacherService.getAllApprovedTeachers()
         
         const teachersData: Teacher[] = []
         
-        for (const docSnapshot of querySnapshot.docs) {
-          const appData = { id: docSnapshot.id, ...docSnapshot.data() } as TeacherApplication
-          
-          let profileData: UserProfile | null = null
-          if (appData.userId) {
-            try {
-              const userDoc = await getDoc(doc(db, 'users', appData.userId))
-              if (userDoc.exists()) {
-                profileData = userDoc.data() as UserProfile
-              }
-            } catch (err) {
-              console.error(`Error fetching user profile for ${appData.userId}:`, err)
-            }
-          }
+        for (const appData of applications) {
+          const profileData = appData.profile || null
+          const teacherId = appData.userId || appData.id
 
-          // Fetch reviews and calculate rating if reviews collection exists
+          // Fetch rating and reviews count
           let rating = 0
           let reviewsCount = 0
           try {
-            const teacherId = appData.userId || appData.id
-            const reviewsQuery = query(
-              collection(db, 'reviews'),
-              where('teacherId', '==', teacherId)
-            )
-            const reviewsSnapshot = await getDocs(reviewsQuery)
-            reviewsCount = reviewsSnapshot.size
-            if (reviewsCount > 0) {
-              const ratings = reviewsSnapshot.docs.map(doc => doc.data().rating || 0).filter(r => r > 0)
-              if (ratings.length > 0) {
-                rating = ratings.reduce((sum, r) => sum + r, 0) / ratings.length
-              }
-            }
+            const ratingData = await teacherService.getTeacherRating(teacherId)
+            rating = ratingData.rating
+            reviewsCount = ratingData.count
           } catch (err) {
-            // Reviews collection might not exist or use different field names
             // Silently fail - this is expected if reviews haven't been implemented yet
             rating = 0
             reviewsCount = 0
           }
 
-          // Fetch completed sessions count if sessions collection exists
+          // Fetch completed sessions count
           let completedSessionsCount = 0
           try {
-            // Try different possible field names for teacher reference
-            const teacherId = appData.userId || appData.id
-            const sessionsQuery = query(
-              collection(db, 'sessions'),
-              where('teacherId', '==', teacherId),
-              where('status', '==', 'completed')
-            )
-            const sessionsSnapshot = await getDocs(sessionsQuery)
-            completedSessionsCount = sessionsSnapshot.size
+            completedSessionsCount = await teacherService.getCompletedSessionsCount(teacherId)
           } catch (err) {
-            // Sessions collection might not exist or use different field names
             // Silently fail - this is expected if sessions haven't been implemented yet
             completedSessionsCount = 0
           }
 
-          // Handle photo URL - use profile photo if available, otherwise use default
-          const teacherPhoto = profileData?.photoURL && profileData.photoURL.trim() !== '' 
-            ? profileData.photoURL 
-            : '/no-image.png'
+          // Use utility functions for data transformation
+          const teacherPhoto = getTeacherImageUrl(profileData)
+          const teacherName = getTeacherDisplayName(profileData, appData)
+          const teacherSpecialty = getTeacherSpecialization(appData)
 
           teachersData.push({
             id: appData.userId || appData.id,
-            name: profileData?.displayName || appData.fullName || 'المعلم',
-            specialty: appData.subjects?.join('، ') || 'معلم قرآن',
+            name: teacherName,
+            specialty: teacherSpecialty,
             description: appData.bio || '',
             rating: rating || 0,
             reviews: reviewsCount,
@@ -558,7 +512,7 @@ export default function TeachersPage() {
                         </div>
                         <div className="flex flex-col items-end">
                           <span className="text-lg font-bold text-primary font-arabic">
-                            {teacher.price} {getCurrencySymbol(teacher.currency)}
+                            {teacher.price} {getCurrencySymbol(teacher.currency as any)}
                           </span>
                           <span className="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
                         </div>

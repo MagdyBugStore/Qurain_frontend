@@ -1,17 +1,18 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, addDoc, updateDoc, doc as firestoreDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import { useNavigate } from 'react-router-dom'
+import { WalletService } from '../../services/walletService'
+import { getCurrencySymbol } from '../../shared/utils/currency'
+import type { Currency } from '../../shared/types/teacher.types'
 
 interface Transaction {
   id: string
   type: 'earning' | 'withdrawal' | 'refund'
   amount: number
-  currency: string
+  currency?: Currency
   description: string
   status: 'pending' | 'completed' | 'rejected'
   createdAt: any
@@ -21,7 +22,7 @@ interface Transaction {
 interface WithdrawalRequest {
   id: string
   amount: number
-  currency: string
+  currency?: Currency
   bankName: string
   accountNumber: string
   iban?: string
@@ -34,7 +35,7 @@ export default function WalletPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [balance, setBalance] = useState(0)
-  const [currency, setCurrency] = useState('SAR')
+  const [currency, setCurrency] = useState<Currency>('SAR')
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,46 +63,13 @@ export default function WalletPage() {
 
     setLoading(true)
     try {
-      // Fetch wallet balance
-      const walletQuery = query(
-        collection(db, 'teacherWallets'),
-        where('teacherId', '==', user.uid)
-      )
-      const walletSnapshot = await getDocs(walletQuery)
+      const walletService = new WalletService()
+      const walletData = await walletService.getWalletData(user.uid)
       
-      if (!walletSnapshot.empty) {
-        const walletData = walletSnapshot.docs[0].data()
-        setBalance(walletData.balance || 0)
-        setCurrency(walletData.currency || 'SAR')
-      }
-
-      // Fetch transactions
-      const transactionsQuery = query(
-        collection(db, 'teacherTransactions'),
-        where('teacherId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      )
-      const transactionsSnapshot = await getDocs(transactionsQuery)
-      const transactionsData = transactionsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Transaction[]
-      setTransactions(transactionsData)
-
-      // Fetch withdrawal requests
-      const withdrawalsQuery = query(
-        collection(db, 'withdrawalRequests'),
-        where('teacherId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      )
-      const withdrawalsSnapshot = await getDocs(withdrawalsQuery)
-      const withdrawalsData = withdrawalsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as WithdrawalRequest[]
-      setWithdrawalRequests(withdrawalsData)
+      setBalance(walletData.balance)
+      setCurrency(walletData.currency)
+      setTransactions(walletData.transactions as Transaction[])
+      setWithdrawalRequests(walletData.withdrawalRequests as WithdrawalRequest[])
     } catch (error) {
       console.error('Error fetching wallet data:', error)
     } finally {
@@ -126,30 +94,22 @@ export default function WalletPage() {
 
     setSubmitting(true)
     try {
-      await addDoc(collection(db, 'withdrawalRequests'), {
+      const walletService = new WalletService()
+      
+      // Create withdrawal request
+      await walletService.submitWithdrawalRequest({
         teacherId: user.uid,
         amount,
         currency,
         bankName: withdrawalForm.bankName,
         accountNumber: withdrawalForm.accountNumber,
         iban: withdrawalForm.iban || '',
-        status: 'pending',
-        createdAt: serverTimestamp()
       })
 
       // Update wallet balance
-      const walletQuery = query(
-        collection(db, 'teacherWallets'),
-        where('teacherId', '==', user.uid)
-      )
-      const walletSnapshot = await getDocs(walletQuery)
-      if (!walletSnapshot.empty) {
-        await updateDoc(firestoreDoc(db, 'teacherWallets', walletSnapshot.docs[0].id), {
-          balance: balance - amount,
-          updatedAt: serverTimestamp()
-        })
-        setBalance(balance - amount)
-      }
+      await walletService.updateBalanceAfterWithdrawal(user.uid, balance, amount)
+      const newBalance = balance - amount
+      setBalance(newBalance)
 
       setShowWithdrawalForm(false)
       setWithdrawalForm({ amount: '', bankName: '', accountNumber: '', iban: '' })
@@ -157,7 +117,8 @@ export default function WalletPage() {
       alert('تم إرسال طلب السحب بنجاح')
     } catch (error) {
       console.error('Error submitting withdrawal request:', error)
-      alert('حدث خطأ أثناء إرسال طلب السحب')
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال طلب السحب'
+      alert(errorMessage)
     } finally {
       setSubmitting(false)
     }
@@ -258,7 +219,7 @@ export default function WalletPage() {
                 <div>
                   <p className="text-white/80 text-sm mb-2">الرصيد الحالي</p>
                   <h2 className="text-4xl font-bold">
-                    {balance.toFixed(2)} {currency === 'SAR' ? 'ر.س' : currency === 'USD' ? '$' : 'ج.م'}
+                    {balance.toFixed(2)} {getCurrencySymbol(currency)}
                   </h2>
                 </div>
                 <div className="h-16 w-16 bg-white/20 rounded-full flex items-center justify-center">
@@ -330,7 +291,7 @@ export default function WalletPage() {
                             'text-blue-600 dark:text-blue-400'
                           }`}>
                             {transaction.type === 'earning' ? '+' : '-'}
-                            {transaction.amount.toFixed(2)} {transaction.currency === 'SAR' ? 'ر.س' : transaction.currency === 'USD' ? '$' : 'ج.م'}
+                            {transaction.amount.toFixed(2)} {getCurrencySymbol(transaction.currency)}
                           </p>
                           <span className={`inline-block px-2 py-1 rounded text-xs mt-1 ${getStatusColor(transaction.status)}`}>
                             {getStatusText(transaction.status)}
@@ -366,7 +327,7 @@ export default function WalletPage() {
                     <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                          المبلغ ({currency === 'SAR' ? 'ر.س' : currency === 'USD' ? '$' : 'ج.م'})
+                          المبلغ ({getCurrencySymbol(currency)})
                         </label>
                         <input
                           type="number"
@@ -455,7 +416,7 @@ export default function WalletPage() {
                         >
                           <div>
                             <h4 className="font-bold">
-                              {request.amount.toFixed(2)} {request.currency === 'SAR' ? 'ر.س' : request.currency === 'USD' ? '$' : 'ج.م'}
+                              {request.amount.toFixed(2)} {getCurrencySymbol(request.currency)}
                             </h4>
                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                               {request.bankName} - {request.accountNumber}

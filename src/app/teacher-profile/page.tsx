@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'
-import { collection, query, where, getDocs, doc as firestoreDoc, updateDoc, addDoc, deleteDoc, getDoc, setDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import type { TeacherApplication, TeacherProfile, Qualification } from '../../shared/types/teacher.types'
 import { getTeacherDisplayName, getTeacherTitle, getTeacherImageUrl, getTeacherSpecialization, getTeacherQualifications } from '../../shared/utils/teacher'
-import { TeacherRepository } from '../../infrastructure/firebase/repositories/TeacherRepository'
+import { getCurrencySymbol } from '../../shared/utils/currency'
+import { TeacherService } from '../../services/teacherService'
+import { PersonalInfoSection } from './components/PersonalInfoSection'
+import { WalletSection } from './components/WalletSection'
+import { SupportSection } from './components/SupportSection'
+import type { Currency } from '../../shared/types/teacher.types'
 
 type TabType = 'personal' | 'qualifications' | 'availability' | 'reviews' | 'wallet' | 'support'
 
@@ -46,29 +49,6 @@ export default function TeacherProfilePage() {
     sessionContent: '',
     introVideo: ''
   })
-  // Wallet state
-  const [walletBalance, setWalletBalance] = useState(0)
-  const [walletCurrency, setWalletCurrency] = useState('SAR')
-  const [walletTransactions, setWalletTransactions] = useState<any[]>([])
-  const [walletWithdrawals, setWalletWithdrawals] = useState<any[]>([])
-  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false)
-  const [withdrawalForm, setWithdrawalForm] = useState({
-    amount: '',
-    bankName: '',
-    accountNumber: '',
-    iban: ''
-  })
-  // Support state
-  const [supportTickets, setSupportTickets] = useState<any[]>([])
-  const [selectedTicket, setSelectedTicket] = useState<any>(null)
-  const [showNewTicketForm, setShowNewTicketForm] = useState(false)
-  const [newTicket, setNewTicket] = useState({
-    subject: '',
-    message: '',
-    category: 'technical',
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent'
-  })
-  const [replyMessage, setReplyMessage] = useState('')
 
   // Fetch teacher application data, profile, and ratings
   useEffect(() => {
@@ -79,166 +59,47 @@ export default function TeacherProfilePage() {
       }
 
       try {
-        const repository = new TeacherRepository()
+        const teacherService = new TeacherService()
         
-        // Fetch teacher application
-        const applicationsQuery = query(
-          collection(db, 'teacherApplications'),
-          where('userId', '==', user.uid)
-        )
-        const querySnapshot = await getDocs(applicationsQuery)
+        // Fetch teacher profile data
+        const profileData = await teacherService.getTeacherProfileData(user.uid)
         
-        if (!querySnapshot.empty) {
-          const doc = querySnapshot.docs[0]
-          const appData = {
-            id: doc.id,
-            ...doc.data()
-          } as TeacherApplication
-          
-          setTeacherApplication(appData)
-
-          // Fetch user profile
-          if (appData.userId) {
-            try {
-              const profile = await repository.getUserProfile(appData.userId)
-              setTeacherProfile(profile)
-            } catch (error) {
-              console.error('Error fetching user profile:', error)
-            }
-          }
-
-          // Fetch rating and reviews count
-          const teacherId = appData.userId || appData.id
-          try {
-            const { rating: avgRating, count: count } = await repository.getTeacherRating(teacherId)
-            setRating(avgRating)
-            setReviewsCount(count)
-          } catch (error) {
-            console.error('Error fetching rating:', error)
-          }
-
-          // Fetch qualifications
-          const quals = getTeacherQualifications(appData)
-          setEditableQualifications(quals)
-
-          // Set personal info fields
-          setPersonalInfo({
-            teachingStyle: appData.teachingStyle || '',
-            sessionContent: appData.sessionContent || '',
-            introVideo: appData.introVideo || ''
-          })
-
-          // Fetch ijazahs from separate collection
-          try {
-            const ijazahsQuery = query(
-              collection(db, 'teacherIjazahs'),
-              where('teacherId', '==', teacherId)
-            )
-            const ijazahsSnapshot = await getDocs(ijazahsQuery)
-            const ijazahsData = ijazahsSnapshot.docs.map(docSnapshot => ({
-              id: docSnapshot.id,
-              ...docSnapshot.data()
-            })) as Array<{ id: string; title: string; description: string; image: string }>
-            setEditableIjazahs(ijazahsData)
-          } catch (error) {
-            console.error('Error fetching ijazahs:', error)
-          }
-
-          // Fetch availability from separate collection
-          try {
-            const availabilityDocRef = firestoreDoc(db, 'teacherAvailability', teacherId)
-            const availabilityDoc = await getDoc(availabilityDocRef)
-            if (availabilityDoc.exists()) {
-              const data = availabilityDoc.data() as { schedule?: (string | null)[][] }
-              setEditableAvailability(data.schedule || [])
-            } else {
-              // Initialize with empty schedule if not exists
-              const initialAvailability: (string | null)[][] = Array(7).fill(null).map(() => Array(12).fill(null))
-              setEditableAvailability(initialAvailability)
-            }
-          } catch (error) {
-            console.error('Error fetching availability:', error)
-            // Initialize with empty schedule on error
-            const initialAvailability: (string | null)[][] = Array(7).fill(null).map(() => Array(12).fill(null))
-            setEditableAvailability(initialAvailability)
-          }
-
-          // Fetch wallet data
-          try {
-            const walletQuery = query(
-              collection(db, 'teacherWallets'),
-              where('teacherId', '==', teacherId)
-            )
-            const walletSnapshot = await getDocs(walletQuery)
-            if (!walletSnapshot.empty) {
-              const walletData = walletSnapshot.docs[0].data()
-              setWalletBalance(walletData.balance || 0)
-              setWalletCurrency(walletData.currency || 'SAR')
-            }
-
-            // Fetch transactions
-            const transactionsQuery = query(
-              collection(db, 'teacherTransactions'),
-              where('teacherId', '==', teacherId),
-              orderBy('createdAt', 'desc'),
-              limit(10)
-            )
-            const transactionsSnapshot = await getDocs(transactionsQuery)
-            setWalletTransactions(transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-
-            // Fetch withdrawal requests
-            const withdrawalsQuery = query(
-              collection(db, 'withdrawalRequests'),
-              where('teacherId', '==', teacherId),
-              orderBy('createdAt', 'desc'),
-              limit(10)
-            )
-            const withdrawalsSnapshot = await getDocs(withdrawalsQuery)
-            setWalletWithdrawals(withdrawalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-          } catch (error) {
-            console.error('Error fetching wallet data:', error)
-          }
-
-          // Fetch support tickets
-          try {
-            const ticketsQuery = query(
-              collection(db, 'supportTickets'),
-              where('userId', '==', user.uid),
-              orderBy('createdAt', 'desc'),
-              limit(10)
-            )
-            const ticketsSnapshot = await getDocs(ticketsQuery)
-            const ticketsData = await Promise.all(
-              ticketsSnapshot.docs.map(async (docSnapshot) => {
-                const ticketData: any = { id: docSnapshot.id, ...docSnapshot.data() }
-                // Fetch replies
-                const repliesQuery = query(
-                  collection(db, 'supportTickets', docSnapshot.id, 'replies'),
-                  orderBy('createdAt', 'asc')
-                )
-                const repliesSnapshot = await getDocs(repliesQuery)
-                ticketData.replies = repliesSnapshot.docs.map(replyDoc => ({
-                  id: replyDoc.id,
-                  ...replyDoc.data()
-                }))
-                return ticketData
-              })
-            )
-            setSupportTickets(ticketsData)
-          } catch (error) {
-            console.error('Error fetching support tickets:', error)
-          }
-        } else {
-          // If no application found, still try to get profile
-          if (user.uid) {
-            try {
-              const profile = await repository.getUserProfile(user.uid)
-              setTeacherProfile(profile)
-            } catch (error) {
-              console.error('Error fetching user profile:', error)
-            }
-          }
+        if (profileData.application) {
+          setTeacherApplication(profileData.application)
         }
+        
+        if (profileData.profile) {
+          setTeacherProfile(profileData.profile)
+        }
+
+        // Set rating and reviews
+        setRating(profileData.rating)
+        setReviewsCount(profileData.reviewsCount)
+
+        // Set qualifications
+        setEditableQualifications(profileData.qualifications)
+
+        // Set personal info fields
+        if (profileData.application) {
+          setPersonalInfo({
+            teachingStyle: profileData.application.teachingStyle || '',
+            sessionContent: profileData.application.sessionContent || '',
+            introVideo: profileData.application.introVideo || ''
+          })
+        }
+
+        // Set ijazahs
+        setEditableIjazahs(profileData.ijazahs as Array<{ id: string; title: string; description: string; image: string }>)
+
+        // Set availability
+        if (profileData.availability && profileData.availability.schedule) {
+          setEditableAvailability(profileData.availability.schedule)
+        } else {
+          // Initialize with empty schedule if not exists
+          const initialAvailability: (string | null)[][] = Array(7).fill(null).map(() => Array(12).fill(null))
+          setEditableAvailability(initialAvailability)
+        }
+
       } catch (error) {
         console.error('Error fetching teacher data:', error)
       } finally {
@@ -257,16 +118,14 @@ export default function TeacherProfilePage() {
   const qualifications = getTeacherQualifications(teacherApplication)
   
   const sessionPrice = teacherApplication?.hourlyRate || 0
-  const currency = teacherApplication?.currency === 'SAR' ? 'ر.س' : 
-                   teacherApplication?.currency === 'USD' ? '$' :
-                   teacherApplication?.currency === 'EGP' ? 'ج.م' : 'ر.س'
+  const currency = getCurrencySymbol(teacherApplication?.currency)
   
   const isPending = teacherApplication?.status === 'pending'
   const isApproved = teacherApplication?.status === 'approved'
 
   // Helper function to show save message
-  const showSaveMessage = (type: 'success' | 'error', text: string) => {
-    setSaveMessage({ type, text })
+  const showSaveMessage = (message: { type: 'success' | 'error'; text: string }) => {
+    setSaveMessage(message)
     setTimeout(() => setSaveMessage(null), 3000)
   }
 
@@ -276,15 +135,12 @@ export default function TeacherProfilePage() {
 
     setSaving(true)
     try {
-      const teacherId = teacherApplication.userId || teacherApplication.id
-      await updateDoc(firestoreDoc(db, 'teacherApplications', teacherApplication.id), {
-        qualifications: editableQualifications,
-        updatedAt: serverTimestamp()
-      })
-      showSaveMessage('success', 'تم حفظ المؤهلات بنجاح')
+      const teacherService = new TeacherService()
+      await teacherService.saveQualifications(teacherApplication.id, editableQualifications)
+      showSaveMessage({ type: 'success', text: 'تم حفظ المؤهلات بنجاح' })
     } catch (error) {
       console.error('Error saving qualifications:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء حفظ المؤهلات')
+      showSaveMessage({ type: 'error', text: 'حدث خطأ أثناء حفظ المؤهلات' })
     } finally {
       setSaving(false)
     }
@@ -313,54 +169,47 @@ export default function TeacherProfilePage() {
 
     setSaving(true)
     try {
+      const teacherService = new TeacherService()
       const teacherId = teacherApplication.userId || teacherApplication.id
       
       // Delete removed ijazahs
-      const currentIjazahs = await getDocs(query(collection(db, 'teacherIjazahs'), where('teacherId', '==', teacherId)))
-      const currentIds = currentIjazahs.docs.map(d => d.id)
-      const newIds = editableIjazahs.filter(i => i.id).map(i => i.id!)
+      const currentIjazahs = await teacherService.getIjazahs(teacherId)
+      const currentIds = currentIjazahs.map(i => i.id).filter((id): id is string => !!id)
+      const newIds = editableIjazahs.filter(i => i.id).map(i => i.id!).filter((id): id is string => !!id)
       const toDelete = currentIds.filter(id => !newIds.includes(id))
       
       for (const id of toDelete) {
-        await deleteDoc(firestoreDoc(db, 'teacherIjazahs', id))
+        await teacherService.deleteIjazah(id)
       }
 
       // Add/update ijazahs
       for (const ijazah of editableIjazahs) {
         if (ijazah.id) {
           // Update existing
-          await updateDoc(firestoreDoc(db, 'teacherIjazahs', ijazah.id), {
+          await teacherService.updateIjazah(ijazah.id, {
             title: ijazah.title,
             description: ijazah.description,
-            image: ijazah.image,
-            updatedAt: serverTimestamp()
+            image: ijazah.image
           })
         } else {
           // Add new
-          await addDoc(collection(db, 'teacherIjazahs'), {
+          await teacherService.saveIjazah({
             teacherId,
             title: ijazah.title,
             description: ijazah.description,
-            image: ijazah.image,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
+            image: ijazah.image
           })
         }
       }
 
-      showSaveMessage('success', 'تم حفظ الإجازات بنجاح')
+      showSaveMessage({ type: 'success', text: 'تم حفظ الإجازات بنجاح' })
       
       // Refresh ijazahs list
-      const ijazahsQuery = query(collection(db, 'teacherIjazahs'), where('teacherId', '==', teacherId))
-      const ijazahsSnapshot = await getDocs(ijazahsQuery)
-      const ijazahsData = ijazahsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Array<{ id: string; title: string; description: string; image: string }>
-      setEditableIjazahs(ijazahsData)
+      const ijazahsData = await teacherService.getIjazahs(teacherId)
+      setEditableIjazahs(ijazahsData as Array<{ id: string; title: string; description: string; image: string }>)
     } catch (error) {
       console.error('Error saving ijazahs:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء حفظ الإجازات')
+      showSaveMessage({ type: 'error', text: 'حدث خطأ أثناء حفظ الإجازات' })
     } finally {
       setSaving(false)
     }
@@ -389,185 +238,21 @@ export default function TeacherProfilePage() {
 
     setSaving(true)
     try {
-      await updateDoc(firestoreDoc(db, 'teacherApplications', teacherApplication.id), {
+      const teacherService = new TeacherService()
+      await teacherService.updatePersonalInfo(teacherApplication.id, {
         teachingStyle: personalInfo.teachingStyle,
         sessionContent: personalInfo.sessionContent,
-        introVideo: personalInfo.introVideo,
-        updatedAt: serverTimestamp()
+        introVideo: personalInfo.introVideo
       })
-      showSaveMessage('success', 'تم حفظ البيانات بنجاح')
+      showSaveMessage({ type: 'success', text: 'تم حفظ البيانات بنجاح' })
     } catch (error) {
       console.error('Error saving personal info:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء حفظ البيانات')
+      showSaveMessage({ type: 'error', text: 'حدث خطأ أثناء حفظ البيانات' })
     } finally {
       setSaving(false)
     }
   }
 
-  // Handle withdrawal submission
-  const handleWithdrawalSubmit = async () => {
-    if (!user || !teacherApplication?.id) return
-
-    const amount = parseFloat(withdrawalForm.amount)
-    if (amount <= 0 || amount > walletBalance) {
-      showSaveMessage('error', 'المبلغ غير صحيح')
-      return
-    }
-
-    if (!withdrawalForm.bankName || !withdrawalForm.accountNumber) {
-      showSaveMessage('error', 'يرجى إدخال جميع البيانات المطلوبة')
-      return
-    }
-
-    setSaving(true)
-    try {
-      const teacherId = teacherApplication.userId || teacherApplication.id
-      await addDoc(collection(db, 'withdrawalRequests'), {
-        teacherId,
-        amount,
-        currency: walletCurrency,
-        bankName: withdrawalForm.bankName,
-        accountNumber: withdrawalForm.accountNumber,
-        iban: withdrawalForm.iban || '',
-        status: 'pending',
-        createdAt: serverTimestamp()
-      })
-
-      // Update wallet balance
-      const walletQuery = query(
-        collection(db, 'teacherWallets'),
-        where('teacherId', '==', teacherId)
-      )
-      const walletSnapshot = await getDocs(walletQuery)
-      if (!walletSnapshot.empty) {
-        await updateDoc(firestoreDoc(db, 'teacherWallets', walletSnapshot.docs[0].id), {
-          balance: walletBalance - amount,
-          updatedAt: serverTimestamp()
-        })
-        setWalletBalance(walletBalance - amount)
-      }
-
-      setShowWithdrawalForm(false)
-      setWithdrawalForm({ amount: '', bankName: '', accountNumber: '', iban: '' })
-      showSaveMessage('success', 'تم إرسال طلب السحب بنجاح')
-    } catch (error) {
-      console.error('Error submitting withdrawal request:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء إرسال طلب السحب')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  // Handle create ticket
-  const handleCreateTicket = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user) return
-
-    if (!newTicket.subject || !newTicket.message) {
-      showSaveMessage('error', 'يرجى إدخال جميع البيانات المطلوبة')
-      return
-    }
-
-    setSaving(true)
-    try {
-      const ticketData = {
-        userId: user.uid,
-        userName: userProfile?.displayName || user.email || 'مستخدم',
-        subject: newTicket.subject,
-        message: newTicket.message,
-        category: newTicket.category,
-        priority: newTicket.priority,
-        status: 'open',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
-
-      const docRef = await addDoc(collection(db, 'supportTickets'), ticketData)
-      
-      setShowNewTicketForm(false)
-      setNewTicket({ subject: '', message: '', category: 'technical', priority: 'medium' })
-      showSaveMessage('success', 'تم إنشاء التذكرة بنجاح')
-      
-      // Refresh tickets
-      const ticketsQuery = query(
-        collection(db, 'supportTickets'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(10)
-      )
-      const ticketsSnapshot = await getDocs(ticketsQuery)
-      const ticketsData = await Promise.all(
-        ticketsSnapshot.docs.map(async (docSnapshot) => {
-          const ticketData: any = { id: docSnapshot.id, ...docSnapshot.data() }
-          const repliesQuery = query(
-            collection(db, 'supportTickets', docSnapshot.id, 'replies'),
-            orderBy('createdAt', 'asc')
-          )
-          const repliesSnapshot = await getDocs(repliesQuery)
-          ticketData.replies = repliesSnapshot.docs.map(replyDoc => ({
-            id: replyDoc.id,
-            ...replyDoc.data()
-          }))
-          return ticketData
-        })
-      )
-      setSupportTickets(ticketsData)
-    } catch (error) {
-      console.error('Error creating ticket:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء إنشاء التذكرة')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  // Handle send reply
-  const handleSendReply = async () => {
-    if (!user || !selectedTicket || !replyMessage.trim()) return
-
-    setSaving(true)
-    try {
-      const replyData = {
-        message: replyMessage,
-        sender: 'user',
-        senderName: userProfile?.displayName || user.email || 'مستخدم',
-        createdAt: serverTimestamp()
-      }
-
-      await addDoc(
-        collection(db, 'supportTickets', selectedTicket.id, 'replies'),
-        replyData
-      )
-
-      await updateDoc(firestoreDoc(db, 'supportTickets', selectedTicket.id), {
-        status: 'in_progress',
-        updatedAt: serverTimestamp()
-      })
-
-      setReplyMessage('')
-      showSaveMessage('success', 'تم إرسال الرد بنجاح')
-      
-      // Refresh selected ticket
-      const ticketDoc = await getDoc(firestoreDoc(db, 'supportTickets', selectedTicket.id))
-      if (ticketDoc.exists()) {
-        const ticketData: any = { id: ticketDoc.id, ...ticketDoc.data() }
-        const repliesQuery = query(
-          collection(db, 'supportTickets', selectedTicket.id, 'replies'),
-          orderBy('createdAt', 'asc')
-        )
-        const repliesSnapshot = await getDocs(repliesQuery)
-        ticketData.replies = repliesSnapshot.docs.map(replyDoc => ({
-          id: replyDoc.id,
-          ...replyDoc.data()
-        }))
-        setSelectedTicket(ticketData)
-      }
-    } catch (error) {
-      console.error('Error sending reply:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء إرسال الرد')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   // Toggle availability slot
   const handleToggleAvailability = (dayIndex: number, timeIndex: number) => {
@@ -596,29 +281,18 @@ export default function TeacherProfilePage() {
 
     setSaving(true)
     try {
+      const teacherService = new TeacherService()
       const teacherId = teacherApplication.userId || teacherApplication.id
-      const availabilityDocRef = firestoreDoc(db, 'teacherAvailability', teacherId)
       
-      // Try to update first, if fails use setDoc with merge
-      try {
-        await updateDoc(availabilityDocRef, {
-          schedule: editableAvailability,
-          updatedAt: serverTimestamp()
-        })
-        showSaveMessage('success', 'تم حفظ جدول التوفر بنجاح')
-      } catch (updateError: any) {
-        // If document doesn't exist, create it using setDoc with merge
-        await setDoc(availabilityDocRef, {
-          teacherId,
-          schedule: editableAvailability,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true })
-        showSaveMessage('success', 'تم حفظ جدول التوفر بنجاح')
-      }
+      await teacherService.saveAvailability({
+        teacherId,
+        schedule: editableAvailability as ('available' | 'booked' | null)[][]
+      })
+      
+      showSaveMessage({ type: 'success', text: 'تم حفظ جدول التوفر بنجاح' })
     } catch (error) {
       console.error('Error saving availability:', error)
-      showSaveMessage('error', 'حدث خطأ أثناء حفظ جدول التوفر')
+      showSaveMessage({ type: 'error', text: 'حدث خطأ أثناء حفظ جدول التوفر' })
     } finally {
       setSaving(false)
     }
@@ -804,134 +478,18 @@ export default function TeacherProfilePage() {
                   </div>
 
                   {/* Personal Information Section */}
-                  <div className="w-full mt-6 pt-6 border-t border-gray-100 dark:border-slate-700">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-bold">البيانات الشخصية</h3>
-                      {isApproved && !isPending && (
-                        <button
-                          onClick={() => toggleEdit('personalInfo')}
-                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                          title="تعديل"
-                        >
-                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 text-sm">edit</span>
-                        </button>
-                      )}
-                    </div>
-                    {editingStates.personalInfo ? (
-                      <div className="space-y-4 text-right">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الاسم الكامل</label>
-                            {editingStates.personalInfo && !isPending ? (
-                              <input
-                                type="text"
-                                defaultValue={teacherName}
-                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                              />
-                            ) : (
-                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                                {teacherName}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">البريد الإلكتروني</label>
-                            {editingStates.personalInfo && !isPending ? (
-                              <input
-                                type="email"
-                                defaultValue={userProfile?.email || teacherApplication?.email || user?.email || ''}
-                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                              />
-                            ) : (
-                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                                {userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">رقم الهاتف</label>
-                            {editingStates.personalInfo && !isPending ? (
-                              <input
-                                type="tel"
-                                defaultValue={`${teacherApplication?.countryCode || '+966'} ${teacherApplication?.phone || ''}`}
-                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                              />
-                            ) : (
-                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                                {teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الجنسية</label>
-                            {editingStates.personalInfo && !isPending ? (
-                              <input
-                                type="text"
-                                defaultValue={teacherApplication?.nationality || ''}
-                                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                              />
-                            ) : (
-                              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                                {teacherApplication?.nationality || 'غير متوفر'}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">نبذة عني</label>
-                          {editingStates.personalInfo && !isPending ? (
-                            <textarea
-                              rows={4}
-                              defaultValue={teacherApplication?.bio || ''}
-                              className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-                            />
-                          ) : (
-                            <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[80px]">
-                              {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
-                            </div>
-                          )}
-                        </div>
-                        {editingStates.personalInfo && !isPending && (
-                          <div className="flex flex-col gap-2">
-                            <button
-                              onClick={handleSavePersonalInfo}
-                              disabled={saving}
-                              className="w-full bg-primary text-slate-900 font-bold py-2 px-4 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                            >
-                              {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                            </button>
-                            <button
-                              onClick={() => toggleEdit('personalInfo')}
-                              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-sm"
-                            >
-                              إلغاء
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-3 text-sm text-gray-600 dark:text-slate-400">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-400 dark:text-slate-500">الاسم:</span>
-                          <span className="font-semibold text-slate-900 dark:text-white">{teacherName}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-400 dark:text-slate-500">البريد:</span>
-                          <span className="font-semibold text-slate-900 dark:text-white">{userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-400 dark:text-slate-500">الهاتف:</span>
-                          <span className="font-semibold text-slate-900 dark:text-white">{teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}</span>
-                        </div>
-                        {teacherApplication?.nationality && (
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-400 dark:text-slate-500">الجنسية:</span>
-                            <span className="font-semibold text-slate-900 dark:text-white">{teacherApplication.nationality}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <PersonalInfoSection
+                    teacherApplication={teacherApplication}
+                    teacherProfile={teacherProfile}
+                    userProfile={userProfile}
+                    user={user}
+                    teacherName={teacherName}
+                    isApproved={isApproved}
+                    isPending={isPending}
+                    isEditing={editingStates.personalInfo}
+                    onToggleEdit={() => toggleEdit('personalInfo')}
+                    onSave={showSaveMessage}
+                  />
 
                   {/* Action Button */}
                   {isApproved && (
@@ -1621,419 +1179,19 @@ export default function TeacherProfilePage() {
 
                 {/* Wallet Section - Only show when activeQuickTab is 'wallet' */}
                 {activeQuickTab === 'wallet' && (
-                  <div id="wallet" className="space-y-6">
-                    {/* Balance Card */}
-                    <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-primary/5">
-                      <div className="absolute top-0 left-0 w-24 sm:w-32 h-24 sm:h-32 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                      <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 relative z-10">
-                        <div className="flex flex-col items-center md:items-start">
-                          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium mb-1">إجمالي الأرباح</p>
-                          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white flex flex-wrap items-baseline gap-2 justify-center md:justify-start">
-                            <span className="break-all">{walletBalance.toFixed(2)}</span> <span className="text-lg sm:text-xl font-bold text-primary">{walletCurrency === 'SAR' ? 'ر.س' : walletCurrency === 'USD' ? '$' : 'ج.م'}</span>
-                          </h1>
-                        </div>
-                        <button
-                          onClick={() => setShowWithdrawalForm(true)}
-                          className="w-full md:w-auto flex-1 md:flex-none min-w-[140px] px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
-                        >
-                          <span className="material-symbols-outlined text-base sm:text-lg">account_balance</span>
-                          سحب رصيدي
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                      {/* Bank Accounts */}
-                      <div className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-primary">account_balance</span>
-                          <h3 className="text-lg font-bold">الحسابات البنكية لاستلام الأرباح</h3>
-                        </div>
-                        <div className="space-y-4">
-                          <div className="p-4 border border-slate-100 dark:border-slate-700 rounded-2xl flex items-center justify-between bg-slate-50 dark:bg-slate-700/50">
-                            <div className="flex items-center gap-3">
-                              <div className="size-10 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-600">
-                                <span className="material-symbols-outlined text-slate-400">account_balance</span>
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-slate-900 dark:text-white">بنك الكويت الوطني</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">**** 4582</p>
-                              </div>
-                            </div>
-                            <span className="material-symbols-outlined text-green-500">check_circle</span>
-                          </div>
-                          <button className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-slate-500 dark:text-slate-400 font-bold flex items-center justify-center gap-2 hover:border-primary hover:text-primary transition-all">
-                            <span className="material-symbols-outlined">add_circle</span>
-                            إضافة حساب بنكي جديد
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Withdrawal Form */}
-                      <div className="flex flex-col gap-4 sm:gap-6 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-primary">payments</span>
-                          <h3 className="text-lg font-bold text-center">طلب سحب</h3>
-                        </div>
-                        <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl flex justify-between items-center">
-                          <div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">متاح للسحب</p>
-                            <p className="text-xl font-bold text-slate-900 dark:text-white">{walletBalance.toFixed(2)} {walletCurrency === 'SAR' ? 'ر.س' : walletCurrency === 'USD' ? '$' : 'ج.م'}</p>
-                          </div>
-                          <span className="material-symbols-outlined text-slate-400">info</span>
-                        </div>
-                        {showWithdrawalForm ? (
-                          <div className="space-y-4">
-                            <label className="block">
-                              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 block">مبلغ السحب</span>
-                              <input
-                                type="number"
-                                value={withdrawalForm.amount}
-                                onChange={(e) => setWithdrawalForm({ ...withdrawalForm, amount: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary text-base"
-                                placeholder="0.00"
-                              />
-                            </label>
-                            <label className="block">
-                              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 block">اسم البنك</span>
-                              <input
-                                type="text"
-                                value={withdrawalForm.bankName}
-                                onChange={(e) => setWithdrawalForm({ ...withdrawalForm, bankName: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary"
-                                placeholder="اسم البنك"
-                              />
-                            </label>
-                            <label className="block">
-                              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 block">رقم الحساب</span>
-                              <input
-                                type="text"
-                                value={withdrawalForm.accountNumber}
-                                onChange={(e) => setWithdrawalForm({ ...withdrawalForm, accountNumber: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary"
-                                placeholder="رقم الحساب"
-                              />
-                            </label>
-                            <label className="block">
-                              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 block">رقم الآيبان (IBAN)</span>
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  value={withdrawalForm.iban}
-                                  onChange={(e) => setWithdrawalForm({ ...withdrawalForm, iban: e.target.value })}
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary text-left font-mono"
-                                  dir="ltr"
-                                  placeholder="KW00 0000 0000 0000 0000"
-                                />
-                                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
-                              </div>
-                            </label>
-                            <div className="flex gap-3">
-                              <button
-                                onClick={() => setShowWithdrawalForm(false)}
-                                className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                              >
-                                إلغاء
-                              </button>
-                              <button
-                                onClick={handleWithdrawalSubmit}
-                                disabled={saving}
-                                className="flex-1 px-4 py-3 bg-primary text-slate-900 font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
-                              >
-                                {saving ? 'جاري الإرسال...' : 'تأكيد طلب السحب'}
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setShowWithdrawalForm(true)}
-                            className="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors text-center"
-                          >
-                            طلب سحب جديد
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Transactions Table */}
-                    <div className="flex flex-col gap-4 bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-primary/5">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                        <h3 className="text-base sm:text-lg font-bold">سجل الأرباح والمدفوعات</h3>
-                        <button className="text-primary text-xs sm:text-sm font-bold hover:underline">عرض الكل</button>
-                      </div>
-                      <div className="overflow-x-auto -mx-4 sm:mx-0">
-                        <div className="inline-block min-w-full align-middle px-4 sm:px-0">
-                          <table className="w-full text-right min-w-[600px]">
-                            <thead>
-                              <tr className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm border-b border-slate-100 dark:border-slate-700">
-                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">التاريخ</th>
-                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">النوع</th>
-                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">الحالة</th>
-                                <th className="pb-3 sm:pb-4 px-2 sm:px-4 font-medium">المبلغ</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
-                              {walletTransactions.length > 0 ? (
-                                walletTransactions.map((transaction) => (
-                                  <tr key={transaction.id} className="group hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-xs sm:text-sm font-medium whitespace-nowrap">{new Date(transaction.createdAt?.toDate?.() || transaction.createdAt).toLocaleDateString('ar-SA')}</td>
-                                    <td className="py-3 sm:py-4 px-2 sm:px-4">
-                                      <div className="flex items-center gap-1.5 sm:gap-2">
-                                        <span className={`material-symbols-outlined text-sm sm:text-base ${
-                                          transaction.type === 'earning' ? 'text-green-500' : 'text-slate-400'
-                                        }`}>
-                                          {transaction.type === 'earning' ? 'add_circle' : 'remove_circle'}
-                                        </span>
-                                        <span className="text-xs sm:text-sm font-bold truncate max-w-[120px] sm:max-w-none">{transaction.description}</span>
-                                      </div>
-                                    </td>
-                                    <td className="py-3 sm:py-4 px-2 sm:px-4">
-                                      <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap ${
-                                        transaction.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                                        transaction.status === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                                      }`}>
-                                        {transaction.status === 'completed' ? 'مكتمل' : transaction.status === 'pending' ? 'قيد المعالجة' : 'مرفوض'}
-                                      </span>
-                                    </td>
-                                    <td className={`py-3 sm:py-4 px-2 sm:px-4 font-bold text-xs sm:text-sm whitespace-nowrap ${
-                                      transaction.type === 'earning' ? 'text-green-600 dark:text-green-400' : 'text-slate-900 dark:text-white'
-                                    }`}>
-                                      {transaction.type === 'earning' ? '+' : '-'}{transaction.amount.toFixed(2)} {transaction.currency === 'SAR' ? 'ر.س' : transaction.currency === 'USD' ? '$' : 'ج.م'}
-                                    </td>
-                                  </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td colSpan={4} className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
-                                    لا توجد معاملات بعد
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <WalletSection
+                    teacherId={teacherApplication?.userId || teacherApplication?.id || null}
+                    onSave={showSaveMessage}
+                  />
                 )}
 
                 {/* Support Section - Only show when activeQuickTab is 'support' */}
                 {activeQuickTab === 'support' && (
-                  <div id="support" className="space-y-8">
-                    {/* Search Section */}
-                    <section className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-primary/10 p-6 sm:p-8 md:p-12 text-center border border-primary/10">
-                      <div className="relative z-10 max-w-xl mx-auto">
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-slate-900 dark:text-slate-100">كيف يمكننا مساعدتك اليوم؟</h2>
-                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mb-6 sm:mb-8">ابحث في مقالات المساعدة أو تصفح المواضيع الشائعة</p>
-                        <div className="relative group">
-                          <span className="material-symbols-outlined absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-primary group-focus-within:text-primary text-lg sm:text-xl">search</span>
-                          <input
-                            className="w-full h-12 sm:h-14 pr-10 sm:pr-12 pl-3 sm:pl-4 rounded-xl sm:rounded-2xl border-none ring-1 ring-primary/20 focus:ring-2 focus:ring-primary bg-background-light dark:bg-background-dark shadow-sm text-sm sm:text-base"
-                            placeholder="ابحث عن دروس، فواتير، أو مشاكل تقنية..."
-                            type="text"
-                          />
-                        </div>
-                      </div>
-                    </section>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                      {/* New Ticket Form */}
-                      <section className="space-y-4 sm:space-y-6">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="material-symbols-outlined text-primary text-lg sm:text-xl">confirmation_number</span>
-                          <h2 className="text-lg sm:text-xl font-bold">فتح تذكرة دعم جديدة</h2>
-                        </div>
-                        {showNewTicketForm ? (
-                          <form onSubmit={handleCreateTicket} className="space-y-4 bg-background-light dark:bg-background-dark p-6 rounded-2xl border border-primary/10 shadow-sm">
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">موضوع المشكلة</label>
-                              <input
-                                type="text"
-                                value={newTicket.subject}
-                                onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="مثال: مشكلة في تسجيل الدخول"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">القسم</label>
-                              <select
-                                value={newTicket.category}
-                                onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary"
-                              >
-                                <option value="technical">مشاكل تقنية</option>
-                                <option value="billing">الاشتراكات والمدفوعات</option>
-                                <option value="account">محتوى الدروس</option>
-                                <option value="other">اقتراحات وتطوير</option>
-                              </select>
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">الأولوية</label>
-                              <select
-                                value={newTicket.priority}
-                                onChange={(e) => setNewTicket({ ...newTicket, priority: e.target.value as any })}
-                                className="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary"
-                              >
-                                <option value="low">منخفضة</option>
-                                <option value="medium">متوسطة</option>
-                                <option value="high">عالية</option>
-                                <option value="urgent">عاجل</option>
-                              </select>
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">تفاصيل المشكلة</label>
-                              <textarea
-                                value={newTicket.message}
-                                onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-primary/10 bg-primary/5 focus:ring-2 focus:ring-primary resize-none"
-                                placeholder="يرجى وصف المشكلة بالتفصيل..."
-                                rows={4}
-                              />
-                            </div>
-                            <div className="flex gap-3">
-                              <button
-                                type="button"
-                                onClick={() => setShowNewTicketForm(false)}
-                                className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                              >
-                                إلغاء
-                              </button>
-                              <button
-                                type="submit"
-                                disabled={saving}
-                                className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl shadow-lg shadow-primary/20 disabled:opacity-50"
-                              >
-                                {saving ? 'جاري الإرسال...' : 'إرسال التذكرة'}
-                              </button>
-                            </div>
-                          </form>
-                        ) : (
-                          <button
-                            onClick={() => setShowNewTicketForm(true)}
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                          >
-                            <span className="material-symbols-outlined">add</span>
-                            فتح تذكرة جديدة
-                          </button>
-                        )}
-                      </section>
-
-                      {/* Recent Tickets */}
-                      <section className="space-y-4 sm:space-y-6">
-                        <div className="flex items-center justify-between mb-2 gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary text-lg sm:text-xl">history</span>
-                            <h2 className="text-lg sm:text-xl font-bold">التذاكر الأخيرة</h2>
-                          </div>
-                          <a className="text-xs sm:text-sm text-primary font-medium hover:underline whitespace-nowrap" href="#">عرض الكل</a>
-                        </div>
-                        <div className="space-y-3 sm:space-y-4">
-                          {supportTickets.length > 0 ? (
-                            supportTickets.map((ticket) => (
-                              <div
-                                key={ticket.id}
-                                onClick={() => setSelectedTicket(ticket)}
-                                className="p-3 sm:p-4 bg-background-light dark:bg-background-dark border border-primary/10 rounded-xl sm:rounded-2xl flex items-start gap-3 sm:gap-4 hover:shadow-md transition-shadow cursor-pointer"
-                              >
-                                <div className={`size-8 sm:size-10 rounded-full flex items-center justify-center shrink-0 ${
-                                  ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' :
-                                  ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
-                                  'bg-blue-100 dark:bg-blue-900/30 text-blue-600'
-                                }`}>
-                                  <span className="material-symbols-outlined text-sm sm:text-base">
-                                    {ticket.status === 'open' ? 'hourglass_empty' : ticket.status === 'resolved' ? 'check_circle' : 'schedule'}
-                                  </span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex flex-col sm:flex-row justify-between items-start gap-1 sm:gap-0 mb-1">
-                                    <h3 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 break-words">{ticket.subject}</h3>
-                                    <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-bold whitespace-nowrap shrink-0 ${
-                                      ticket.status === 'open' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
-                                      ticket.status === 'resolved' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                                      'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                                    }`}>
-                                      {ticket.status === 'open' ? 'قيد الانتظار' : ticket.status === 'resolved' ? 'تم الحل' : 'قيد المعالجة'}
-                                    </span>
-                                  </div>
-                                  <p className="text-[10px] sm:text-xs text-slate-500 mb-1 sm:mb-2">رقم التذكرة: #{ticket.id.slice(0, 8)}</p>
-                                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 sm:line-clamp-1">{ticket.message}</p>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="p-6 sm:p-8 border-2 border-dotted border-primary/10 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center text-center opacity-60">
-                              <span className="material-symbols-outlined text-3xl sm:text-4xl text-primary/40 mb-2">contact_support</span>
-                              <p className="text-xs sm:text-sm">لا توجد تذاكر للعرض</p>
-                            </div>
-                          )}
-                        </div>
-                      </section>
-                    </div>
-
-                    {/* Ticket Details Modal */}
-                    {selectedTicket && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
-                        <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700 max-h-[90vh]">
-                          <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-3 sm:pb-4 flex justify-between items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1 break-words">{selectedTicket.subject}</h2>
-                              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">{selectedTicket.category}</p>
-                            </div>
-                            <button
-                              onClick={() => setSelectedTicket(null)}
-                              className="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors shrink-0"
-                            >
-                              <span className="material-symbols-outlined text-slate-500 text-lg sm:text-xl">close</span>
-                            </button>
-                          </div>
-                          <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 max-h-[calc(90vh-120px)] overflow-y-auto">
-                            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
-                              <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedTicket.message}</p>
-                            </div>
-                            {selectedTicket.replies && selectedTicket.replies.length > 0 && (
-                              <div className="space-y-4">
-                                <h3 className="font-bold">الردود</h3>
-                                {selectedTicket.replies.map((reply: any) => (
-                                  <div
-                                    key={reply.id}
-                                    className={`p-3 sm:p-4 rounded-lg ${
-                                      reply.sender === 'user' ? 'bg-primary/10 ml-4 sm:ml-8' : 'bg-slate-100 dark:bg-slate-700 mr-4 sm:mr-8'
-                                    }`}
-                                  >
-                                    <div className="flex items-center justify-between mb-2">
-                                      <p className="font-bold text-sm">{reply.senderName}</p>
-                                      <p className="text-xs text-slate-500">{new Date(reply.createdAt?.toDate?.() || reply.createdAt).toLocaleDateString('ar-SA')}</p>
-                                    </div>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{reply.message}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {selectedTicket.status !== 'closed' && (
-                              <div className="border-t border-slate-200 dark:border-slate-700 pt-3 sm:pt-4 mt-3 sm:mt-4">
-                                <textarea
-                                  value={replyMessage}
-                                  onChange={(e) => setReplyMessage(e.target.value)}
-                                  placeholder="اكتب ردك هنا..."
-                                  rows={3}
-                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-3"
-                                />
-                                <button
-                                  onClick={handleSendReply}
-                                  disabled={!replyMessage.trim() || saving}
-                                  className="w-full sm:w-auto bg-primary text-slate-900 font-bold py-2 px-4 sm:px-6 rounded-lg hover:brightness-110 transition-all disabled:opacity-50 text-sm sm:text-base"
-                                >
-                                  {saving ? 'جاري الإرسال...' : 'إرسال الرد'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <SupportSection
+                    userId={user?.uid || null}
+                    userName={userProfile?.displayName || user?.email || 'مستخدم'}
+                    onSave={showSaveMessage}
+                  />
                 )}
               </section>
             </div>
