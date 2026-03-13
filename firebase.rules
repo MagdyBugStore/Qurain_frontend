@@ -95,8 +95,8 @@ service cloud.firestore {
     // Allow authenticated users to read sessions
     // السماح للمستخدمين المسجلين بقراءة الجلسات
     match /sessions/{sessionId} {
-      // Allow read if user is authenticated (to display session counts on teacher profiles)
-      // السماح بالقراءة إذا كان المستخدم مسجلاً (لعرض عدد الجلسات في ملفات المعلمين)
+      // Allow read if user is authenticated (queries filter by studentId/teacherId)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (الاستعلامات تفلتر حسب studentId/teacherId)
       allow read: if isAuthenticated();
       
       // Allow create if user is authenticated
@@ -227,6 +227,73 @@ service cloud.firestore {
       // Allow delete if user is authenticated and owns the request OR is admin
       // السماح بالحذف إذا كان المستخدم مسجلاً ويملك الطلب أو مشرفاً
       allow delete: if (isAuthenticated() && resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Student Tasks collection - مجموعة مهام الطلاب
+    // Allow students to manage their own tasks
+    // السماح للطلاب بإدارة مهامهم
+    match /studentTasks/{taskId} {
+      // Allow read if user is authenticated (queries filter by studentId/teacherId)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (الاستعلامات تفلتر حسب studentId/teacherId)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated (teachers can create tasks for students)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً (المعلمون يمكنهم إنشاء مهام للطلاب)
+      allow create: if isAuthenticated();
+      
+      // Allow update if user owns the task (student) OR is the assigned teacher OR is admin
+      // السماح بالتحديث إذا كان المستخدم يملك المهمة (طالب) أو المعلم المكلف أو مشرفاً
+      allow update: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow delete if user owns the task OR is admin
+      // السماح بالحذف إذا كان المستخدم يملك المهمة أو مشرفاً
+      allow delete: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Memorization Logs collection - مجموعة سجلات الحفظ
+    // Allow students to manage their own memorization logs
+    // السماح للطلاب بإدارة سجلات حفظهم
+    match /memorizationLogs/{logId} {
+      // Allow read if user is authenticated (queries filter by studentId/teacherId)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (الاستعلامات تفلتر حسب studentId/teacherId)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated (students or teachers can create logs)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً (الطلاب أو المعلمون يمكنهم إنشاء السجلات)
+      allow create: if isAuthenticated();
+      
+      // Allow update if user owns the log OR is the assigned teacher OR is admin
+      // السماح بالتحديث إذا كان المستخدم يملك السجل أو المعلم المكلف أو مشرفاً
+      allow update: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
+      
+      // Allow delete if user owns the log OR is admin
+      // السماح بالحذف إذا كان المستخدم يملك السجل أو مشرفاً
+      allow delete: if isAuthenticated() 
+                    && (resource.data.studentId == request.auth.uid 
+                        || resource.data.teacherId == request.auth.uid) || isAdmin();
+    }
+    
+    // Student Activities collection - مجموعة نشاطات الطلاب
+    // Allow students to view their own activities
+    // السماح للطلاب بعرض نشاطاتهم
+    match /studentActivities/{activityId} {
+      // Allow read if user is authenticated (queries filter by studentId)
+      // السماح بالقراءة إذا كان المستخدم مسجلاً (الاستعلامات تفلتر حسب studentId)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is authenticated (system can create activities)
+      // السماح بالإنشاء إذا كان المستخدم مسجلاً (النظام يمكنه إنشاء النشاطات)
+      allow create: if isAuthenticated();
+      
+      // Allow update/delete only for admin (activities should not be modified by users)
+      // السماح بالتحديث/الحذف فقط للمشرف (النشاطات لا يجب تعديلها من قبل المستخدمين)
+      allow update, delete: if isAdmin();
     }
     
     // Support Tickets collection - مجموعة تذاكر الدعم الفني

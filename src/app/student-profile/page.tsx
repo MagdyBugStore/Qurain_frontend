@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
@@ -15,16 +15,20 @@ export default function StudentProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const { user, userProfile } = useAuth()
   const [studentService] = useState(() => new StudentService())
-  
+
   // Calendar state
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [allSessions, setAllSessions] = useState<StudentSession[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(false)
-  
+
   // Memorization logs state
   const [allMemorizationLogs, setAllMemorizationLogs] = useState<MemorizationLog[]>([])
   const [allLogsLoading, setAllLogsLoading] = useState(false)
   
+  // Goals layout state (column or row) - auto based on card size
+  const [goalsLayout, setGoalsLayout] = useState<'column' | 'row'>('column')
+  const goalsContainerRef = useRef<HTMLDivElement>(null)
+
   // Fetch dynamic student data
   const {
     weeklyTasks,
@@ -114,7 +118,7 @@ export default function StudentProfilePage() {
     prevMonth.setMonth(currentMonth.getMonth() - 1)
     const nextMonth = new Date(currentMonth)
     nextMonth.setMonth(currentMonth.getMonth() + 1)
-    
+
     return [
       { date: prevMonth, label: getArabicMonthName(prevMonth.getMonth()) },
       { date: currentMonth, label: getArabicMonthName(currentMonth.getMonth()), isActive: true },
@@ -143,12 +147,36 @@ export default function StudentProfilePage() {
     }
   }, [allSessions])
 
+  // Auto-detect goals layout based on card width
+  useEffect(() => {
+    const container = goalsContainerRef.current
+    if (!container) return
+
+    const updateLayout = () => {
+      const width = container.offsetWidth
+      const height = container.offsetHeight
+      
+      setGoalsLayout(width < 300 ? 'column' : 'row')
+    }
+
+    // Initial check
+    updateLayout()
+
+    // Watch for resize
+    const resizeObserver = new ResizeObserver(updateLayout)
+    resizeObserver.observe(container)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
   // Get student data from userProfile
-  const studentName = userProfile?.displayName || 
+  const studentName = userProfile?.displayName ||
     `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() ||
     user?.displayName ||
     'الطالب'
-  
+
   // Map internal IDs from onboarding steps to human‑readable Arabic labels
   const levelLabels: Record<string, string> = {
     beginner: 'مبتدئ',
@@ -224,65 +252,123 @@ export default function StudentProfilePage() {
         <main className="flex-1 max-w-[1400px] mx-auto w-full p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Sidebar: Profile Info - Fixed Layout */}
           <aside className="lg:col-span-3 space-y-6">
-            {/* Profile Card - Always Visible */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
-              <div className="relative group">
-                <div className="size-32 rounded-full border-4 border-primary/20 p-1 mb-4">
-                  {studentPhoto ? (
-                    <img
-                      alt="صورة المستخدم الكبيرة"
-                      className="w-full h-full rounded-full object-cover"
-                      src={studentPhoto}
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-slate-400">person</span>
-                    </div>
-                  )}
+            {/* Profile Card - Always Visible - Improved UI/UX */}
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+              {/* Profile Header */}
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="relative group mb-4">
+                  <div className="size-24 rounded-full border-2 border-primary/30 p-0.5">
+                    {studentPhoto ? (
+                      <img
+                        alt="صورة المستخدم"
+                        className="w-full h-full rounded-full object-cover"
+                        src={studentPhoto}
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-5xl text-primary/60">person</span>
+                      </div>
+                    )}
+                  </div>
+                  <button className="absolute bottom-0 left-0 size-8 p-4 bg-primary text-white rounded-full shadow-md border-2 border-white dark:border-slate-900 hover:scale-110 transition-transform flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base">edit</span>
+                  </button>
                 </div>
-                <button className="absolute bottom-4 left-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-900">
-                  <span className="material-symbols-outlined text-sm">edit</span>
-                </button>
-              </div>
-              <h3 className="text-xl font-bold mb-1">{studentName}</h3>
-              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-6">
-                {studentLevel}
-              </span>
 
-              {/* Extra real data from onboarding flow */}
-              <div className="w-full space-y-3 mb-4">
-                <div className="flex flex-wrap gap-2 justify-center text-xs">
-                  <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    الفئة العمرية: <span className="font-bold">{ageGroup}</span>
+                {/* Student Name - Larger and Prominent */}
+                <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                  {studentName}
+                </h2>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <span className="px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold">
+                    {ageGroup}
                   </span>
                 </div>
-
-                {selectedGoals.length > 0 && (
-                  <div className="text-xs text-slate-600 dark:text-slate-300">
-                    <span className="font-bold">الأهداف الرئيسية: </span>
-                    <span>{selectedGoals.join(' • ')}</span>
-                  </div>
-                )}
-
-                {selectedLearningGoals.length > 0 && (
-                  <div className="text-xs text-slate-600 dark:text-slate-300">
-                    <span className="font-bold">الهدف التعليمي: </span>
-                    <span>{selectedLearningGoals.join(' • ')}</span>
-                  </div>
-                )}
+                {/* Level Badge */}
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold mb-4">
+                  {studentLevel}
+                </span>
               </div>
-              <div className="w-full grid grid-cols-2 gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl font-bold text-primary">
-                    {stats?.totalSessions ?? 0}
-                  </span>
-                  <span className="text-xs text-slate-500">إجمالي الحصص</span>
+              
+              {/* Goals Section - Grid Layout */}
+              {(selectedGoals.length > 0 || selectedLearningGoals.length > 0) && (
+                <div 
+                  ref={goalsContainerRef}
+                  className="mb-6 pb-6 border-b border-slate-100 dark:border-slate-800"
+                >
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4">الأهداف</h3>
+                  
+                  <div className={`grid gap-4 ${
+                    goalsLayout === 'column' 
+                      ? 'grid-cols-1' 
+                      : 'grid-cols-1 sm:grid-cols-2'
+                  }`}>
+                    {/* Main Goals with Tags */}
+                    {selectedGoals.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-3">
+                          <span className="material-symbols-outlined text-lg text-primary">flag</span>
+                          <span className="font-medium">الأهداف الرئيسية</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedGoals.map((goal, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800"
+                            >
+                              {goal}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Learning Goals with Tags */}
+                    {selectedLearningGoals.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-3">
+                          <span className="material-symbols-outlined text-lg text-primary">school</span>
+                          <span className="font-medium">الهدف التعليمي</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedLearningGoals.map((goal, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-semibold border border-blue-200 dark:border-blue-800"
+                            >
+                              {goal}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-col items-center border-r border-slate-100 dark:border-slate-800">
-                  <span className="text-2xl font-bold text-primary">
+              )}
+
+              {/* Stats with Icons */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                    <span className="material-symbols-outlined text-primary text-xl">auto_stories</span>
+                  </div>
+                  <span className="text-3xl font-black text-primary mb-1">
                     {stats?.memorizedParts ?? 0}
                   </span>
-                  <span className="text-xs text-slate-500">أجزاء محفوظة</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center">
+                    أجزاء محفوظة
+                  </span>
+                </div>
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                    <span className="material-symbols-outlined text-primary text-xl">event</span>
+                  </div>
+                  <span className="text-3xl font-black text-primary mb-1">
+                    {stats?.totalSessions ?? 0}
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center">
+                    إجمالي الحصص
+                  </span>
                 </div>
               </div>
             </div>
@@ -293,11 +379,10 @@ export default function StudentProfilePage() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as TabType)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                    activeTab === item.id
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${activeTab === item.id
                       ? 'bg-primary text-white'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
+                    }`}
                 >
                   <span className="material-symbols-outlined">{item.icon}</span>
                   <span>{item.label}</span>
@@ -308,8 +393,6 @@ export default function StudentProfilePage() {
             {/* Schedule Tab Specific Content */}
             {activeTab === 'schedule' && (
               <>
-                
-
                 {/* Next Session Highlight */}
                 {upcomingSession ? (
                   <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-primary/20 shadow-sm relative overflow-hidden">
@@ -406,11 +489,10 @@ export default function StudentProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-8 py-4 whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
+                  className={`px-8 py-4 whitespace-nowrap transition-colors ${activeTab === tab.id
                       ? 'text-primary border-b-2 border-primary font-bold'
                       : 'text-slate-500 dark:text-slate-400 hover:text-primary'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -483,9 +565,9 @@ export default function StudentProfilePage() {
                   <div className="lg:col-span-2 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-lg font-bold">المهام المطلوبة خلال الأسبوع</h4>
-                      
+
                     </div>
-                    
+
                     {loading ? (
                       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 p-8 flex items-center justify-center">
                         <div className="text-center">
@@ -500,19 +582,17 @@ export default function StudentProfilePage() {
                           return (
                             <div
                               key={task.id}
-                              className={`p-4 flex items-center justify-between transition-colors ${
-                                isCompleted
+                              className={`p-4 flex items-center justify-between transition-colors ${isCompleted
                                   ? 'bg-green-50/50 dark:bg-green-900/10'
                                   : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div
-                                  className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${
-                                    isCompleted
+                                  className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${isCompleted
                                       ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                                       : 'bg-primary/10 text-primary'
-                                  }`}
+                                    }`}
                                 >
                                   {isCompleted ? (
                                     <span className="material-symbols-outlined">check_circle</span>
@@ -525,11 +605,10 @@ export default function StudentProfilePage() {
                                     <p className={`font-bold truncate ${isCompleted ? 'line-through text-slate-500' : ''}`}>
                                       {task.title}
                                     </p>
-                                    <span className={`px-2 py-0.5 rounded text-xs font-medium shrink-0 ${
-                                      isCompleted
+                                    <span className={`px-2 py-0.5 rounded text-xs font-medium shrink-0 ${isCompleted
                                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                         : 'bg-primary/20 text-primary'
-                                    }`}>
+                                      }`}>
                                       {getTaskStatusDisplay(task.status)}
                                     </span>
                                   </div>
@@ -574,7 +653,7 @@ export default function StudentProfilePage() {
                   <div className="lg:col-span-2 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-lg font-bold">آخر الإنجازات في سجل الحفظ</h4>
-                      
+
                     </div>
                     {loading ? (
                       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 p-8 flex items-center justify-center">
@@ -614,7 +693,6 @@ export default function StudentProfilePage() {
                       </div>
                     )}
                   </div>
-
                   {/* Activity Feed */}
                   <div className="space-y-4">
                     <h4 className="text-lg font-bold">النشاط الأخير</h4>
@@ -667,11 +745,10 @@ export default function StudentProfilePage() {
                       <button
                         key={index}
                         onClick={() => setCurrentMonth(month.date)}
-                        className={`px-6 py-2 rounded-lg transition-colors ${
-                          month.isActive
+                        className={`px-6 py-2 rounded-lg transition-colors ${month.isActive
                             ? 'bg-primary text-background-dark font-bold shadow-sm'
                             : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'
-                        }`}
+                          }`}
                       >
                         {month.label}
                       </button>
@@ -741,18 +818,16 @@ export default function StudentProfilePage() {
                         return (
                           <div
                             key={index}
-                            className={`p-1 border-b border-l border-slate-100 dark:border-slate-700 relative ${
-                              isToday ? 'bg-primary/5' : ''
-                            } ${!day.isCurrentMonth ? 'opacity-40' : ''}`}
+                            className={`p-1 border-b border-l border-slate-100 dark:border-slate-700 relative ${isToday ? 'bg-primary/5' : ''
+                              } ${!day.isCurrentMonth ? 'opacity-40' : ''}`}
                           >
                             <span
-                              className={`absolute top-2 right-2 text-xs ${
-                                isToday
+                              className={`absolute top-2 right-2 text-xs ${isToday
                                   ? 'text-primary font-bold'
                                   : day.isCurrentMonth
-                                  ? 'text-slate-400'
-                                  : 'text-slate-300'
-                              }`}
+                                    ? 'text-slate-400'
+                                    : 'text-slate-300'
+                                }`}
                             >
                               {day.dayOfMonth}
                             </span>
@@ -765,13 +840,12 @@ export default function StudentProfilePage() {
                                 return (
                                   <div
                                     key={session.id}
-                                    className={`p-2 rounded-lg cursor-pointer transition-all ${
-                                      isTodaySession
+                                    className={`p-2 rounded-lg cursor-pointer transition-all ${isTodaySession
                                         ? 'bg-primary border-r-4 border-background-dark shadow-md'
                                         : isCompleted
-                                        ? 'bg-slate-100 dark:bg-slate-700 border-r-4 border-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                                        : 'bg-primary/10 border-r-4 border-primary hover:bg-primary/20'
-                                    }`}
+                                          ? 'bg-slate-100 dark:bg-slate-700 border-r-4 border-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                                          : 'bg-primary/10 border-r-4 border-primary hover:bg-primary/20'
+                                      }`}
                                   >
                                     <div className="flex items-center gap-2 mb-1">
                                       {session.teacherPhoto ? (
@@ -786,19 +860,17 @@ export default function StudentProfilePage() {
                                         </div>
                                       )}
                                       <p
-                                        className={`text-[10px] font-bold truncate ${
-                                          isTodaySession ? 'text-background-dark' : ''
-                                        }`}
+                                        className={`text-[10px] font-bold truncate ${isTodaySession ? 'text-background-dark' : ''
+                                          }`}
                                       >
                                         {session.teacherName}
                                       </p>
                                     </div>
                                     <p
-                                      className={`text-[10px] ${
-                                        isTodaySession
+                                      className={`text-[10px] ${isTodaySession
                                           ? 'text-background-dark/80 font-medium'
                                           : 'text-slate-600 dark:text-slate-300'
-                                      }`}
+                                        }`}
                                     >
                                       {getSessionTypeLabel(session.sessionType)} - {formatArabicTime(session.scheduledDate)}
                                     </p>
