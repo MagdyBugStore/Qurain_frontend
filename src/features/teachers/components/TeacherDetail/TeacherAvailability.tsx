@@ -18,6 +18,11 @@ const timeSlots = [
 const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 
 export function TeacherAvailability({ availability }: TeacherAvailabilityProps) {
+  // Count available slots
+  const availableCount = availability.flat().filter(slot => slot === 'available').length;
+  const bookedCount = availability.flat().filter(slot => slot === 'booked').length;
+  const totalSlots = availability.flat().length;
+
   return (
     <div className="bg-bg-card rounded-xl p-6 sm:p-8 border border-gray-200">
       <div className="flex items-center justify-between mb-8">
@@ -30,6 +35,23 @@ export function TeacherAvailability({ availability }: TeacherAvailabilityProps) 
           <button className="px-3 py-1 text-xs font-bold text-text-light hover:text-primary transition-colors">التالي</button>
         </div>
       </div>
+      {/* Availability Summary */}
+      {availableCount > 0 && (
+        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/10">
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-lg">schedule</span>
+              <span className="text-text-dark font-bold">{availableCount} وقت متاح</span>
+            </div>
+            {bookedCount > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-gray-500 text-lg">event_busy</span>
+                <span className="text-text-light">{bookedCount} وقت محجوز</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div className="mb-4 flex items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-primary/20 rounded border border-primary/30"></div>

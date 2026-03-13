@@ -347,18 +347,7 @@ export default function StudentProfilePage() {
               )}
 
               {/* Stats with Icons */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                    <span className="material-symbols-outlined text-primary text-xl">auto_stories</span>
-                  </div>
-                  <span className="text-3xl font-black text-primary mb-1">
-                    {stats?.memorizedParts ?? 0}
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center">
-                    أجزاء محفوظة
-                  </span>
-                </div>
+              <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                     <span className="material-symbols-outlined text-primary text-xl">event</span>

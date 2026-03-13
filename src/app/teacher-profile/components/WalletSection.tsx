@@ -80,17 +80,10 @@ export function WalletSection({ teacherId, onSave }: WalletSectionProps) {
             <h3 className="text-lg font-bold">الحسابات البنكية لاستلام الأرباح</h3>
           </div>
           <div className="space-y-4">
-            <div className="p-4 border border-slate-100 dark:border-slate-700 rounded-2xl flex items-center justify-between bg-slate-50 dark:bg-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className="size-10 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-600">
-                  <span className="material-symbols-outlined text-slate-400">account_balance</span>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">بنك الكويت الوطني</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">**** 4582</p>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-green-500">check_circle</span>
+            {/* Bank accounts list - will be populated from database */}
+            <div className="p-8 text-center border border-slate-100 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/50">
+              <span className="material-symbols-outlined text-4xl text-slate-400 mb-2 block">account_balance</span>
+              <p className="text-sm text-slate-500 dark:text-slate-400">لا توجد حسابات بنكية محفوظة</p>
             </div>
             <button className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-slate-500 dark:text-slate-400 font-bold flex items-center justify-center gap-2 hover:border-primary hover:text-primary transition-all">
               <span className="material-symbols-outlined">add_circle</span>

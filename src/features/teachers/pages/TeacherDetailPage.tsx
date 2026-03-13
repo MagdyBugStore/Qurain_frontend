@@ -2,6 +2,13 @@
  * Teacher Detail Page
  * Main page component for displaying teacher details
  * Refactored from TeacherDetailPageClient.tsx
+ * 
+ * All data is integrated from Firestore:
+ * - Teacher application (bio, introVideo, teachingStyle, sessionContent, etc.)
+ * - Teacher profile (displayName, photoURL, etc.)
+ * - Ratings and reviews from reviews collection
+ * - Qualifications from application
+ * - Availability schedule from teacherAvailability collection
  */
 
 import React, { useState } from 'react';
@@ -130,7 +137,7 @@ export function TeacherDetailPage() {
               reviewsCount={reviewsCount}
             />
 
-            <TeacherVideoIntro />
+            <TeacherVideoIntro introVideo={application.introVideo} />
 
             <TeacherDetailTabs activeTab={activeTab} onTabChange={setActiveTab} />
 

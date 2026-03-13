@@ -21,6 +21,7 @@ export interface TeacherProfileData {
   profile: TeacherProfile | null;
   rating: number;
   reviewsCount: number;
+  reviews: Review[];
   qualifications: Qualification[];
   ijazahs: Ijazah[];
   availability: Availability | null;
@@ -156,6 +157,7 @@ export class TeacherService {
           profile,
           rating: 0,
           reviewsCount: 0,
+          reviews: [],
           qualifications: [],
           ijazahs: [],
           availability: null,
@@ -167,12 +169,14 @@ export class TeacherService {
       const [
         profile,
         { rating, count: reviewsCount },
+        reviews,
         qualifications,
         ijazahs,
         availability,
       ] = await Promise.all([
         this.repository.getUserProfile(teacherId),
         this.repository.getTeacherRating(teacherId),
+        this.repository.getTeacherReviews(teacherId),
         Promise.resolve(getTeacherQualifications(application)),
         this.repository.getIjazahs(teacherId),
         this.repository.getAvailability(teacherId),
@@ -183,6 +187,7 @@ export class TeacherService {
         profile,
         rating,
         reviewsCount,
+        reviews,
         qualifications,
         ijazahs,
         availability,

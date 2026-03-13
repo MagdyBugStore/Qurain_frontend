@@ -57,8 +57,7 @@ export function TeacherSidebar({
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 text-green-400 text-sm mb-6">
-            <span className="material-symbols-outlined text-[18px]">bolt</span>
-            <span>رد سريع (خلال ساعة)</span>
+            
           </div>
           <button
             onClick={handleBookClick}
@@ -75,52 +74,69 @@ export function TeacherSidebar({
         </div>
         <div className="p-6 bg-gray-50">
           <h4 className="text-text-dark font-bold mb-4 text-sm uppercase tracking-wider text-center">ماذا تتضمن الحصة؟</h4>
-          <ul className="space-y-0">
-            <li className="flex items-start gap-3 text-text-light text-sm pb-3 border-b border-gray-200">
-              <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-              <span>خطة دراسية مخصصة</span>
-            </li>
-            <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
-              <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-              <span>مواد تعليمية مجانية</span>
-            </li>
-            <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
-              <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-              <span>تسجيل صوتي للحصة للمراجعة</span>
-            </li>
-            <li className="flex items-start gap-3 text-text-light text-sm pt-3">
-              <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-              <span>شهادة إتمام المستوى</span>
-            </li>
-          </ul>
+          {(() => {
+            // Parse sessionContent from JSON string
+            let sessionContent: Array<{ title: string; subject: string }> = [];
+            try {
+              if (application.sessionContent) {
+                const parsed = JSON.parse(application.sessionContent);
+                if (Array.isArray(parsed)) {
+                  sessionContent = parsed;
+                }
+              }
+            } catch (e) {
+              // If parsing fails, use default items
+            }
+
+            // If no session content, show default items
+            if (sessionContent.length === 0) {
+              return (
+                <ul className="space-y-0">
+                  <li className="flex items-start gap-3 text-text-light text-sm pb-3 border-b border-gray-200">
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                    <span>خطة دراسية مخصصة</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                    <span>مواد تعليمية مجانية</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                    <span>تسجيل صوتي للحصة للمراجعة</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-text-light text-sm pt-3">
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                    <span>شهادة إتمام المستوى</span>
+                  </li>
+                </ul>
+              );
+            }
+
+            // Show real session content
+            return (
+              <ul className="space-y-0">
+                {sessionContent.map((item, index) => (
+                  <li
+                    key={index}
+                    className={`flex items-start gap-3 text-text-light text-sm ${
+                      index < sessionContent.length - 1 ? 'pb-3 border-b border-gray-200' : 'pt-3'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+                    <div className="flex-1">
+                      {item.title && (
+                        <span className="font-bold text-text-dark block mb-1">{item.title}</span>
+                      )}
+                      <span>{item.subject || item.title}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
         </div>
       </div>
 
-      {/* Similar Tutors */}
-      <div className="bg-bg-card rounded-xl border border-gray-200 p-6 hidden lg:block">
-        <h4 className="text-text-dark font-bold mb-4">معلمون مشابهون</h4>
-        <div className="space-y-4">
-          {/* TODO: Fetch similar teachers */}
-          <div className="flex gap-3 items-center group cursor-pointer">
-            <img
-              alt="معلم مشابه"
-              className="w-12 h-12 rounded-full object-cover group-hover:ring-2 ring-primary transition-all"
-              src="/no-image.png"
-            />
-            <div>
-              <h5 className="text-text-dark font-bold text-sm group-hover:text-primary transition-colors">
-                معلم آخر
-              </h5>
-              <div className="flex items-center gap-1 text-xs text-text-light">
-                <span className="material-symbols-outlined text-[14px] text-primary filled">star</span>
-                4.9
-                <span>•</span>
-                <span>١٢٠ {currency}/ساعة</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

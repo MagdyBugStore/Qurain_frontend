@@ -28,42 +28,84 @@ export function TeacherBio({ application, qualifications }: TeacherBioProps) {
       </section>
 
       {/* Student Benefits */}
-      <section>
-        <h3 className="text-xl font-bold text-text-dark mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-primary rounded-full"></span>
-          ما الثمار التي سيجنيها الطالب؟
-        </h3>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="bg-bg-main p-4 rounded-lg border border-gray-100">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-              <span className="material-symbols-outlined">auto_stories</span>
+      {(() => {
+        // Parse teachingStyle (benefits) from JSON string
+        let benefits: Array<{ title: string; subject: string }> = [];
+        try {
+          if (application.teachingStyle) {
+            const parsed = JSON.parse(application.teachingStyle);
+            if (Array.isArray(parsed)) {
+              benefits = parsed;
+            }
+          }
+        } catch (e) {
+          // If parsing fails, treat as empty
+        }
+
+        if (benefits.length === 0) {
+          return null;
+        }
+
+        return (
+          <section>
+            <h3 className="text-xl font-bold text-text-dark mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full"></span>
+              ما الثمار التي سيجنيها الطالب؟
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="bg-bg-main p-4 rounded-lg border border-gray-100">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                    <span className="material-symbols-outlined">check_circle</span>
+                  </div>
+                  <h4 className="text-text-dark font-bold mb-1">{benefit.title || 'فائدة'}</h4>
+                  <p className="text-sm text-text-light">{benefit.subject || 'وصف الفائدة...'}</p>
+                </div>
+              ))}
             </div>
-            <h4 className="text-text-dark font-bold mb-1">إتقان التلاوة</h4>
-            <p className="text-sm text-text-light">تلاوة القرآن الكريم بشكل صحيح مع تطبيق أحكام التجويد بدقة.</p>
-          </div>
-          <div className="bg-bg-main p-4 rounded-lg border border-gray-100">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-              <span className="material-symbols-outlined">lightbulb</span>
+          </section>
+        );
+      })()}
+
+      {/* Session Content */}
+      {(() => {
+        // Parse sessionContent from JSON string
+        let sessionContent: Array<{ title: string; subject: string }> = [];
+        try {
+          if (application.sessionContent) {
+            const parsed = JSON.parse(application.sessionContent);
+            if (Array.isArray(parsed)) {
+              sessionContent = parsed;
+            }
+          }
+        } catch (e) {
+          // If parsing fails, treat as empty
+        }
+
+        if (sessionContent.length === 0) {
+          return null;
+        }
+
+        return (
+          <section>
+            <h3 className="text-xl font-bold text-text-dark mb-4 flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full"></span>
+              ماذا تتضمن الحصة؟
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {sessionContent.map((item, index) => (
+                <div key={index} className="bg-bg-main p-4 rounded-lg border border-gray-100">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                    <span className="material-symbols-outlined">menu_book</span>
+                  </div>
+                  <h4 className="text-text-dark font-bold mb-1">{item.title || 'عنصر'}</h4>
+                  <p className="text-sm text-text-light">{item.subject || 'وصف العنصر...'}</p>
+                </div>
+              ))}
             </div>
-            <h4 className="text-text-dark font-bold mb-1">فهم المعاني</h4>
-            <p className="text-sm text-text-light">فهم معاني الآيات وربطها بأحكام التجويد لتحقيق الفهم الشامل.</p>
-          </div>
-          <div className="bg-bg-main p-4 rounded-lg border border-gray-100">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-              <span className="material-symbols-outlined">psychology</span>
-            </div>
-            <h4 className="text-text-dark font-bold mb-1">الثقة بالنفس</h4>
-            <p className="text-sm text-text-light">بناء الثقة في التلاوة والقراءة الصحيحة أمام الآخرين.</p>
-          </div>
-          <div className="bg-bg-main p-4 rounded-lg border border-gray-100">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-              <span className="material-symbols-outlined">workspace_premium</span>
-            </div>
-            <h4 className="text-text-dark font-bold mb-1">الحصول على الإجازة</h4>
-            <p className="text-sm text-text-light">نيل الإجازة بالسند المتصل إلى رسول الله صلى الله عليه وسلم.</p>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* Resume / Certifications */}
       <section>

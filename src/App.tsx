@@ -24,7 +24,6 @@ import TechnicalCheckPage from "./app/technical-check/[id]/page";
 import WaitingRoomPage from "./app/waiting-room/[id]/page";
 import LiveSessionPage from "./app/live-session/[id]/page";
 import PostSessionPage from "./app/post-session/[id]/page";
-import StartFreePage from "./app/start-free/page";
 import RoadmapPage from "./app/roadmap/page";
 import SectionsPage from "./app/sections/page";
 import PersonalInfoPageNew from "./app/personal-info/page";
@@ -186,7 +185,6 @@ function AppShell() {
         <Route path="/waiting-room/:id" element={<WaitingRoomPage />} />
         <Route path="/live-session/:id" element={<LiveSessionPage />} />
         <Route path="/post-session/:id" element={<PostSessionPage />} />
-        <Route path="/start-free" element={<StartFreePage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/sections" element={<SectionsPage />} />
         <Route path="/profile/:id" element={<ProfilePage />} />

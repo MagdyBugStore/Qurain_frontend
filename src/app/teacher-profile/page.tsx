@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
-import type { TeacherApplication, TeacherProfile, Qualification } from '../../shared/types/teacher.types'
+import type { TeacherApplication, TeacherProfile, Qualification, Review } from '../../shared/types/teacher.types'
 import { getTeacherDisplayName, getTeacherTitle, getTeacherImageUrl, getTeacherSpecialization, getTeacherQualifications } from '../../shared/utils/teacher'
 import { getCurrencySymbol } from '../../shared/utils/currency'
 import { TeacherService } from '../../services/teacherService'
@@ -29,7 +29,7 @@ export default function TeacherProfilePage() {
   })
   const [activeQuickTab, setActiveQuickTab] = useState<'personal' | 'wallet' | 'support' | null>('personal')
   const [activeSubTab, setActiveSubTab] = useState<'content' | 'qualifications' | 'availability' | 'reviews' | null>('content')
-  
+
   // Helper function to toggle edit state for a specific section
   const toggleEdit = (section: keyof typeof editingStates) => {
     setEditingStates(prev => ({ ...prev, [section]: !prev[section] }))
@@ -39,11 +39,16 @@ export default function TeacherProfilePage() {
   const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null)
   const [rating, setRating] = useState(0)
   const [reviewsCount, setReviewsCount] = useState(0)
+  const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [editableQualifications, setEditableQualifications] = useState<Qualification[]>([])
   const [editableIjazahs, setEditableIjazahs] = useState<Array<{ id?: string; title: string; description: string; image: string }>>([])
   const [editableAvailability, setEditableAvailability] = useState<(string | null)[][]>([])
+  const [editableBenefits, setEditableBenefits] = useState<Array<{ title: string; subject: string }>>([])
+  const [editableSessionContent, setEditableSessionContent] = useState<Array<{ title: string; subject: string }>>([])
   const [saving, setSaving] = useState(false)
+  const [savingBenefits, setSavingBenefits] = useState(false)
+  const [savingSessionContent, setSavingSessionContent] = useState(false)
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [personalInfo, setPersonalInfo] = useState({
     teachingStyle: '',
@@ -61,14 +66,14 @@ export default function TeacherProfilePage() {
 
       try {
         const teacherService = new TeacherService()
-        
+
         // Fetch teacher profile data
         const profileData = await teacherService.getTeacherProfileData(user.uid)
-        
+
         if (profileData.application) {
           setTeacherApplication(profileData.application)
         }
-        
+
         if (profileData.profile) {
           setTeacherProfile(profileData.profile)
         }
@@ -76,6 +81,7 @@ export default function TeacherProfilePage() {
         // Set rating and reviews
         setRating(profileData.rating)
         setReviewsCount(profileData.reviewsCount)
+        setReviews(profileData.reviews || [])
 
         // Set qualifications
         setEditableQualifications(profileData.qualifications)
@@ -87,6 +93,44 @@ export default function TeacherProfilePage() {
             sessionContent: profileData.application.sessionContent || '',
             introVideo: profileData.application.introVideo || ''
           })
+
+          // Initialize benefits from teachingStyle if it's a JSON string
+          if (profileData.application.teachingStyle) {
+            try {
+              const parsed = JSON.parse(profileData.application.teachingStyle)
+              if (Array.isArray(parsed)) {
+                setEditableBenefits(parsed)
+              } else {
+                // If not array, leave empty
+                setEditableBenefits([])
+              }
+            } catch {
+              // If not valid JSON, leave empty
+              setEditableBenefits([])
+            }
+          } else {
+            // No data from store, leave empty
+            setEditableBenefits([])
+          }
+
+          // Initialize session content from sessionContent if it's a JSON string
+          if (profileData.application.sessionContent) {
+            try {
+              const parsed = JSON.parse(profileData.application.sessionContent)
+              if (Array.isArray(parsed)) {
+                setEditableSessionContent(parsed)
+              } else {
+                // If not array, leave empty
+                setEditableSessionContent([])
+              }
+            } catch {
+              // If not valid JSON, leave empty
+              setEditableSessionContent([])
+            }
+          } else {
+            // No data from store, leave empty
+            setEditableSessionContent([])
+          }
         }
 
         // Set ijazahs
@@ -117,10 +161,10 @@ export default function TeacherProfilePage() {
   const profileImage = getTeacherImageUrl(teacherProfile || userProfile)
   const specialization = getTeacherSpecialization(teacherApplication)
   const qualifications = getTeacherQualifications(teacherApplication)
-  
+
   const sessionPrice = teacherApplication?.hourlyRate || 0
   const currency = getCurrencySymbol(teacherApplication?.currency)
-  
+
   const isPending = teacherApplication?.status === TEACHER_APPLICATION_STATUS.PENDING
   const isApproved = teacherApplication?.status === TEACHER_APPLICATION_STATUS.APPROVED
 
@@ -172,13 +216,13 @@ export default function TeacherProfilePage() {
     try {
       const teacherService = new TeacherService()
       const teacherId = teacherApplication.userId || teacherApplication.id
-      
+
       // Delete removed ijazahs
       const currentIjazahs = await teacherService.getIjazahs(teacherId)
       const currentIds = currentIjazahs.map(i => i.id).filter((id): id is string => !!id)
       const newIds = editableIjazahs.filter(i => i.id).map(i => i.id!).filter((id): id is string => !!id)
       const toDelete = currentIds.filter(id => !newIds.includes(id))
-      
+
       for (const id of toDelete) {
         await teacherService.deleteIjazah(id)
       }
@@ -204,7 +248,7 @@ export default function TeacherProfilePage() {
       }
 
       showSaveMessage({ type: 'success', text: 'تم حفظ الإجازات بنجاح' })
-      
+
       // Refresh ijazahs list
       const ijazahsData = await teacherService.getIjazahs(teacherId)
       setEditableIjazahs(ijazahsData as Array<{ id: string; title: string; description: string; image: string }>)
@@ -233,22 +277,186 @@ export default function TeacherProfilePage() {
     setEditableIjazahs(editableIjazahs.filter((_, i) => i !== index))
   }
 
-  // Save personal info
+  // Add new benefit (only if there are no empty benefits)
+  const handleAddBenefit = () => {
+    // Check if there are any empty benefits
+    const hasEmptyBenefits = editableBenefits.some(b => !b.title.trim() || !b.subject.trim())
+    if (hasEmptyBenefits) {
+      showSaveMessage({ type: 'error', text: 'يرجى إكمال الفوائد الحالية قبل إضافة فائدة جديدة' })
+      return
+    }
+    setEditableBenefits([...editableBenefits, { title: '', subject: '' }])
+  }
+
+  // Update benefit
+  const handleUpdateBenefit = (index: number, field: 'title' | 'subject', value: string) => {
+    const updated = [...editableBenefits]
+    updated[index] = { ...updated[index], [field]: value }
+    setEditableBenefits(updated)
+  }
+
+  // Delete benefit
+  const handleDeleteBenefit = (index: number) => {
+    setEditableBenefits(editableBenefits.filter((_, i) => i !== index))
+  }
+
+  // Add new session content item (only if there are no empty items)
+  const handleAddSessionContent = () => {
+    // Check if there are any empty items
+    const hasEmptyItems = editableSessionContent.some(item => !item.title.trim() || !item.subject.trim())
+    if (hasEmptyItems) {
+      showSaveMessage({ type: 'error', text: 'يرجى إكمال العناصر الحالية قبل إضافة عنصر جديد' })
+      return
+    }
+    setEditableSessionContent([...editableSessionContent, { title: '', subject: '' }])
+  }
+
+  // Update session content item
+  const handleUpdateSessionContent = (index: number, field: 'title' | 'subject', value: string) => {
+    const updated = [...editableSessionContent]
+    updated[index] = { ...updated[index], [field]: value }
+    setEditableSessionContent(updated)
+  }
+
+  // Delete session content item
+  const handleDeleteSessionContent = (index: number) => {
+    setEditableSessionContent(editableSessionContent.filter((_, i) => i !== index))
+  }
+
+  // Save benefits only
+  const handleSaveBenefits = async () => {
+    if (!teacherApplication?.id || !user) {
+      console.error('Cannot save: missing teacherApplication.id or user')
+      return
+    }
+
+    // Filter out empty benefits before saving
+    const validBenefits = editableBenefits.filter(b => b.title.trim() && b.subject.trim())
+
+    if (validBenefits.length === 0 && editableBenefits.length > 0) {
+      showSaveMessage({ type: 'error', text: 'يرجى إضافة فائدة واحدة على الأقل مع عنوان ووصف' })
+      return
+    }
+
+    setSavingBenefits(true)
+    try {
+      const teacherService = new TeacherService()
+      // Get current sessionContent and introVideo to preserve them
+      const currentSessionContent = teacherApplication.sessionContent || ''
+      const currentIntroVideo = teacherApplication.introVideo || personalInfo.introVideo || ''
+      const benefitsJson = JSON.stringify(validBenefits)
+
+      await teacherService.updatePersonalInfo(teacherApplication.id, {
+        teachingStyle: benefitsJson,
+        sessionContent: currentSessionContent,
+        introVideo: currentIntroVideo
+      })
+
+      // Update local state with filtered benefits
+      setEditableBenefits(validBenefits)
+
+      // Update local state
+      if (teacherApplication) {
+        setTeacherApplication({
+          ...teacherApplication,
+          teachingStyle: benefitsJson
+        })
+      }
+
+      showSaveMessage({ type: 'success', text: 'تم حفظ الفوائد بنجاح' })
+      toggleEdit('benefits')
+    } catch (error) {
+      console.error('Error saving benefits:', error)
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ الفوائد'
+      showSaveMessage({ type: 'error', text: errorMessage })
+    } finally {
+      setSavingBenefits(false)
+    }
+  }
+
+  // Save session content only
+  const handleSaveSessionContent = async () => {
+    if (!teacherApplication?.id || !user) {
+      console.error('Cannot save: missing teacherApplication.id or user')
+      return
+    }
+
+    // Filter out empty items before saving
+    const validSessionContent = editableSessionContent.filter(item => item.title.trim() && item.subject.trim())
+
+    if (validSessionContent.length === 0 && editableSessionContent.length > 0) {
+      showSaveMessage({ type: 'error', text: 'يرجى إضافة عنصر واحد على الأقل مع عنوان ووصف' })
+      return
+    }
+
+    setSavingSessionContent(true)
+    try {
+      const teacherService = new TeacherService()
+      // Get current teachingStyle and introVideo to preserve them
+      const currentTeachingStyle = teacherApplication.teachingStyle || ''
+      const currentIntroVideo = teacherApplication.introVideo || personalInfo.introVideo || ''
+      const sessionContentJson = JSON.stringify(validSessionContent)
+
+      await teacherService.updatePersonalInfo(teacherApplication.id, {
+        teachingStyle: currentTeachingStyle,
+        sessionContent: sessionContentJson,
+        introVideo: currentIntroVideo
+      })
+
+      // Update local state with filtered content
+      setEditableSessionContent(validSessionContent)
+      if (teacherApplication) {
+        setTeacherApplication({
+          ...teacherApplication,
+          sessionContent: sessionContentJson
+        })
+      }
+
+      showSaveMessage({ type: 'success', text: 'تم حفظ محتوى الحصة بنجاح' })
+      toggleEdit('sessionContent')
+    } catch (error) {
+      console.error('Error saving session content:', error)
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ محتوى الحصة'
+      showSaveMessage({ type: 'error', text: errorMessage })
+    } finally {
+      setSavingSessionContent(false)
+    }
+  }
+
+  // Save personal info (for about section and intro video)
   const handleSavePersonalInfo = async () => {
-    if (!teacherApplication?.id || !user) return
+    if (!teacherApplication?.id || !user) {
+      console.error('Cannot save: missing teacherApplication.id or user')
+      return
+    }
 
     setSaving(true)
     try {
       const teacherService = new TeacherService()
+      // Get current benefits and sessionContent to preserve them
+      const currentBenefits = teacherApplication.teachingStyle || ''
+      const currentSessionContent = teacherApplication.sessionContent || ''
+
       await teacherService.updatePersonalInfo(teacherApplication.id, {
-        teachingStyle: personalInfo.teachingStyle,
-        sessionContent: personalInfo.sessionContent,
+        teachingStyle: currentBenefits,
+        sessionContent: currentSessionContent,
         introVideo: personalInfo.introVideo
       })
+
+      // Update local state
+      if (teacherApplication) {
+        setTeacherApplication({
+          ...teacherApplication,
+          introVideo: personalInfo.introVideo
+        })
+      }
+
       showSaveMessage({ type: 'success', text: 'تم حفظ البيانات بنجاح' })
+      toggleEdit('about')
     } catch (error) {
       console.error('Error saving personal info:', error)
-      showSaveMessage({ type: 'error', text: 'حدث خطأ أثناء حفظ البيانات' })
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ البيانات'
+      showSaveMessage({ type: 'error', text: errorMessage })
     } finally {
       setSaving(false)
     }
@@ -258,7 +466,7 @@ export default function TeacherProfilePage() {
   // Toggle availability slot
   const handleToggleAvailability = (dayIndex: number, timeIndex: number) => {
     if (isPending) return
-    
+
     const updated = editableAvailability.map((day, dIdx) => {
       if (dIdx === dayIndex) {
         return day.map((slot, tIdx) => {
@@ -284,12 +492,12 @@ export default function TeacherProfilePage() {
     try {
       const teacherService = new TeacherService()
       const teacherId = teacherApplication.userId || teacherApplication.id
-      
+
       await teacherService.saveAvailability({
         teacherId,
         schedule: editableAvailability as ('available' | 'booked' | null)[][]
       })
-      
+
       showSaveMessage({ type: 'success', text: 'تم حفظ جدول التوفر بنجاح' })
     } catch (error) {
       console.error('Error saving availability:', error)
@@ -299,46 +507,15 @@ export default function TeacherProfilePage() {
     }
   }
 
-  // Mock Reviews Data - بيانات وهمية للتقييمات
-  const reviews: Array<{ name: string; time: string; rating: number; comment: string; avatar: string }> = [
-    {
-      name: 'محمد علي',
-      time: 'قبل يومين',
-      rating: 5,
-      comment: 'ما شاء الله تبارك الله، أسلوب الدكتور متميز جداً في تصحيح التلاوة. يهتم بدقائق التجويد ويربطها بمعاني الآيات. جزاكم الله خيراً.',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAqR32u1hY7LX4IdVqqSVCzRsckr5Tpd-ubbFOEahgGBpXlGZIiBBWdnToWsAS4Nj3xlGt3-0CIVInGch9IcZjnbHxwGPFw8mk1dAUjEX0tLEj_Yr3PT0kfhZV983nFSwVhpYjeSpNac94V0R0jXzPekFstM5xAE7hXW2qYSKT0bj-6ddD-xLqVvMC9K9CqhaoFOkGD0K6ziJ7oUWHpRcwO42GqjtoVVK6OdXzQaIcuPJq3AkygWhbBlEw7qSXlo5oxvM3lqU17YOCo',
-    },
-    {
-      name: 'عبد الله عمر',
-      time: 'قبل أسبوع',
-      rating: 5,
-      comment: 'استفدت كثيراً من دورة مخارج الحروف. الشرح وافي والتطبيق العملي مفيد جداً. أنصح بالدراسة معه لكل طالب علم.',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEimIImSLgw0XsDxrT1crt0NFg8Fs_vVPLV__RobSTEk8F9Vic0Vwokcx5p9d6e9n01WqncOetVqniX6pz5Ul97-Whs_0FlxHE_OwPFiWN7vZFQ_OsoBVgMCyJsLY_D52YxA1ZvmOLxge_AqBLu_eQ8IXrnj-G6jDUVOm9kRt8u5z4PzFeROve6MdrLRAtikMKP5Z6WfAgC4ISOMM12jPOjhJBwAYqFP11cKL-xYeoi_2ysCJjOFJSb5Ee8kUpuYYvIYiobfsLlwic',
-    },
-    {
-      name: 'فاطمة أحمد',
-      time: 'قبل أسبوعين',
-      rating: 5,
-      comment: 'معلمة ممتازة، صبورة جداً وتشرح بطريقة واضحة. ساعدتني في تحسين تلاوتي بشكل كبير. الله يبارك في جهودها.',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaHCQpQDIhRCTg8znqGbspw1A1F6Zar1Syu1aLwWIQat1CNApShCs6EKLwGnERa9BLy_zwlwOAPw7sLW8qgsiPJIiXGWL4B0KMcMnHdJcvbOIrtiSKYYlhWoiyKFRz7ol7BumuHGknAqEeSUXxfrzxk6sHDfrepKu8GiXJcm8IJpTCYIlEKrMDSvQP_eE-ePAzmoROe-xBU2UtjrP8j93LQuthyn4pLtWeWolZnyevkFcf-cE_8Ugxc-6zr4dclaScsP8KvndSVtUa',
-    },
-    {
-      name: 'خالد سعيد',
-      time: 'قبل شهر',
-      rating: 4,
-      comment: 'تجربة جيدة جداً. المعلم محترف ويقدم محتوى تعليمي قيم. أنصح به.',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuATkUyF19AckE7-EAcEpTWbRp5BQ0QDZNDQTcP5IXl3SwoL-89c4tiTdoUn-9IGSenrFQScQT4lWpcUyRRnAkDF-6_Fx2S982e836ZjDcJGeTjNYQkXPgIfjL6-zeFPuUtEaWELB7cXJgFspyWWdg7i8WfUM8r0xiGqv1KCpwEOW4QF4dwXP5KzcJVYDwH_jRvtKe7zqBGMv5SH8aDAo1dk4ioSVPjNYTeeoJZeuboSlu-jQmO9SY2C560OiDtk4rRxVyYWuqXfIL3H',
-    },
-  ]
 
   // Availability schedule data
   const timeSlots = [
-    '٠٨:٠٠ ص', '٠٩:٠٠ ص', '١٠:٠٠ ص', '١١:٠٠ ص', 
+    '٠٨:٠٠ ص', '٠٩:٠٠ ص', '١٠:٠٠ ص', '١١:٠٠ ص',
     '١٢:٠٠ م', '٠١:٠٠ م', '٠٢:٠٠ م', '٠٣:٠٠ م',
     '٠٤:٠٠ م', '٠٥:٠٠ م', '٠٦:٠٠ م', '٠٧:٠٠ م'
   ]
   const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
-  
+
   // Use editable availability, fallback to empty if not loaded
   const availability = editableAvailability.length > 0 ? editableAvailability : Array(7).fill(null).map(() => Array(12).fill(null))
 
@@ -370,21 +547,18 @@ export default function TeacherProfilePage() {
         <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 lg:px-20">
           {/* Save Message */}
           {saveMessage && (
-            <div className={`mb-4 sm:mb-6 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 ${
-              saveMessage.type === 'success' 
-                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+            <div className={`mb-4 sm:mb-6 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 ${saveMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                 : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-            }`}>
-              <span className={`material-symbols-outlined text-lg sm:text-xl ${
-                saveMessage.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}>
+              <span className={`material-symbols-outlined text-lg sm:text-xl ${saveMessage.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                }`}>
                 {saveMessage.type === 'success' ? 'check_circle' : 'error'}
               </span>
-              <p className={`font-bold text-sm sm:text-base ${
-                saveMessage.type === 'success' 
-                  ? 'text-green-900 dark:text-green-200' 
+              <p className={`font-bold text-sm sm:text-base ${saveMessage.type === 'success'
+                  ? 'text-green-900 dark:text-green-200'
                   : 'text-red-900 dark:text-red-200'
-              }`}>
+                }`}>
                 {saveMessage.text}
               </p>
             </div>
@@ -525,11 +699,10 @@ export default function TeacherProfilePage() {
                           }
                         }, 100)
                       }}
-                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
-                        activeQuickTab === 'personal'
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${activeQuickTab === 'personal'
                           ? 'bg-primary/10 text-primary'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                      }`}
+                        }`}
                     >
                       <span className="material-symbols-outlined filled text-lg sm:text-xl">account_circle</span>
                       <span className="text-xs sm:text-sm font-medium">الملف الشخصي</span>
@@ -544,11 +717,10 @@ export default function TeacherProfilePage() {
                           }
                         }, 100)
                       }}
-                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
-                        activeQuickTab === 'wallet'
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${activeQuickTab === 'wallet'
                           ? 'bg-primary/10 text-primary'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                      }`}
+                        }`}
                     >
                       <span className="material-symbols-outlined text-lg sm:text-xl">account_balance_wallet</span>
                       <span className="text-xs sm:text-sm font-medium">إدارة المحفظة</span>
@@ -563,11 +735,10 @@ export default function TeacherProfilePage() {
                           }
                         }, 100)
                       }}
-                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${
-                        activeQuickTab === 'support'
+                      className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg transition-all ${activeQuickTab === 'support'
                           ? 'bg-primary/10 text-primary'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                      }`}
+                        }`}
                     >
                       <span className="material-symbols-outlined text-lg sm:text-xl">support_agent</span>
                       <span className="text-xs sm:text-sm font-medium">الدعم الفني</span>
@@ -595,11 +766,10 @@ export default function TeacherProfilePage() {
                             }
                           }, 100)
                         }}
-                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
-                          activeSubTab === 'content'
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${activeSubTab === 'content'
                             ? 'bg-primary text-slate-900'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
+                          }`}
                       >
                         المنهج
                       </button>
@@ -613,11 +783,10 @@ export default function TeacherProfilePage() {
                             }
                           }, 100)
                         }}
-                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
-                          activeSubTab === 'availability'
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${activeSubTab === 'availability'
                             ? 'bg-primary text-slate-900'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
+                          }`}
                       >
                         جدول التوفر
                       </button>
@@ -631,11 +800,10 @@ export default function TeacherProfilePage() {
                             }
                           }, 100)
                         }}
-                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${
-                          activeSubTab === 'reviews'
+                        className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium transition-all ${activeSubTab === 'reviews'
                             ? 'bg-primary text-slate-900'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                        }`}
+                          }`}
                       >
                         التقييمات
                       </button>
@@ -645,287 +813,514 @@ export default function TeacherProfilePage() {
 
                 {/* About Me & Philosophy Section */}
                 {activeQuickTab === 'personal' && activeSubTab === 'content' && (
-                <div id="content" className="space-y-6 sm:space-y-8">
-                  {/* About Me Section */}
-                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm">
-                    {isApproved && !isPending && (
-                      <button
-                        onClick={() => toggleEdit('about')}
-                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                        title="تعديل"
-                      >
-                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
-                      </button>
-                    )}
-                    <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">نبذة عني وفلسفتي في التعليم</h2>
-                    <div className="space-y-3 sm:space-y-4">
-                      {editingStates.about && !isPending ? (
-                        <textarea
-                          rows={4}
-                          defaultValue={teacherApplication?.bio || ''}
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed"
-                          placeholder="اكتب نبذة عنك وفلسفتك في التعليم..."
-                        />
-                      ) : (
-                        <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                          {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
-                        </div>
+                  <div id="content" className="space-y-6 sm:space-y-8">
+                    {/* About Me Section */}
+                    <div className="relative bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm">
+                      {isApproved && !isPending && (
+                        <button
+                          onClick={() => toggleEdit('about')}
+                          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
+                        >
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                        </button>
                       )}
+                      <div className="space-y-3 sm:space-y-4">
                       
-                      {/* Intro Video - In same row with title */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
-                        <div className="md:col-span-1">
-                          {personalInfo.introVideo ? (
-                            <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700" style={{ aspectRatio: '16/9' }}>
-                              {personalInfo.introVideo.includes('youtube.com') || personalInfo.introVideo.includes('youtu.be') ? (
-                                <iframe
-                                  src={personalInfo.introVideo.includes('youtu.be') 
-                                    ? `https://www.youtube.com/embed/${personalInfo.introVideo.split('/').pop()}`
-                                    : `https://www.youtube.com/embed/${personalInfo.introVideo.split('v=')[1]?.split('&')[0]}`
-                                  }
-                                  className="absolute top-0 left-0 w-full h-full"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                  allowFullScreen
-                                />
-                              ) : personalInfo.introVideo.includes('vimeo.com') ? (
-                                <iframe
-                                  src={`https://player.vimeo.com/video/${personalInfo.introVideo.split('/').pop()}`}
-                                  className="absolute top-0 left-0 w-full h-full"
-                                  allow="autoplay; fullscreen; picture-in-picture"
-                                  allowFullScreen
+                        {/* Intro Video - In same row with title */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="md:col-span-3">
+                            <h3 className="text-base font-semibold mb-2">نبذة عني وفلسفتي في التعليم</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              {editingStates.about && !isPending ? (
+                                <textarea
+                                  rows={4}
+                                  defaultValue={teacherApplication?.bio || ''}
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed"
+                                  placeholder="اكتب نبذة عنك وفلسفتك في التعليم..."
                                 />
                               ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <a href={personalInfo.introVideo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                    فتح رابط الفيديو
-                                  </a>
+                                <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                  {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
                                 </div>
                               )}
-                            </div>
-                          ) : (
-                            <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center" style={{ aspectRatio: '16/9', minHeight: '200px' }}>
-                              <div className="text-center">
-                                <span className="material-symbols-outlined text-5xl text-slate-400 mb-2">play_circle</span>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">لا يوجد فيديو</p>
+                            </p>
+                          </div>
+                          <div className="md:col-span-1">
+                            {personalInfo.introVideo ? (
+                              <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700" style={{ aspectRatio: '16/9' }}>
+                                {personalInfo.introVideo.includes('youtube.com') || personalInfo.introVideo.includes('youtu.be') ? (
+                                  <iframe
+                                    src={personalInfo.introVideo.includes('youtu.be')
+                                      ? `https://www.youtube.com/embed/${personalInfo.introVideo.split('/').pop()}`
+                                      : `https://www.youtube.com/embed/${personalInfo.introVideo.split('v=')[1]?.split('&')[0]}`
+                                    }
+                                    className="absolute top-0 left-0 w-full h-full"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                  />
+                                ) : personalInfo.introVideo.includes('vimeo.com') ? (
+                                  <iframe
+                                    src={`https://player.vimeo.com/video/${personalInfo.introVideo.split('/').pop()}`}
+                                    className="absolute top-0 left-0 w-full h-full"
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowFullScreen
+                                  />
+                                ) : (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <a href={personalInfo.introVideo} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                      فتح رابط الفيديو
+                                    </a>
+                                  </div>
+                                )}
                               </div>
+                            ) : (
+                              <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 flex items-center justify-center" style={{ aspectRatio: '16/9', minHeight: '200px' }}>
+                                <div className="text-center">
+                                  <span className="material-symbols-outlined text-5xl text-slate-400 mb-2">play_circle</span>
+                                  <p className="text-sm text-slate-500 dark:text-slate-400">لا يوجد فيديو</p>
+                                </div>
+                              </div>
+                            )}
+                            {editingStates.about && !isPending && (
+                              <input
+                                type="url"
+                                value={personalInfo.introVideo}
+                                onChange={(e) => setPersonalInfo({ ...personalInfo, introVideo: e.target.value })}
+                                placeholder="رابط الفيديو"
+                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 mt-2"
+                              />
+                            )}
+                          </div>
+                          
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Benefits Section */}
+                    <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
+                      {isApproved && !isPending && (
+                        <button
+                          onClick={() => toggleEdit('benefits')}
+                          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
+                        >
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                        </button>
+                      )}
+                      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ما الثمار التي سيجنيها الطالب؟</h2>
+                      {editingStates.benefits && !isPending ? (
+                        <div className="space-y-4">
+                          {editableBenefits.map((benefit, index) => (
+                            <div key={index} className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg space-y-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input
+                                  type="text"
+                                  value={benefit.title}
+                                  onChange={(e) => handleUpdateBenefit(index, 'title', e.target.value)}
+                                  placeholder="عنوان الفائدة"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 font-bold"
+                                />
+                                <input
+                                  type="text"
+                                  value={benefit.subject}
+                                  onChange={(e) => handleUpdateBenefit(index, 'subject', e.target.value)}
+                                  placeholder="وصف الفائدة"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                                />
+                              </div>
+                              <button
+                                onClick={() => handleDeleteBenefit(index)}
+                                className="text-red-500 text-sm hover:underline flex items-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-sm">delete</span>
+                                حذف
+                              </button>
+                            </div>
+                          ))}
+                          {editableBenefits.length === 0 && (
+                            <p className="text-slate-500 text-sm text-center py-4">لا توجد فوائد.</p>
+                          )}
+                          <div className="flex justify-center pt-4">
+                            <button
+                              onClick={handleAddBenefit}
+                              className="px-6 py-3 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2"
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              إضافة فائدة
+                            </button>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4">
+                            <button
+                              onClick={() => toggleEdit('benefits')}
+                              className="px-6 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            >
+                              إلغاء
+                            </button>
+                            <button
+                              onClick={handleSaveBenefits}
+                              disabled={savingBenefits}
+                              className="px-6 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                            >
+                              {savingBenefits ? 'جاري الحفظ...' : 'حفظ الفوائد'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                            {editableBenefits.length > 0 ? (
+                              editableBenefits.map((benefit, index) => (
+                                <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
+                                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{benefit.title || 'فائدة'}</h3>
+                                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                                    {benefit.subject || 'وصف الفائدة والنتائج المتوقعة...'}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-8 text-slate-500">
+                                لا توجد فوائد متاحة
+                              </div>
+                            )}
+                          </div>
+                          {isApproved && !isPending && editingStates.benefits && (
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => toggleEdit('benefits')}
+                                className="px-6 py-3 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2"
+                              >
+                                <span className="material-symbols-outlined">add</span>
+                                إضافة فائدة
+                              </button>
                             </div>
                           )}
-                          {editingStates.about && !isPending && (
-                            <input
-                              type="url"
-                              value={personalInfo.introVideo}
-                              onChange={(e) => setPersonalInfo({ ...personalInfo, introVideo: e.target.value })}
-                              placeholder="رابط الفيديو"
-                              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 mt-2"
-                            />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Session Content Section */}
+                    <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
+                      {isApproved && !isPending && (
+                        <button
+                          onClick={() => toggleEdit('sessionContent')}
+                          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
+                        >
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                        </button>
+                      )}
+                      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ماذا تتضمن الحصة؟</h2>
+                      {editingStates.sessionContent && !isPending ? (
+                        <div className="space-y-4">
+                          {editableSessionContent.map((item, index) => (
+                            <div key={index} className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg space-y-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) => handleUpdateSessionContent(index, 'title', e.target.value)}
+                                  placeholder="عنوان العنصر"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 font-bold"
+                                />
+                                <input
+                                  type="text"
+                                  value={item.subject}
+                                  onChange={(e) => handleUpdateSessionContent(index, 'subject', e.target.value)}
+                                  placeholder="وصف العنصر"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
+                                />
+                              </div>
+                              <button
+                                onClick={() => handleDeleteSessionContent(index)}
+                                className="text-red-500 text-sm hover:underline flex items-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-sm">delete</span>
+                                حذف
+                              </button>
+                            </div>
+                          ))}
+                          {editableSessionContent.length === 0 && (
+                            <p className="text-slate-500 text-sm text-center py-4">لا توجد عناصر.</p>
+                          )}
+                          <div className="flex justify-center pt-4">
+                            <button
+                              onClick={handleAddSessionContent}
+                              className="px-6 py-3 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2"
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              إضافة عنصر
+                            </button>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4">
+                            <button
+                              onClick={() => toggleEdit('sessionContent')}
+                              className="px-6 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            >
+                              إلغاء
+                            </button>
+                            <button
+                              onClick={handleSaveSessionContent}
+                              disabled={savingSessionContent}
+                              className="px-6 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                            >
+                              {savingSessionContent ? 'جاري الحفظ...' : 'حفظ محتوى الحصة'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                            {editableSessionContent.length > 0 ? (
+                              editableSessionContent.map((item, index) => (
+                                <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
+                                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{item.title || 'عنصر'}</h3>
+                                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                                    {item.subject || 'وصف محتوى الحصة والأنشطة...'}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-8 text-slate-500">
+                                لا توجد عناصر متاحة
+                              </div>
+                            )}
+                          </div>
+                          {isApproved && !isPending && editingStates.sessionContent && (
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => toggleEdit('sessionContent')}
+                                className="px-6 py-3 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2"
+                              >
+                                <span className="material-symbols-outlined">add</span>
+                                إضافة عنصر
+                              </button>
+                            </div>
                           )}
                         </div>
-                        <div className="md:col-span-3">
-                          <h3 className="text-base font-semibold mb-2">فيديو تعريفي</h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
-                            شاهد الفيديو التعريفي للتعرف على أسلوب التدريس والنهج المتبع في تعليم القرآن الكريم والتجويد
-                          </p>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Benefits Section */}
-                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
-                    {isApproved && !isPending && (
-                      <button
-                        onClick={() => toggleEdit('benefits')}
-                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                        title="تعديل"
-                      >
-                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
-                      </button>
-                    )}
-                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ما الثمار التي سيجنيها الطالب؟</h2>
-                    {editingStates.benefits && !isPending ? (
-                      <textarea
-                        rows={5}
-                        value={personalInfo.teachingStyle}
-                        onChange={(e) => setPersonalInfo({ ...personalInfo, teachingStyle: e.target.value })}
-                        placeholder="اكتب وصفاً للفوائد والنتائج التي سيحصل عليها الطالب..."
-                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-slate-900 dark:text-slate-100"
-                      />
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                        {['ارتباط روحي بالقرآن', 'إتقان التلاوة والتجويد', 'تقدم ملحوظ في الحفظ'].map((benefit, index) => (
-                          <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
-                            <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{benefit}</h3>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                              {personalInfo.teachingStyle || 'وصف الفائدة والنتائج المتوقعة...'}
-                            </p>
-                            <button className="text-primary hover:underline text-sm font-semibold">استعراض التفاصيل</button>
-                          </div>
-                        ))}
+                    {/* Save button for about section only */}
+                    {editingStates.about && !isPending && (
+                      <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                        <button
+                          onClick={() => toggleEdit('about')}
+                          className="px-6 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          إلغاء
+                        </button>
+                        <button
+                          onClick={handleSavePersonalInfo}
+                          disabled={saving}
+                          className="px-6 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                        >
+                          {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  {/* Session Content Section */}
-                  <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
-                    {isApproved && !isPending && (
-                      <button
-                        onClick={() => toggleEdit('sessionContent')}
-                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                        title="تعديل"
-                      >
-                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
-                      </button>
-                    )}
-                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ماذا تتضمن الحصة؟</h2>
-                    {editingStates.sessionContent && !isPending ? (
-                      <textarea
-                        rows={5}
-                        value={personalInfo.sessionContent}
-                        onChange={(e) => setPersonalInfo({ ...personalInfo, sessionContent: e.target.value })}
-                        placeholder="اكتب وصفاً لما تتضمنه الحصة..."
-                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-slate-900 dark:text-slate-100"
-                      />
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                        {['مراجعة الحفظ السابق', 'تلقي الدرس الجديد', 'تطبيق عملي وتصحيح'].map((item, index) => (
-                          <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 sm:p-6 border border-slate-200 dark:border-slate-600">
-                            <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white">{item}</h3>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                              {personalInfo.sessionContent || 'وصف محتوى الحصة والأنشطة...'}
-                            </p>
-                            <button className="text-primary hover:underline text-sm font-semibold">استعراض التفاصيل</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {(editingStates.about || editingStates.benefits || editingStates.sessionContent) && !isPending && (
-                    <div className="flex flex-col sm:flex-row gap-3 justify-end">
-                      <button
-                        onClick={() => {
-                          if (editingStates.about) toggleEdit('about')
-                          if (editingStates.benefits) toggleEdit('benefits')
-                          if (editingStates.sessionContent) toggleEdit('sessionContent')
-                        }}
-                        className="px-6 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                      >
-                        إلغاء
-                      </button>
-                      <button
-                        onClick={handleSavePersonalInfo}
-                        disabled={saving}
-                        className="px-6 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
-                      >
-                        {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                      </button>
-                    </div>
-                  )}
-                </div>
                 )}
 
                 {/* Qualifications Section */}
                 {activeQuickTab === 'personal' && activeSubTab === 'qualifications' && (
-                <>
-                  {/* Education */}
-                  <div id="qualifications" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
-                    {isApproved && !isPending && (
-                      <button
-                        onClick={() => toggleEdit('qualifications')}
-                        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                        title="تعديل"
-                      >
-                        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
-                      </button>
-                    )}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">school</span>
-                        <h3 className="text-lg sm:text-xl font-bold">المؤهلات العلمية</h3>
-                      </div>
-                      {editingStates.qualifications && !isPending && (
+                  <>
+                    {/* Education */}
+                    <div id="qualifications" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                      {isApproved && !isPending && (
                         <button
-                          onClick={handleAddQualification}
-                          className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
+                          onClick={() => toggleEdit('qualifications')}
+                          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
                         >
-                          <span className="material-symbols-outlined text-sm">add</span> إضافة مؤهل
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
                         </button>
                       )}
-                    </div>
-                    <div className="space-y-6">
-                      {editableQualifications.length > 0 ? (
-                        editableQualifications.map((qual, index) => (
-                          <div key={index} className="flex gap-4 items-start p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                            <div className="h-12 w-12 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-primary">
-                              <span className="material-symbols-outlined">history_edu</span>
-                            </div>
-                            <div className="flex-1 space-y-3">
-                              {editingStates.qualifications && !isPending ? (
-                                <>
-                                  <input
-                                    type="text"
-                                    value={qual.title}
-                                    onChange={(e) => handleUpdateQualification(index, 'title', e.target.value)}
-                                    placeholder="اسم المؤهل"
-                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
-                                  />
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">school</span>
+                          <h3 className="text-lg sm:text-xl font-bold">المؤهلات العلمية</h3>
+                        </div>
+                        {editingStates.qualifications && !isPending && (
+                          <button
+                            onClick={handleAddQualification}
+                            className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
+                          >
+                            <span className="material-symbols-outlined text-sm">add</span> إضافة مؤهل
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-6">
+                        {editableQualifications.length > 0 ? (
+                          editableQualifications.map((qual, index) => (
+                            <div key={index} className="flex gap-4 items-start p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                              <div className="h-12 w-12 flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-primary">
+                                <span className="material-symbols-outlined">history_edu</span>
+                              </div>
+                              <div className="flex-1 space-y-3">
+                                {editingStates.qualifications && !isPending ? (
+                                  <>
                                     <input
                                       type="text"
-                                      value={qual.institution || ''}
-                                      onChange={(e) => handleUpdateQualification(index, 'institution', e.target.value)}
-                                      placeholder="المؤسسة"
-                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
+                                      value={qual.title}
+                                      onChange={(e) => handleUpdateQualification(index, 'title', e.target.value)}
+                                      placeholder="اسم المؤهل"
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100"
                                     />
-                                    <input
-                                      type="text"
-                                      value={qual.year || ''}
-                                      onChange={(e) => handleUpdateQualification(index, 'year', e.target.value)}
-                                      placeholder="السنة"
-                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
-                                    />
-                                  </div>
-                                  <button
-                                    onClick={() => handleDeleteQualification(index)}
-                                    className="text-red-500 text-sm hover:underline flex items-center gap-1"
-                                  >
-                                    <span className="material-symbols-outlined text-sm">delete</span>
-                                    حذف
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <h4 className="font-bold text-lg text-slate-900 dark:text-white">{qual.title}</h4>
-                                  {qual.institution && (
-                                    <p className="text-slate-600 dark:text-slate-400 text-sm">{qual.institution} {qual.year && `- ${qual.year}`}</p>
-                                  )}
-                                </>
-                              )}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <input
+                                        type="text"
+                                        value={qual.institution || ''}
+                                        onChange={(e) => handleUpdateQualification(index, 'institution', e.target.value)}
+                                        placeholder="المؤسسة"
+                                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={qual.year || ''}
+                                        onChange={(e) => handleUpdateQualification(index, 'year', e.target.value)}
+                                        placeholder="السنة"
+                                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 sm:px-4 py-2 text-sm sm:text-base text-slate-900 dark:text-slate-100"
+                                      />
+                                    </div>
+                                    <button
+                                      onClick={() => handleDeleteQualification(index)}
+                                      className="text-red-500 text-sm hover:underline flex items-center gap-1"
+                                    >
+                                      <span className="material-symbols-outlined text-sm">delete</span>
+                                      حذف
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">{qual.title}</h4>
+                                    {qual.institution && (
+                                      <p className="text-slate-600 dark:text-slate-400 text-sm">{qual.institution} {qual.year && `- ${qual.year}`}</p>
+                                    )}
+                                  </>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-slate-500 text-sm">لا توجد مؤهلات مسجلة</p>
+                          ))
+                        ) : (
+                          <p className="text-slate-500 text-sm">لا توجد مؤهلات مسجلة</p>
+                        )}
+                      </div>
+                      {editingStates.qualifications && !isPending && editableQualifications.length > 0 && (
+                        <div className="mt-6 flex justify-end">
+                          <button
+                            onClick={handleSaveQualifications}
+                            disabled={saving}
+                            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {saving ? 'جاري الحفظ...' : 'حفظ المؤهلات'}
+                          </button>
+                        </div>
                       )}
                     </div>
-                    {editingStates.qualifications && !isPending && editableQualifications.length > 0 && (
-                      <div className="mt-6 flex justify-end">
-                        <button
-                          onClick={handleSaveQualifications}
-                          disabled={saving}
-                          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {saving ? 'جاري الحفظ...' : 'حفظ المؤهلات'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Ijazahs */}
-                  <div className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                    {/* Ijazahs */}
+                    <div className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                      {isApproved && !isPending && (
+                        <button
+                          onClick={() => toggleEdit('ijazahs')}
+                          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          title="تعديل"
+                        >
+                          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
+                        </button>
+                      )}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">workspace_premium</span>
+                          <h3 className="text-lg sm:text-xl font-bold">الإجازات والسند</h3>
+                        </div>
+                        {editingStates.ijazahs && !isPending && (
+                          <button
+                            onClick={handleAddIjazah}
+                            className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
+                          >
+                            <span className="material-symbols-outlined text-sm">add</span> إضافة إجازة
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        {editableIjazahs.length > 0 ? (
+                          editableIjazahs.map((ijazah, index) => (
+                            <div
+                              key={index}
+                              className="group border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden hover:border-primary/40 transition-all"
+                            >
+                              <div
+                                className="h-40 bg-cover bg-center"
+                                style={{ backgroundImage: ijazah.image ? `url('${ijazah.image}')` : 'none', backgroundColor: '#f3f4f6' }}
+                              />
+                              <div className="p-4 space-y-3">
+                                {editingStates.ijazahs && !isPending ? (
+                                  <>
+                                    <input
+                                      type="text"
+                                      value={ijazah.title}
+                                      onChange={(e) => handleUpdateIjazah(index, 'title', e.target.value)}
+                                      placeholder="عنوان الإجازة"
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 font-bold"
+                                    />
+                                    <textarea
+                                      value={ijazah.description}
+                                      onChange={(e) => handleUpdateIjazah(index, 'description', e.target.value)}
+                                      placeholder="وصف الإجازة"
+                                      rows={2}
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 text-sm"
+                                    />
+                                    <input
+                                      type="url"
+                                      value={ijazah.image}
+                                      onChange={(e) => handleUpdateIjazah(index, 'image', e.target.value)}
+                                      placeholder="رابط الصورة"
+                                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 text-sm"
+                                    />
+                                    <button
+                                      onClick={() => handleDeleteIjazah(index)}
+                                      className="text-red-500 text-sm hover:underline flex items-center gap-1"
+                                    >
+                                      <span className="material-symbols-outlined text-sm">delete</span>
+                                      حذف
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <h4 className="font-bold text-slate-900 dark:text-white">{ijazah.title || 'بدون عنوان'}</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">{ijazah.description || 'لا يوجد وصف'}</p>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-slate-500 text-sm">لا توجد إجازات مسجلة</p>
+                        )}
+                      </div>
+                      {editingStates.ijazahs && !isPending && editableIjazahs.length > 0 && (
+                        <div className="mt-6 flex justify-end">
+                          <button
+                            onClick={handleSaveIjazahs}
+                            disabled={saving}
+                            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {saving ? 'جاري الحفظ...' : 'حفظ الإجازات'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Availability Section */}
+                {activeQuickTab === 'personal' && activeSubTab === 'availability' && (
+                  <div id="availability" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
                     {isApproved && !isPending && (
                       <button
-                        onClick={() => toggleEdit('ijazahs')}
+                        onClick={() => toggleEdit('availability')}
                         className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                         title="تعديل"
                       >
@@ -934,201 +1329,102 @@ export default function TeacherProfilePage() {
                     )}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">workspace_premium</span>
-                        <h3 className="text-lg sm:text-xl font-bold">الإجازات والسند</h3>
+                        <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">event_available</span>
+                        <h3 className="text-lg sm:text-xl font-bold">جدول التوفر الأسبوعي</h3>
                       </div>
-                      {editingStates.ijazahs && !isPending && (
-                        <button
-                          onClick={handleAddIjazah}
-                          className="text-xs sm:text-sm font-bold text-primary flex items-center gap-1 hover:underline"
-                        >
-                          <span className="material-symbols-outlined text-sm">add</span> إضافة إجازة
-                        </button>
-                      )}
+                      <div className="flex gap-2">
+                        <button className="px-2 sm:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">الأسبوع الحالي</button>
+                        <button className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors whitespace-nowrap">التالي</button>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                      {editableIjazahs.length > 0 ? (
-                        editableIjazahs.map((ijazah, index) => (
+                    <div className="mb-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-primary/20 rounded border border-primary/30"></div>
+                        <span className="text-slate-600 dark:text-slate-400">متاح</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-slate-900/10 dark:bg-slate-900/30 rounded border border-slate-900/20"></div>
+                        <span className="text-slate-600 dark:text-slate-400">محجوز</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-transparent rounded border border-slate-200 dark:border-slate-700"></div>
+                        <span className="text-slate-600 dark:text-slate-400">غير متاح</span>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto -mx-4 sm:mx-0">
+                      <div className="min-w-[600px] sm:min-w-[800px] grid grid-cols-8 border-t border-slate-100 dark:border-slate-800">
+                        {/* Header Row */}
+                        <div className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">الوقت</div>
+                        {days.map((day) => (
                           <div
-                            key={index}
-                            className="group border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden hover:border-primary/40 transition-all"
+                            key={day}
+                            className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-center bg-slate-50 dark:bg-slate-800/50"
                           >
-                            <div
-                              className="h-40 bg-cover bg-center"
-                              style={{ backgroundImage: ijazah.image ? `url('${ijazah.image}')` : 'none', backgroundColor: '#f3f4f6' }}
-                            />
-                            <div className="p-4 space-y-3">
-                              {editingStates.ijazahs && !isPending ? (
-                                <>
-                                  <input
-                                    type="text"
-                                    value={ijazah.title}
-                                    onChange={(e) => handleUpdateIjazah(index, 'title', e.target.value)}
-                                    placeholder="عنوان الإجازة"
-                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 font-bold"
-                                  />
-                                  <textarea
-                                    value={ijazah.description}
-                                    onChange={(e) => handleUpdateIjazah(index, 'description', e.target.value)}
-                                    placeholder="وصف الإجازة"
-                                    rows={2}
-                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 text-sm"
-                                  />
-                                  <input
-                                    type="url"
-                                    value={ijazah.image}
-                                    onChange={(e) => handleUpdateIjazah(index, 'image', e.target.value)}
-                                    placeholder="رابط الصورة"
-                                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-slate-900 dark:text-slate-100 text-sm"
-                                  />
-                                  <button
-                                    onClick={() => handleDeleteIjazah(index)}
-                                    className="text-red-500 text-sm hover:underline flex items-center gap-1"
-                                  >
-                                    <span className="material-symbols-outlined text-sm">delete</span>
-                                    حذف
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <h4 className="font-bold text-slate-900 dark:text-white">{ijazah.title || 'بدون عنوان'}</h4>
-                                  <p className="text-sm text-slate-600 dark:text-slate-400">{ijazah.description || 'لا يوجد وصف'}</p>
-                                </>
-                              )}
-                            </div>
+                            {day}
                           </div>
-                        ))
-                      ) : (
-                        <p className="text-slate-500 text-sm">لا توجد إجازات مسجلة</p>
-                      )}
+                        ))}
+                        {/* Time Rows */}
+                        {timeSlots.map((time, timeIndex) => (
+                          <React.Fragment key={timeIndex}>
+                            <div className="p-1.5 sm:p-2 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
+                              {time}
+                            </div>
+                            {days.map((day, dayIndex) => {
+                              const status = availability[dayIndex]?.[timeIndex]
+                              return (
+                                <div key={`${dayIndex}-${timeIndex}`} className="p-1 border-l border-b border-slate-100 dark:border-slate-800">
+                                  {status === 'available' && (
+                                    <div
+                                      onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
+                                      className={`h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[35px] flex items-center justify-center transition-colors ${editingStates.availability && !isPending ? 'cursor-pointer hover:bg-primary/30' : ''
+                                        }`}
+                                    >
+                                      <span className="text-[10px] font-bold text-primary">متاح</span>
+                                    </div>
+                                  )}
+                                  {status === 'booked' && (
+                                    <div className="h-full w-full bg-slate-900/10 dark:bg-slate-900/30 rounded border border-slate-900/20 min-h-[35px] flex items-center justify-center">
+                                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">محجوز</span>
+                                    </div>
+                                  )}
+                                  {!status && (
+                                    <div
+                                      onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
+                                      className={`h-full w-full min-h-[35px] ${editingStates.availability && !isPending ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded' : ''
+                                        }`}
+                                    />
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
-                    {editingStates.ijazahs && !isPending && editableIjazahs.length > 0 && (
+                    {editingStates.availability && !isPending && (
                       <div className="mt-6 flex justify-end">
                         <button
-                          onClick={handleSaveIjazahs}
+                          onClick={handleSaveAvailability}
                           disabled={saving}
                           className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {saving ? 'جاري الحفظ...' : 'حفظ الإجازات'}
+                          {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                         </button>
                       </div>
                     )}
+                    {isPending && (
+                      <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                        <p className="text-sm text-amber-700 dark:text-amber-300">
+                          لا يمكنك تعديل جدول التوفر أثناء انتظار الموافقة على طلبك.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </>
-                )}
-
-                {/* Availability Section */}
-                {activeQuickTab === 'personal' && activeSubTab === 'availability' && (
-                <div id="availability" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
-                  {isApproved && !isPending && (
-                    <button
-                      onClick={() => toggleEdit('availability')}
-                      className="absolute top-4 left-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                      title="تعديل"
-                    >
-                      <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">edit</span>
-                    </button>
-                  )}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">event_available</span>
-                      <h3 className="text-lg sm:text-xl font-bold">جدول التوفر الأسبوعي</h3>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="px-2 sm:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] sm:text-xs font-bold whitespace-nowrap">الأسبوع الحالي</button>
-                      <button className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors whitespace-nowrap">التالي</button>
-                    </div>
-                  </div>
-                  <div className="mb-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-primary/20 rounded border border-primary/30"></div>
-                      <span className="text-slate-600 dark:text-slate-400">متاح</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-slate-900/10 dark:bg-slate-900/30 rounded border border-slate-900/20"></div>
-                      <span className="text-slate-600 dark:text-slate-400">محجوز</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-transparent rounded border border-slate-200 dark:border-slate-700"></div>
-                      <span className="text-slate-600 dark:text-slate-400">غير متاح</span>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto -mx-4 sm:mx-0">
-                    <div className="min-w-[600px] sm:min-w-[800px] grid grid-cols-8 border-t border-slate-100 dark:border-slate-800">
-                      {/* Header Row */}
-                      <div className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">الوقت</div>
-                      {days.map((day) => (
-                        <div
-                          key={day}
-                          className="p-2 sm:p-3 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-center bg-slate-50 dark:bg-slate-800/50"
-                        >
-                          {day}
-                        </div>
-                      ))}
-                      {/* Time Rows */}
-                      {timeSlots.map((time, timeIndex) => (
-                        <React.Fragment key={timeIndex}>
-                          <div className="p-1.5 sm:p-2 border-l border-b border-slate-100 dark:border-slate-800 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
-                            {time}
-                          </div>
-                          {days.map((day, dayIndex) => {
-                            const status = availability[dayIndex]?.[timeIndex]
-                            return (
-                              <div key={`${dayIndex}-${timeIndex}`} className="p-1 border-l border-b border-slate-100 dark:border-slate-800">
-                                {status === 'available' && (
-                                  <div
-                                    onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
-                                    className={`h-full w-full bg-primary/20 rounded border border-primary/30 min-h-[35px] flex items-center justify-center transition-colors ${
-                                      editingStates.availability && !isPending ? 'cursor-pointer hover:bg-primary/30' : ''
-                                    }`}
-                                  >
-                                    <span className="text-[10px] font-bold text-primary">متاح</span>
-                                  </div>
-                                )}
-                                {status === 'booked' && (
-                                  <div className="h-full w-full bg-slate-900/10 dark:bg-slate-900/30 rounded border border-slate-900/20 min-h-[35px] flex items-center justify-center">
-                                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">محجوز</span>
-                                  </div>
-                                )}
-                                {!status && (
-                                  <div
-                                    onClick={() => editingStates.availability && !isPending && handleToggleAvailability(dayIndex, timeIndex)}
-                                    className={`h-full w-full min-h-[35px] ${
-                                      editingStates.availability && !isPending ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded' : ''
-                                    }`}
-                                  />
-                                )}
-                              </div>
-                            )
-                          })}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-                  {editingStates.availability && !isPending && (
-                    <div className="mt-6 flex justify-end">
-                      <button
-                        onClick={handleSaveAvailability}
-                        disabled={saving}
-                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                      </button>
-                    </div>
-                  )}
-                  {isPending && (
-                    <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                      <p className="text-sm text-amber-700 dark:text-amber-300">
-                        لا يمكنك تعديل جدول التوفر أثناء انتظار الموافقة على طلبك.
-                      </p>
-                    </div>
-                  )}
-                </div>
                 )}
 
                 {/* Reviews Section */}
                 {activeQuickTab === 'personal' && activeSubTab === 'reviews' && (
-                <div id="reviews" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
+                  <div id="reviews" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
                     {isApproved && !isPending && (
                       <button
                         onClick={() => toggleEdit('reviews')}
@@ -1145,8 +1441,8 @@ export default function TeacherProfilePage() {
                     <div className="space-y-4 sm:space-y-6">
                       {reviews.length > 0 ? (
                         <>
-                          {reviews.map((review, index) => (
-                            <div key={index} className="p-4 sm:p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
+                          {reviews.map((review) => (
+                            <div key={review.id || `review-${review.name}-${review.time}`} className="p-4 sm:p-6 border border-slate-100 dark:border-slate-800 rounded-xl space-y-3">
                               <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                   <div
@@ -1175,7 +1471,7 @@ export default function TeacherProfilePage() {
                         <p className="text-slate-500 text-xs sm:text-sm text-center py-6 sm:py-8">لا توجد تقييمات بعد</p>
                       )}
                     </div>
-                </div>
+                  </div>
                 )}
 
                 {/* Wallet Section - Only show when activeQuickTab is 'wallet' */}
