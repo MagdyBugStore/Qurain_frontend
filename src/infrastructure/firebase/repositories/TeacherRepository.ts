@@ -18,6 +18,7 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  deleteField,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
@@ -26,7 +27,7 @@ import type { TeacherApplication, TeacherProfile, Review } from '../../../shared
 import type { ITeacherRepository } from '../../../features/teachers/domain/interfaces/ITeacherRepository';
 import type { Qualification } from '../../../features/teachers/domain/entities/Qualification';
 import type { Ijazah } from '../../../features/teachers/domain/entities/Ijazah';
-import type { Availability } from '../../../features/teachers/domain/entities/Availability';
+import type { Availability, SlotStatus } from '../../../features/teachers/domain/entities/Availability';
 import type { Wallet, WithdrawalRequest } from '../../../features/teachers/domain/entities/Wallet';
 import type { SupportTicket, TicketReply } from '../../../features/teachers/domain/entities/SupportTicket';
 
@@ -284,29 +285,155 @@ export class TeacherRepository implements ITeacherRepository {
   }
 
   // Availability Methods
-
+  
   async getAvailability(teacherId: string): Promise<Availability | null> {
     try {
       const availabilityDoc = await getDoc(doc(db, 'teacherAvailability', teacherId));
       if (!availabilityDoc.exists()) {
         return null;
       }
-      return availabilityDoc.data() as Availability;
+
+      const data = availabilityDoc.data() as any;
+
+      // Firestore does not support nested arrays, so we store schedule as a flat map.
+      // Here we normalize whatever is in Firestore back to our domain shape: SlotStatus[][]
+      let schedule: SlotStatus[][] = Array(7)
+        .fill(null)
+        .map(() => Array(12).fill(null));
+
+      if (data.schedule) {
+        // New format: schedule is an object map like { "0_0": "available", ... }
+        if (!Array.isArray(data.schedule) && typeof data.schedule === 'object') {
+          Object.entries(data.schedule as Record<string, SlotStatus>).forEach(
+            ([key, value]) => {
+              const [dayStr, timeStr] = key.split('_');
+              const dayIndex = parseInt(dayStr, 10);
+              const timeIndex = parseInt(timeStr, 10);
+
+              if (
+                Number.isInteger(dayIndex) &&
+                Number.isInteger(timeIndex) &&
+                dayIndex >= 0 &&
+                dayIndex < schedule.length &&
+                timeIndex >= 0 &&
+                timeIndex < schedule[dayIndex].length
+              ) {
+                schedule[dayIndex][timeIndex] = value;
+              }
+            }
+          );
+          
+        }
+        // Backward compatibility: if an older document has nested arrays, try to use it directly
+        else if (Array.isArray(data.schedule)) {
+          schedule = data.schedule as SlotStatus[][];
+        }
+      }
+
+      // Count slots by type
+      let availableCount = 0;
+      let bookedCount = 0;
+      let nullCount = 0;
+      
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+          const slot = schedule[dayIndex]?.[timeIndex];
+          if (slot === 'available') availableCount++;
+          else if (slot === 'booked') bookedCount++;
+          else nullCount++;
+        }
+      }
+
+      const availability: Availability = {
+        teacherId: data.teacherId || teacherId,
+        schedule,
+        updatedAt: data.updatedAt,
+      };
+
+      return availability;
     } catch (error) {
-      console.error('Error getting availability:', error);
       return null;
     }
   }
 
   async saveAvailability(availability: Availability): Promise<void> {
     try {
-      const availabilityDocRef = doc(db, 'teacherAvailability', availability.teacherId);
-      await setDoc(availabilityDocRef, {
-        ...availability,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
+      // Count slots before conversion
+      let beforeAvailable = 0;
+      let beforeBooked = 0;
+      let beforeNull = 0;
+      
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+          const slot = availability.schedule[dayIndex]?.[timeIndex];
+          if (slot === 'available') beforeAvailable++;
+          else if (slot === 'booked') beforeBooked++;
+          else beforeNull++;
+        }
+      }
+      
+      const availabilityDocRef = doc(
+        db,
+        'teacherAvailability',
+        availability.teacherId
+      );
+
+      // Get current document to know which keys exist
+      const currentDoc = await getDoc(availabilityDocRef);
+      const currentSchedule = currentDoc.exists() 
+        ? (currentDoc.data()?.schedule as Record<string, SlotStatus> | undefined) 
+        : undefined;
+
+      // Firestore does not allow nested arrays. Convert 2D schedule matrix into a flat map:
+      // { "dayIndex_timeIndex": "available" | "booked" }
+      const scheduleMap: Record<string, SlotStatus | ReturnType<typeof deleteField>> = {};
+
+      // Process all slots (7 days × 12 time slots = 84 slots)
+      let slotsToSave = 0;
+      let slotsToDelete = 0;
+      let slotsNull = 0;
+      let slotsAvailable = 0;
+      let slotsBooked = 0;
+      
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+          const key = `${dayIndex}_${timeIndex}`;
+          const slot = availability.schedule[dayIndex]?.[timeIndex];
+          
+          if (slot === 'available') {
+            slotsAvailable++;
+          } else if (slot === 'booked') {
+            slotsBooked++;
+          } else {
+            slotsNull++;
+          }
+          
+          if (slot !== null && slot !== undefined) {
+            // Save non-null slots
+            scheduleMap[key] = slot;
+            slotsToSave++;
+          } else {
+            // For null slots, use deleteField() to remove them from Firestore
+            // Only delete if the key exists in current schedule
+            if (currentSchedule && key in currentSchedule) {
+              scheduleMap[key] = deleteField();
+              slotsToDelete++;
+            }
+            // If key doesn't exist, don't add it (it's already null/not set)
+          }
+        }
+      }
+      await setDoc(
+        availabilityDocRef,
+        {
+          teacherId: availability.teacherId,
+          schedule: scheduleMap,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      
     } catch (error) {
-      console.error('Error saving availability:', error);
       throw error;
     }
   }

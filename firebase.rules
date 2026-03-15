@@ -220,6 +220,21 @@ service cloud.firestore {
     }
     
     // ============================================
+    // Subscriptions - الاشتراكات الشهرية
+    // ============================================
+    match /subscriptions/{subscriptionId} {
+      // يمكن للطالب أو المعلم صاحب الاشتراك، أو الأدمن، قراءة بيانات الاشتراك
+      allow read: if isStudentOrTeacherOwner(resource.data.studentId, resource.data.teacherId) || isAdmin();
+
+      // يمكن للطالب فقط إنشاء اشتراك باسمه
+      allow create: if isAuthenticated()
+                    && request.resource.data.studentId == request.auth.uid;
+
+      // يمكن للطالب أو المعلم صاحب الاشتراك، أو الأدمن، تعديل أو حذف الاشتراك
+      allow update, delete: if isStudentOrTeacherOwner(resource.data.studentId, resource.data.teacherId) || isAdmin();
+    }
+    
+    // ============================================
     // Default Deny - الرفض الافتراضي
     // ============================================
     match /{document=**} {

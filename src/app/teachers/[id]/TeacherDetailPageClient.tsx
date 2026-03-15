@@ -377,7 +377,7 @@ export default function TeacherDetailPageClient() {
                                 </div>
                               )}
                               {status === 'booked' && (
-                                <div className="h-full w-full bg-gray-200 rounded border border-gray-300 min-h-[35px] flex items-center justify-center">
+                                <div className="h-full w-full bg-gray-200 rounded border border-gray-300 min-h-[35px] flex items-center justify-center cursor-not-allowed opacity-60 pointer-events-none">
                                   <span className="text-[10px] font-bold text-text-light">محجوز</span>
                                 </div>
                               )}
@@ -456,7 +456,7 @@ export default function TeacherDetailPageClient() {
                   disabled={isTeacher}
                   className="w-full bg-primary hover:bg-primary-hover text-text-dark font-bold py-3 px-4 rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 font-arabic disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isTeacher ? 'غير متاح للمعلمين' : 'أحجز الان'}
+                  {isTeacher ? 'غير متاح للمعلمين' : 'اشترك الآن'}
                 </button>
                 {isTeacher && (
                   <p className="text-center text-xs text-text-light mt-2 font-arabic">

@@ -88,15 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // الحصول على المسار الحالي لتجنب حلقة إعادة التوجيه
       const currentPath = window.location.pathname;
       
-      // Only redirect if not already on personal-info, login, teacher-application, or profile pages
-      // إعادة التوجيه فقط إذا لم يكن المستخدم في صفحة personal-info أو login أو teacher-application أو صفحات البروفايل بالفعل
+      // Only redirect if not already on personal-info, login, teacher-application, teachers, or profile pages
+      // إعادة التوجيه فقط إذا لم يكن المستخدم في صفحة personal-info أو login أو teacher-application أو صفحات المعلمين/البروفايل بالفعل
       if (
         currentPath !== '/personal-info' && 
         currentPath !== '/login' && 
         !currentPath.startsWith('/teacher-application') &&
         !currentPath.startsWith('/student-profile') &&
         !currentPath.startsWith('/teacher-profile') &&
-        !currentPath.startsWith('/profile')
+        !currentPath.startsWith('/profile') &&
+        // Allow public teachers listing and detail pages without forcing profile completion
+        !currentPath.startsWith('/teachers')
       ) {
         // Check if user is a teacher and has submitted application
         // التحقق من أن المستخدم معلم وقد أرسل طلب

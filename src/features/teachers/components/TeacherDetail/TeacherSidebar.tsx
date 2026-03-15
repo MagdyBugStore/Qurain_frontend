@@ -64,7 +64,7 @@ export function TeacherSidebar({
             disabled={isTeacher}
             className="w-full bg-primary hover:bg-primary/90 text-text-dark font-bold text-lg py-3 rounded-lg shadow-lg shadow-primary/10 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isTeacher ? 'غير متاح للمعلمين' : 'أحجز الان'}
+            {isTeacher ? 'غير متاح للمعلمين' : 'اشترك الآن'}
           </button>
           {isTeacher && (
             <p className="text-center text-xs text-text-light mt-2">

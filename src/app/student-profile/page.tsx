@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
 import { StudentService } from '../../services/studentService'
+import { SubscriptionService, type StudentSubscription } from '../../services/subscriptionService'
 import { formatArabicDate, formatArabicTime, getRelativeTime } from '../../shared/utils/date'
 import { getCalendarDays, getArabicMonthName, isSameDay } from '../../shared/utils/calendar'
 import type { StudentSession, MemorizationLog } from '../../shared/types/student.types'
@@ -15,11 +16,17 @@ export default function StudentProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const { user, userProfile } = useAuth()
   const [studentService] = useState(() => new StudentService())
+  const [subscriptionService] = useState(() => new SubscriptionService())
 
   // Calendar state
-  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  })
   const [allSessions, setAllSessions] = useState<StudentSession[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(false)
+  const [activeSubscription, setActiveSubscription] = useState<StudentSubscription | null>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
 
   // Memorization logs state
   const [allMemorizationLogs, setAllMemorizationLogs] = useState<MemorizationLog[]>([])
@@ -40,6 +47,24 @@ export default function StudentProfilePage() {
     error,
     updateTaskStatus,
   } = useStudentProfile(user?.uid)
+
+  // Fetch active subscription once user is available
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!user?.uid) return
+      try {
+        setSubscriptionLoading(true)
+        const sub = await subscriptionService.getActiveSubscriptionForStudent(user.uid)
+        setActiveSubscription(sub)
+      } catch (err) {
+        console.error('Error fetching active subscription for student:', err)
+      } finally {
+        setSubscriptionLoading(false)
+      }
+    }
+
+    fetchSubscription()
+  }, [user?.uid, subscriptionService])
 
   // Fetch all sessions when schedule tab is active
   useEffect(() => {
@@ -99,31 +124,47 @@ export default function StudentProfilePage() {
     return labels[type || 'memorization'] || 'حفظ'
   }
 
-  // Navigate months
+  // Navigate months (from start of current month until end of the year فقط)
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
+      const now = new Date()
+      const minMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const maxMonth = new Date(now.getFullYear(), 11, 1) // ديسمبر من نفس السنة
+
       const newDate = new Date(prev)
       if (direction === 'prev') {
         newDate.setMonth(prev.getMonth() - 1)
       } else {
         newDate.setMonth(prev.getMonth() + 1)
       }
+
+      if (newDate < minMonth || newDate > maxMonth) {
+        return prev
+      }
       return newDate
     })
   }
 
-  // Get month buttons (current month and adjacent months)
+  // Get month buttons from الشهر الحالي إلى نهاية السنة
   const monthButtons = useMemo(() => {
-    const prevMonth = new Date(currentMonth)
-    prevMonth.setMonth(currentMonth.getMonth() - 1)
-    const nextMonth = new Date(currentMonth)
-    nextMonth.setMonth(currentMonth.getMonth() + 1)
+    const now = new Date()
+    const startMonthIndex = now.getMonth()
+    const year = now.getFullYear()
 
-    return [
-      { date: prevMonth, label: getArabicMonthName(prevMonth.getMonth()) },
-      { date: currentMonth, label: getArabicMonthName(currentMonth.getMonth()), isActive: true },
-      { date: nextMonth, label: getArabicMonthName(nextMonth.getMonth()) },
-    ]
+    const buttons: { date: Date; label: string; isActive?: boolean }[] = []
+
+    for (let month = startMonthIndex; month < 12; month++) {
+      const date = new Date(year, month, 1)
+      buttons.push({
+        date,
+        label: getArabicMonthName(month),
+        isActive:
+          date.getFullYear() === currentMonth.getFullYear() &&
+          date.getMonth() === currentMonth.getMonth(),
+      })
+    }
+
+    return buttons
   }, [currentMonth])
 
   // Calculate monthly stats for current month
@@ -346,8 +387,9 @@ export default function StudentProfilePage() {
                 </div>
               )}
 
-              {/* Stats with Icons */}
+              {/* Stats & Subscription */}
               <div className="grid grid-cols-1 gap-4">
+                {/* Total Sessions */}
                 <div className="flex flex-col items-center p-4 bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                     <span className="material-symbols-outlined text-primary text-xl">event</span>
@@ -358,6 +400,47 @@ export default function StudentProfilePage() {
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium text-center">
                     إجمالي الحصص
                   </span>
+                </div>
+
+                {/* Active Subscription */}
+                <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100/60 dark:from-[#3b3320] dark:to-[#1f1b13] rounded-xl border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-amber-500 text-xl">workspace_premium</span>
+                      <h3 className="text-sm font-bold text-slate-800 dark:text-amber-50">الاشتراك الحالي</h3>
+                    </div>
+                    {subscriptionLoading && (
+                      <div className="size-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                    )}
+                  </div>
+                  {activeSubscription ? (
+                    <div className="space-y-1 text-xs text-slate-700 dark:text-amber-100">
+                      <p className="font-bold text-sm">
+                        {activeSubscription.planLabel} • {activeSubscription.sessionsPerMonth} جلسة / شهر
+                      </p>
+                      <p>
+                        عدد الحصص الأسبوعية: <span className="font-semibold">{activeSubscription.weeklyFrequency}</span>
+                      </p>
+                      <p>
+                        المدة: <span className="font-semibold">{activeSubscription.durationMinutes} دقيقة</span>
+                      </p>
+                      <p>
+                        السعر الشهري:{' '}
+                        <span className="font-semibold">
+                          {activeSubscription.monthlyPrice.toFixed(2)} {activeSubscription.currency}
+                        </span>
+                      </p>
+                      {activeSubscription.nextRenewalDate && (
+                        <p className="text-[11px] text-slate-600 dark:text-amber-200/80 mt-1">
+                          التجديد القادم: {formatArabicDate(activeSubscription.nextRenewalDate)}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-600 dark:text-amber-100">
+                      لا يوجد اشتراك نشط حالياً. يمكنك حجز باقة اشتراك من صفحة المعلمين.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -749,16 +832,7 @@ export default function StudentProfilePage() {
                       <span className="material-symbols-outlined text-sm">chevron_left</span>
                     </button>
                   </div>
-                  <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      <span className="material-symbols-outlined text-lg">filter_list</span>
-                      تصفية
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                      <span className="material-symbols-outlined text-lg">print</span>
-                      طباعة
-                    </button>
-                  </div>
+                  
                 </div>
 
                 {/* Calendar View */}

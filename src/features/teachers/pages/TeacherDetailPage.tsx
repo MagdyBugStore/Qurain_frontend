@@ -47,7 +47,9 @@ export function TeacherDetailPage() {
       return;
     }
     
-    navigate(`/booking/${id}`);
+    if (id) {
+      navigate(`/teachers/${id}/book`);
+    }
   };
 
   const handleSendMessage = () => {

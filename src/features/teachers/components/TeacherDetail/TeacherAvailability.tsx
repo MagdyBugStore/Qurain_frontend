@@ -89,7 +89,7 @@ export function TeacherAvailability({ availability }: TeacherAvailabilityProps) 
                       </div>
                     )}
                     {status === 'booked' && (
-                      <div className="h-full w-full bg-gray-200 rounded border border-gray-300 min-h-[35px] flex items-center justify-center">
+                      <div className="h-full w-full bg-gray-200 rounded border border-gray-300 min-h-[35px] flex items-center justify-center cursor-not-allowed opacity-60 pointer-events-none">
                         <span className="text-[10px] font-bold text-text-light">محجوز</span>
                       </div>
                     )}

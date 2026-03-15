@@ -36,7 +36,7 @@ export function PersonalInfoSection({
 
   const handleSave = async () => {
     const result = await savePersonalInfo();
-    if (result.success) {
+    if (result?.success) {
       onSave({ type: 'success', text: 'تم حفظ البيانات بنجاح' });
       onToggleEdit();
     } else {
@@ -45,19 +45,7 @@ export function PersonalInfoSection({
   };
 
   return (
-    <div className="w-full mt-6 pt-6 border-t border-gray-100 dark:border-slate-700">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-bold">البيانات الشخصية</h3>
-        {isApproved && !isPending && (
-          <button
-            onClick={onToggleEdit}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            title="تعديل"
-          >
-            <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 text-sm">edit</span>
-          </button>
-        )}
-      </div>
+    <div className="">
       {isEditing ? (
         <div className="space-y-4 text-right">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -112,38 +100,7 @@ export function PersonalInfoSection({
         </div>
       ) : (
         <div className="space-y-4 text-right">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الاسم الكامل</label>
-              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                {teacherName}
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">البريد الإلكتروني</label>
-              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                {userProfile?.email || teacherApplication?.email || user?.email || 'غير متوفر'}
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">رقم الهاتف</label>
-              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                {teacherApplication?.countryCode || '+966'} {teacherApplication?.phone || 'غير متوفر'}
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">الجنسية</label>
-              <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 font-medium">
-                {teacherApplication?.nationality || 'غير متوفر'}
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-400 dark:text-slate-500 mb-1.5">نبذة عني</label>
-            <div className="w-full rounded-lg bg-gray-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap min-h-[80px]">
-              {teacherApplication?.bio || 'لا توجد نبذة متاحة'}
-            </div>
-          </div>
+
         </div>
       )}
     </div>

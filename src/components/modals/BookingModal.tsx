@@ -28,10 +28,10 @@ export default function BookingModal() {
       return
     }
     
-    // Navigate to booking page
+    // Navigate to teacher booking page
     if (teacherId) {
       closeModal()
-      navigate(`/booking/${teacherId}`)
+      navigate(`/teachers/${teacherId}/book`)
     }
   }
 

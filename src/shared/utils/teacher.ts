@@ -59,30 +59,14 @@ export function getTeacherImageUrl(profile?: TeacherProfile | null): string {
 }
 
 /**
- * Generate qualifications from education level
- * TODO: This should be fetched from a separate collection in the future
+ * Get qualifications from application
+ * Returns qualifications stored in the application document
  */
 export function getTeacherQualifications(application?: TeacherApplication | null): Qualification[] {
-  if (!application?.educationLevel) {
+  if (!application) {
     return [];
   }
   
-  // Mock qualifications - should be replaced with actual data from database
-  return [
-    {
-      title: application.educationLevel,
-      institution: 'الأزهر الشريف',
-      year: '2010',
-    },
-    {
-      title: 'بكالوريوس الدراسات الإسلامية والعربية',
-      institution: 'جامعة الأزهر',
-      year: '2008',
-    },
-    {
-      title: 'دورة في طرق تدريس اللغة العربية لغير الناطقين بها',
-      institution: 'معهد تعليم اللغة العربية',
-      year: '2012',
-    },
-  ];
+  // Return qualifications from application if they exist
+  return (application as any).qualifications || [];
 }

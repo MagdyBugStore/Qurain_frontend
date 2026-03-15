@@ -53,7 +53,7 @@ export default function TeacherApplicationPage() {
     const finalData = { ...teacherFormData, ...data }
     
     // TODO: Save to backend
-    console.log('Submitting teacher application:', finalData)
+    
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -68,7 +68,7 @@ export default function TeacherApplicationPage() {
     } else if (currentStep === 'step2') {
       setCurrentStep('step1')
     } else if (currentStep === 'step1') {
-      console.log('redirecting to personal-info');
+      
       navigate('/personal-info')
     }
   }

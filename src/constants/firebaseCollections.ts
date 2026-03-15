@@ -17,6 +17,7 @@ export const COLLECTIONS = {
   STUDENT_TASKS: 'studentTasks',
   MEMORIZATION_LOGS: 'memorizationLogs',
   STUDENT_ACTIVITIES: 'studentActivities',
+  SUBSCRIPTIONS: 'subscriptions',
 } as const;
 
 export type CollectionName = typeof COLLECTIONS[keyof typeof COLLECTIONS];

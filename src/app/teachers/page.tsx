@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { TeacherService } from '../../services/teacherService'
 import { getCurrencySymbol } from '../../shared/utils/currency'
 import { getTeacherDisplayName, getTeacherImageUrl, getTeacherSpecialization } from '../../shared/utils/teacher'
+import { useAppStore } from '../../store/useAppStore'
 
 interface Teacher {
   id: string
@@ -60,7 +61,8 @@ interface UserProfile {
 
 export default function TeachersPage() {
   const { requireAuth } = useAuthGuard()
-  const { userProfile } = useAuth()
+  const { user: currentUser, userProfile } = useAuth()
+  const openLoginModal = useAppStore((state) => state.openLoginModal)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
@@ -148,13 +150,6 @@ export default function TeachersPage() {
 
     fetchTeachers()
   }, [])
-
-  const handleBookTrial = () => {
-    requireAuth(() => {
-      // Proceed with booking logic after authentication
-      console.log('Booking trial session...')
-    })
-  }
 
   // Filter and sort teachers
   const filteredTeachers = React.useMemo(() => {
@@ -544,13 +539,17 @@ export default function TeachersPage() {
                       {!isTeacher && (
                         <button
                           onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            handleBookTrial()
+                            // If user is not logged in, prevent navigation and open login popup
+                            if (!currentUser) {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              openLoginModal()
+                            }
+                            // If user is logged in, let the Link navigation happen (no popup)
                           }}
                           className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto text-center"
                         >
-                          احجز الان
+                          اشترك الآن
                         </button>
                       )}
                     </div>

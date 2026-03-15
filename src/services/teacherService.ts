@@ -13,7 +13,7 @@ import type {
 } from '../shared/types/teacher.types';
 import type { Qualification } from '../features/teachers/domain/entities/Qualification';
 import type { Ijazah } from '../features/teachers/domain/entities/Ijazah';
-import type { Availability } from '../features/teachers/domain/entities/Availability';
+import type { Availability, SlotStatus } from '../features/teachers/domain/entities/Availability';
 import { getTeacherQualifications } from '../shared/utils/teacher';
 
 export interface TeacherProfileData {
@@ -314,15 +314,99 @@ export class TeacherService {
   }
 
   /**
-   * Save availability
+   * Save availability with smart merging to preserve booked slots
+   * This ensures that booked slots from student subscriptions are never overwritten
    */
   async saveAvailability(availability: Availability): Promise<void> {
     try {
-      await this.repository.saveAvailability(availability);
+      // Get current availability from database to preserve booked slots
+      const currentAvailability = await this.repository.getAvailability(availability.teacherId);
+      
+      if (currentAvailability) {
+        // Merge: preserve booked slots, allow changes to available/null slots
+        const mergedSchedule = this.mergeAvailabilitySchedules(
+          currentAvailability.schedule,
+          availability.schedule
+        );
+        
+        await this.repository.saveAvailability({
+          teacherId: availability.teacherId,
+          schedule: mergedSchedule as SlotStatus[][],
+          updatedAt: availability.updatedAt,
+        });
+      } else {
+        // No existing availability, save as is (but ensure all slots are explicitly set)
+        const completeSchedule: (string | null)[][] = Array(7)
+          .fill(null)
+          .map(() => Array(12).fill(null));
+        
+        // Copy user's schedule
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+          for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+            completeSchedule[dayIndex][timeIndex] = availability.schedule[dayIndex]?.[timeIndex] ?? null;
+          }
+        }
+        
+        await this.repository.saveAvailability({
+          teacherId: availability.teacherId,
+          schedule: completeSchedule as SlotStatus[][],
+          updatedAt: availability.updatedAt,
+        });
+      }
     } catch (error) {
-      console.error('Error saving availability:', error);
+      console.error('[TeacherService] Error saving availability:', error);
       throw error;
     }
+  }
+
+  /**
+   * Merge availability schedules intelligently
+   * Rules:
+   * - Preserve all 'booked' slots from current (database) schedule
+   * - Allow changes to 'available' and null slots from new (user edits) schedule
+   * - Never allow overwriting 'booked' slots with 'available' or null
+   * - Explicitly handle null values for removal
+   */
+  private mergeAvailabilitySchedules(
+    currentSchedule: (string | null)[][],
+    newSchedule: (string | null)[][]
+  ): (string | null)[][] {
+    const merged: (string | null)[][] = Array(7)
+      .fill(null)
+      .map(() => Array(12).fill(null));
+
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+        const currentSlot = currentSchedule[dayIndex]?.[timeIndex];
+        const newSlot = newSchedule[dayIndex]?.[timeIndex];
+
+        // Priority 1: Preserve booked slots from database (never overwrite)
+        if (currentSlot === 'booked') {
+          merged[dayIndex][timeIndex] = 'booked';
+        }
+        // Priority 2: Apply new changes (including null for removal) if current slot is not booked
+        else {
+          // Explicitly handle null values - user wants to remove this slot
+          if (newSlot === null) {
+            merged[dayIndex][timeIndex] = null;
+          }
+          // Apply new non-null values
+          else if (newSlot !== null && newSlot !== undefined) {
+            merged[dayIndex][timeIndex] = newSlot;
+          }
+          // If new is undefined but current exists, keep current
+          else if (currentSlot !== null && currentSlot !== undefined) {
+            merged[dayIndex][timeIndex] = currentSlot;
+          }
+          // Default: null (not available)
+          else {
+            merged[dayIndex][timeIndex] = null;
+          }
+        }
+      }
+    }
+
+    return merged;
   }
 
   /**

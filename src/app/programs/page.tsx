@@ -12,7 +12,7 @@ export default function ProgramsPage() {
   const handleEnrollProgram = () => {
     requireAuth(() => {
       // Proceed with enrollment logic after authentication
-      console.log('Enrolling in program...')
+      
       // TODO: Implement enrollment logic
     })
   }

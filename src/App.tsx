@@ -179,6 +179,8 @@ function AppShell() {
         <Route path="/programs" element={<ProgramsPageNew />} />
         <Route path="/teachers" element={<TeachersPageNew />} />
         <Route path="/teachers/:id" element={<TeacherDetailPage />} />
+        {/* Alternate booking path under teachers namespace */}
+        <Route path="/teachers/:id/book" element={<BookingPage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/booking/:id/confirm" element={<BookingConfirmPage />} />
         <Route path="/technical-check/:id" element={<TechnicalCheckPage />} />
