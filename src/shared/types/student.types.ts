@@ -26,13 +26,14 @@ export interface StudentSession {
   studentId: string;
   teacherId: string;
   teacherName: string;
-  teacherPhoto?: string;
+  teacherPhoto: string;
   title: string;
   description?: string;
   scheduledDate: Date | string;
   duration: number; // in minutes
   status: SessionStatus;
   sessionType?: 'memorization' | 'recitation' | 'review' | 'test';
+  subscriptionId?: string; // ID of the subscription this session belongs to
   meetingLink?: string;
   notes?: string;
   createdAt: Date | string;

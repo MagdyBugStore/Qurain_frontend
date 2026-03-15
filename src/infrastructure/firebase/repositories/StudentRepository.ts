@@ -290,6 +290,68 @@ export class StudentRepository {
   }
 
   /**
+   * Get all sessions with optional filters (for admin)
+   */
+  async getAllSessions(
+    filters?: {
+      status?: SessionStatus;
+      teacherId?: string;
+      studentId?: string;
+    },
+    limitCount?: number
+  ): Promise<StudentSession[]> {
+    try {
+      const constraints: QueryConstraint[] = [];
+
+      if (filters?.status) {
+        constraints.push(where('status', '==', filters.status));
+      }
+      if (filters?.teacherId) {
+        constraints.push(where('teacherId', '==', filters.teacherId));
+      }
+      if (filters?.studentId) {
+        constraints.push(where('studentId', '==', filters.studentId));
+      }
+
+      constraints.push(orderBy('scheduledDate', 'desc'));
+
+      if (limitCount) {
+        constraints.push(limit(limitCount));
+      }
+
+      const sessionsQuery = query(
+        collection(db, COLLECTIONS.SESSIONS),
+        ...constraints
+      );
+
+      const snapshot = await getDocs(sessionsQuery);
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        scheduledDate: this.toDate(doc.data().scheduledDate),
+        createdAt: this.toDate(doc.data().createdAt),
+        updatedAt: this.toDate(doc.data().updatedAt),
+      })) as StudentSession[];
+    } catch (error) {
+      console.error('Error fetching all sessions:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a session
+   */
+  async deleteSession(sessionId: string): Promise<void> {
+    try {
+      const sessionRef = doc(db, COLLECTIONS.SESSIONS, sessionId);
+      await deleteDoc(sessionRef);
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Subscribe to upcoming session
    */
   subscribeToUpcomingSession(

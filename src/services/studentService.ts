@@ -65,6 +65,27 @@ export class StudentService {
   }
 
   /**
+   * Get all sessions with optional filters (for admin)
+   */
+  async getAllSessions(
+    filters?: {
+      status?: 'scheduled' | 'completed' | 'cancelled';
+      teacherId?: string;
+      studentId?: string;
+    },
+    limitCount?: number
+  ): Promise<StudentSession[]> {
+    return this.repository.getAllSessions(filters, limitCount);
+  }
+
+  /**
+   * Delete a session
+   */
+  async deleteSession(sessionId: string): Promise<void> {
+    return this.repository.deleteSession(sessionId);
+  }
+
+  /**
    * Get memorization logs
    */
   async getMemorizationLogs(studentId: string, limit?: number): Promise<MemorizationLog[]> {
