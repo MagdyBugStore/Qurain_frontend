@@ -10,6 +10,9 @@ import { useAppStore } from '../../../store/useAppStore'
 import { TeacherService } from '../../../features/teachers/services/teacherService'
 import { getTeacherDisplayName, getTeacherTitle, getTeacherImageUrl } from '../../../shared/utils/teacher'
 import type { TeacherApplication, TeacherProfile, Qualification, Review } from '../../../shared/types/teacher.types'
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../../../config/firebase'
+import { COLLECTIONS } from '../../../constants/firebaseCollections'
 
 type TabType = 'personal' | 'availability' | 'reviews'
 
@@ -26,6 +29,66 @@ export default function TeacherDetailPageClient() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [qualifications, setQualifications] = useState<Qualification[]>([])
   const [availability, setAvailability] = useState<(string | null)[][]>([])
+  const [bookedSlotsSet, setBookedSlotsSet] = useState<Set<string>>(new Set())
+
+  // Fetch booked slots from subscriptions
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      if (!id) return
+
+      try {
+        const subscriptionsQuery = query(
+          collection(db, COLLECTIONS.SUBSCRIPTIONS),
+          where('teacherId', '==', id),
+          where('status', '==', 'active')
+        )
+        
+        let subscriptionsSnapshot
+        try {
+          subscriptionsSnapshot = await getDocs(subscriptionsQuery)
+        } catch (queryError: any) {
+          if (queryError?.code === 'failed-precondition' || queryError?.message?.includes('index')) {
+            const fallbackQuery = query(
+              collection(db, COLLECTIONS.SUBSCRIPTIONS),
+              where('teacherId', '==', id)
+            )
+            subscriptionsSnapshot = await getDocs(fallbackQuery)
+            
+            const filteredDocs = subscriptionsSnapshot.docs.filter(doc => {
+              const data = doc.data()
+              return data.status === 'active'
+            })
+            
+            subscriptionsSnapshot = {
+              docs: filteredDocs,
+              size: filteredDocs.length,
+            } as any
+          } else {
+            return
+          }
+        }
+        
+        const booked = new Set<string>()
+        subscriptionsSnapshot.docs.forEach((doc) => {
+          const subscriptionData = doc.data()
+          const weeklySlots = subscriptionData.weeklySlots || []
+          
+          weeklySlots.forEach((slot: { dayIndex: number; time: string }) => {
+            const key = `${slot.dayIndex}_${slot.time}`
+            booked.add(key)
+          })
+        })
+        
+        setBookedSlotsSet(booked)
+      } catch (error) {
+        console.error('Error fetching booked slots:', error)
+      }
+    }
+
+    if (id) {
+      fetchBookedSlots()
+    }
+  }, [id])
 
   // Fetch teacher data by ID using service layer
   useEffect(() => {
@@ -100,6 +163,34 @@ export default function TeacherDetailPageClient() {
   }
   
   const isTeacher = userProfile?.accountType === 'teacher'
+
+  // Calculate total available slots for the teacher
+  const calculateAvailableSlots = (): number => {
+    if (!availability || availability.length === 0) {
+      return 0
+    }
+
+    let availableCount = 0
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const daySchedule = availability[dayIndex] || []
+      for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+        const slotStatus = daySchedule[timeIndex]
+        // Check if slot is available and not booked
+        if (slotStatus === 'available') {
+          const slotTime = timeSlots[timeIndex]
+          const key = `${dayIndex}_${slotTime}`
+          // Only count if not booked by subscriptions
+          if (!bookedSlotsSet.has(key)) {
+            availableCount++
+          }
+        }
+      }
+    }
+    return availableCount
+  }
+
+  const totalAvailableSlots = calculateAvailableSlots()
+  const hasAvailableSlots = totalAvailableSlots > 0
 
   const handleSendMessage = () => {
     if (!currentUser) {
@@ -451,17 +542,29 @@ export default function TeacherDetailPageClient() {
                 </div>
               </div>
               <div className="space-y-3 mb-6">
-                <button
-                  onClick={handleBookSession}
-                  disabled={isTeacher}
-                  className="w-full bg-primary hover:bg-primary-hover text-text-dark font-bold py-3 px-4 rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 font-arabic disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isTeacher ? 'غير متاح للمعلمين' : 'اشترك الآن'}
-                </button>
-                {isTeacher && (
-                  <p className="text-center text-xs text-text-light mt-2 font-arabic">
-                    المعلمون لا يمكنهم حجز حصص مع معلمين آخرين
-                  </p>
+                {hasAvailableSlots ? (
+                  <>
+                    <button
+                      onClick={handleBookSession}
+                      disabled={isTeacher}
+                      className="w-full bg-primary hover:bg-primary-hover text-text-dark font-bold py-3 px-4 rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 font-arabic disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isTeacher ? 'غير متاح للمعلمين' : 'اشترك الآن'}
+                    </button>
+                    {isTeacher && (
+                      <p className="text-center text-xs text-text-light mt-2 font-arabic">
+                        المعلمون لا يمكنهم حجز حصص مع معلمين آخرين
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="material-symbols-outlined text-yellow-500 text-2xl">schedule</span>
+                      <p className="text-sm font-bold text-text-dark font-arabic">لا يوجد وقت متاح</p>
+                      <p className="text-xs text-text-light font-arabic">المعلم لا يمتلك أي أوقات متاحة للحجز حالياً</p>
+                    </div>
+                  </div>
                 )}
                 <button
                   onClick={handleSendMessage}

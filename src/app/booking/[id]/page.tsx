@@ -179,7 +179,7 @@ export default function BookingPage() {
       id: 'elite',
       label: 'باقة الإتقان',
       sessionsPerMonth: 16,
-      weeklyFrequency: '5 مرات أسبوعياً',
+      weeklyFrequency: '4 مرات أسبوعياً',
       durationMinutes: 60,
     },
   ]
@@ -410,6 +410,45 @@ export default function BookingPage() {
     )
   }
 
+  // Calculate total available slots for the teacher
+  const calculateAvailableSlots = (): number => {
+    if (!teacherData?.availability || teacherData.availability.length === 0) {
+      return 0
+    }
+
+    let availableCount = 0
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const daySchedule = teacherData.availability[dayIndex] || []
+      for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
+        const slotStatus = daySchedule[timeIndex]
+        // Check if slot is available and not booked
+        if (slotStatus === 'available') {
+          const slotTime = availabilityTimeSlots[timeIndex]
+          const key = `${dayIndex}_${slotTime}`
+          // Only count if not booked by subscriptions
+          if (!bookedSlotsSet.has(key)) {
+            availableCount++
+          }
+        }
+      }
+    }
+    return availableCount
+  }
+
+  const totalAvailableSlots = calculateAvailableSlots()
+  const availableWeeklySessions = totalAvailableSlots // Total available slots per week
+
+  // Filter plans based on available slots
+  const getAvailablePlans = () => {
+    return plans.filter((plan) => {
+      const requiredWeekly = Math.round(plan.sessionsPerMonth / 4)
+      return availableWeeklySessions >= requiredWeekly
+    })
+  }
+
+  const availablePlans = getAvailablePlans()
+  const hasAvailableSlots = totalAvailableSlots > 0
+
   const timeSlots = getAvailableTimeSlots()
   const calendarDays = getCalendarDays()
   const selectedPlanConfig = selectedPlan ? plans.find((p) => p.id === selectedPlan) ?? null : null
@@ -446,23 +485,56 @@ export default function BookingPage() {
                     الخطوة الأولى: حدد الخطة المناسبة لأهدافك في حفظ القرآن
                   </p>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <div className="relative size-16 flex items-center justify-center rounded-full">
-                    <div className="absolute inset-0 rounded-full bg-slate-100 dark:bg-slate-800" />
-                    <div className="absolute inset-[3px] rounded-full bg-white dark:bg-slate-900" />
-                    <div className="absolute inset-[3px] rounded-full bg-[conic-gradient(#d5aa2a_50%,#e5e7eb_0)]" />
-                    <span className="text-primary font-bold text-lg font-cairo z-10">1/2</span>
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center">
+                    <svg className="w-10 h-10 transform -rotate-90">
+                      <circle
+                        className="text-slate-200 dark:text-slate-700"
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      />
+                      <circle
+                        className="text-primary transition-all duration-500 ease-in-out"
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeDasharray="100"
+                        strokeDashoffset="50"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-[11px] font-bold text-slate-700 dark:text-slate-100 transition-all duration-300">
+                      1/2
+                    </span>
                   </div>
-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
-                    مرحلة الاختيار
-                  </span>
                 </div>
               </div>
 
               {/* Plans Grid - centered on screen */}
               <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                  {plans.map((plan) => {
+                {!hasAvailableSlots ? (
+                  <div className="text-center py-12">
+                    <div className="mb-4 flex justify-center">
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-full">
+                        <span className="material-symbols-outlined text-yellow-500 text-4xl">schedule</span>
+                      </div>
+                    </div>
+                    <h2 className="text-text-dark dark:text-white text-2xl font-bold mb-2">لا يوجد وقت متاح</h2>
+                    <p className="text-text-light mb-4">المعلم لا يمتلك أي أوقات متاحة للحجز حالياً</p>
+                    <Link to={`/teachers/${id}`} className="text-primary hover:underline">
+                      العودة إلى صفحة المعلم
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+                    {availablePlans.map((plan) => {
                     const isSelected = selectedPlan === plan.id
                     const isPremium = plan.id === 'premium'
                     return (
@@ -530,7 +602,8 @@ export default function BookingPage() {
                       </div>
                     )
                   })}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -561,7 +634,7 @@ export default function BookingPage() {
                       strokeWidth="3"
                     />
                     <circle
-                      className="text-primary"
+                      className="text-primary transition-all duration-500 ease-in-out"
                       cx="20"
                       cy="20"
                       r="16"
@@ -570,9 +643,10 @@ export default function BookingPage() {
                       strokeWidth="3"
                       strokeDasharray="100"
                       strokeDashoffset="0"
+                      strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute text-[11px] font-bold text-slate-700 dark:text-slate-100">
+                  <span className="absolute text-[11px] font-bold text-slate-700 dark:text-slate-100 transition-all duration-300">
                     2/2
                   </span>
                 </div>

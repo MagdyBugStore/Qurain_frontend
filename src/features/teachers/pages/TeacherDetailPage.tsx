@@ -159,9 +159,11 @@ export function TeacherDetailPage() {
           {/* Sidebar Column */}
           <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
             <TeacherSidebar
-            application={application}
-            onBookSession={handleBookSession}
-            onSendMessage={handleSendMessage}
+              application={application}
+              availability={availability}
+              teacherId={id}
+              onBookSession={handleBookSession}
+              onSendMessage={handleSendMessage}
             />
           </aside>
         </div>

@@ -10,6 +10,7 @@ import { TeacherService } from '../../services/teacherService'
 import { getCurrencySymbol } from '../../shared/utils/currency'
 import { getTeacherDisplayName, getTeacherImageUrl, getTeacherSpecialization } from '../../shared/utils/teacher'
 import { useAppStore } from '../../store/useAppStore'
+import { TeacherCard } from '../../features/teachers/components/TeacherCard/TeacherCard'
 
 interface Teacher {
   id: string
@@ -476,84 +477,7 @@ export default function TeachersPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center items-center">
                 {paginatedTeachers.map((teacher) => (
-                  <Link
-                    key={teacher.id}
-                    to={`/teachers/${teacher.id}`}
-                    className="bg-white dark:bg-[#1a170d] rounded-xl border border-[#e6e2de] dark:border-[#3a3528] overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer max-w-sm w-full"
-                  >
-                    <div className="p-5 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0"
-                            style={{
-                              backgroundImage: `url(${teacher.image})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                            }}
-                          />
-                          <div>
-                            <h3 className="font-bold text-[#181611] dark:text-white font-arabic text-lg leading-tight">
-                              {teacher.name}
-                            </h3>
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="material-symbols-outlined text-primary text-sm filled">star</span>
-                              <span className="text-sm font-bold text-[#181611] dark:text-white">
-                                {teacher.rating}
-                              </span>
-                              <span className="text-xs text-[#8a8060]">({teacher.reviews})</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <span className="text-lg font-bold text-primary font-arabic">
-                            {teacher.price} {getCurrencySymbol(teacher.currency as any)}
-                          </span>
-                          <span className="text-[10px] text-[#8a8060] font-arabic">/ساعة</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2 mb-4 flex-grow">
-                        <div className="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
-                          <span className="material-symbols-outlined text-base">school</span>
-                          <span>{teacher.qualification}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
-                          <span className="material-symbols-outlined text-base">translate</span>
-                          <span>يتحدث: {teacher.languages}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-[#4d4738] dark:text-[#a09a8a] font-arabic">
-                          <span className="material-symbols-outlined text-base">schedule</span>
-                          <span>{teacher.completedSessions}+ حصة مكتملة</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {teacher.tags.map((tag, tagIndex) => (
-                          <span
-                            key={tagIndex}
-                            className="px-2 py-1 bg-[#f5f3f0] dark:bg-[#2d2a24] text-[#8a8060] text-xs rounded font-arabic"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      {!isTeacher && (
-                        <button
-                          onClick={(e) => {
-                            // If user is not logged in, prevent navigation and open login popup
-                            if (!currentUser) {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              openLoginModal()
-                            }
-                            // If user is logged in, let the Link navigation happen (no popup)
-                          }}
-                          className="w-full py-2.5 rounded-lg border-2 border-primary text-[#181611] dark:text-white font-bold text-sm hover:bg-primary hover:text-white transition-all font-arabic mt-auto text-center"
-                        >
-                          اشترك الآن
-                        </button>
-                      )}
-                    </div>
-                  </Link>
+                  <TeacherCard key={teacher.id} teacher={teacher} />
                 ))}
               </div>
             )}
