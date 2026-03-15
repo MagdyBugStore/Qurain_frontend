@@ -249,13 +249,45 @@ export class BookingService {
     weeklySlots: WeeklySlot[]
   ): Promise<void> {
     try {
+      console.log('[BookingService] ===== UPDATING AVAILABILITY AFTER BOOKING =====');
+      console.log('[BookingService] Teacher ID:', teacherId);
+      console.log('[BookingService] Weekly slots to mark as booked:', weeklySlots);
+      
       // Get current availability
       const currentAvailability = await this.teacherRepository.getAvailability(teacherId);
       
       if (!currentAvailability) {
-        console.warn(`⚠️ [BookingService] No availability found for teacher ${teacherId}`);
+        console.warn(`⚠️ [BookingService] No availability found for teacher ${teacherId}, creating new schedule`);
+        // Create new availability schedule with booked slots
+        const newSchedule: (string | null)[][] = Array(7)
+          .fill(null)
+          .map(() => Array(12).fill(null));
+        
+        const availabilityTimeSlots = [
+          '٠٨:٠٠ ص', '٠٩:٠٠ ص', '١٠:٠٠ ص', '١١:٠٠ ص',
+          '١٢:٠٠ م', '٠١:٠٠ م', '٠٢:٠٠ م', '٠٣:٠٠ م',
+          '٠٤:٠٠ م', '٠٥:٠٠ م', '٠٦:٠٠ م', '٠٧:٠٠ م',
+        ];
+        
+        for (const slot of weeklySlots) {
+          const dayIndex = slot.dayIndex;
+          const timeIndex = availabilityTimeSlots.indexOf(slot.time);
+          
+          if (dayIndex >= 0 && dayIndex < 7 && timeIndex >= 0 && timeIndex < 12) {
+            newSchedule[dayIndex][timeIndex] = 'booked';
+          }
+        }
+        
+        await this.teacherService.saveAvailability({
+          teacherId,
+          schedule: newSchedule as ('available' | 'booked' | null)[][],
+        });
+        
+        console.log(`✅ [BookingService] Created new availability schedule with ${weeklySlots.length} booked slots`);
         return;
       }
+
+      console.log('[BookingService] Current availability before update:', currentAvailability.schedule);
 
       // Time slots mapping (12 slots per day) - must match the order in UI
       const availabilityTimeSlots = [
@@ -266,26 +298,30 @@ export class BookingService {
 
       // Create a copy of the schedule
       const updatedSchedule = currentAvailability.schedule.map(day => [...day]);
+      let slotsMarkedAsBooked = 0;
 
       // Mark each booked slot as 'booked'
       for (const slot of weeklySlots) {
         const dayIndex = slot.dayIndex;
         const timeIndex = availabilityTimeSlots.indexOf(slot.time);
 
+        console.log(`[BookingService] Processing slot: dayIndex=${dayIndex}, timeIndex=${timeIndex}, time=${slot.time}`);
+
         if (dayIndex >= 0 && dayIndex < 7 && timeIndex >= 0 && timeIndex < 12) {
-          // Only mark as booked if it was previously available
-          // Don't overwrite if it's already booked (in case of multiple bookings)
-          if (updatedSchedule[dayIndex][timeIndex] === 'available') {
-            updatedSchedule[dayIndex][timeIndex] = 'booked';
-          } else if (updatedSchedule[dayIndex][timeIndex] === null) {
-            // If slot was null (not available), mark it as booked anyway since student booked it
-            updatedSchedule[dayIndex][timeIndex] = 'booked';
-          }
-          // If already 'booked', leave it as is
+          const previousStatus = updatedSchedule[dayIndex][timeIndex];
+          
+          // Always mark as booked regardless of previous status (student has booked it)
+          updatedSchedule[dayIndex][timeIndex] = 'booked';
+          slotsMarkedAsBooked++;
+          
+          console.log(`[BookingService] Marked slot [${dayIndex}][${timeIndex}] as booked (was: ${previousStatus})`);
         } else {
           console.warn(`⚠️ [BookingService] Invalid slot indices: dayIndex=${dayIndex}, timeIndex=${timeIndex}, time=${slot.time}`);
         }
       }
+
+      console.log('[BookingService] Updated schedule after marking booked slots:', updatedSchedule);
+      console.log(`[BookingService] Total slots marked as booked: ${slotsMarkedAsBooked}`);
 
       // Save updated availability using service layer for proper merging
       await this.teacherService.saveAvailability({
@@ -294,9 +330,15 @@ export class BookingService {
         updatedAt: currentAvailability.updatedAt,
       });
 
-      console.log(`✅ [BookingService] Updated availability for teacher ${teacherId} with ${weeklySlots.length} booked slots`);
+      console.log(`✅ [BookingService] Successfully updated availability for teacher ${teacherId} with ${weeklySlots.length} booked slots`);
+      console.log('[BookingService] ===== AVAILABILITY UPDATE COMPLETED =====');
     } catch (error) {
+      console.error('[BookingService] ===== AVAILABILITY UPDATE FAILED =====');
       console.error('❌ [BookingService] Error updating teacher availability:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       // Don't throw - booking is already created, availability can be updated later
     }
   }

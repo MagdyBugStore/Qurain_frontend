@@ -224,7 +224,12 @@ service cloud.firestore {
     // ============================================
     match /subscriptions/{subscriptionId} {
       // يمكن للطالب أو المعلم صاحب الاشتراك، أو الأدمن، قراءة بيانات الاشتراك
-      allow read: if isStudentOrTeacherOwner(resource.data.studentId, resource.data.teacherId) || isAdmin();
+      // كما يمكن لأي مستخدم مسجل دخول قراءة الاشتراكات النشطة للمعلمين (لرؤية الأوقات المحجوزة)
+      allow read: if isAuthenticated() && (
+        isStudentOrTeacherOwner(resource.data.studentId, resource.data.teacherId) || 
+        isAdmin() ||
+        (resource.data.status == 'active' && resource.data.teacherId != null)
+      );
 
       // يمكن للطالب فقط إنشاء اشتراك باسمه
       allow create: if isAuthenticated()

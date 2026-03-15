@@ -55,6 +55,9 @@ export class TeacherService {
         console.error('Error fetching availability:', error);
         // Use empty availability if fetch fails
       }
+      
+      // Note: Booked slots from subscriptions are handled in the booking page component
+      // to avoid permissions issues when fetching subscriptions
 
       return {
         application,

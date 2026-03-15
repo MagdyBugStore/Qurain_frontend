@@ -9,6 +9,9 @@ import { getCurrencySymbol } from '../../../shared/utils/currency'
 import { useAuth } from '../../../contexts/AuthContext'
 import { TeacherDetailHeader } from '../../../features/teachers/components/TeacherDetail/TeacherDetailHeader'
 import { TeacherAvailability } from '../../../features/teachers/components/TeacherDetail/TeacherAvailability'
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../../../config/firebase'
+import { COLLECTIONS } from '../../../constants/firebaseCollections'
 
 export default function BookingPage() {
   const { id } = useParams<{ id: string }>()
@@ -41,6 +44,112 @@ export default function BookingPage() {
   const reviewsCount = teacherData?.reviewsCount || 0
 
   const [selectedWeeklySlots, setSelectedWeeklySlots] = useState<WeeklySlot[]>([])
+  const [bookedSlotsSet, setBookedSlotsSet] = useState<Set<string>>(new Set())
+
+  // Fetch booked slots from subscriptions
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      console.log('[BookingPage] ===== FETCHING BOOKED SLOTS =====')
+      console.log('[BookingPage] Teacher data:', teacherData)
+      console.log('[BookingPage] Teacher ID from params:', id)
+      
+      if (!teacherData?.application?.userId && !id) {
+        console.log('[BookingPage] No teacher data or ID, skipping fetch')
+        return
+      }
+
+      try {
+        const teacherId = teacherData?.application?.userId || id || ''
+        console.log('[BookingPage] Using teacher ID:', teacherId)
+        
+        const subscriptionsQuery = query(
+          collection(db, COLLECTIONS.SUBSCRIPTIONS),
+          where('teacherId', '==', teacherId),
+          where('status', '==', 'active')
+        )
+        
+        console.log('[BookingPage] Query created, fetching subscriptions...')
+        
+        let subscriptionsSnapshot
+        try {
+          subscriptionsSnapshot = await getDocs(subscriptionsQuery)
+          console.log('[BookingPage] Subscriptions fetched successfully:', subscriptionsSnapshot.size)
+        } catch (queryError: any) {
+          console.error('[BookingPage] Query error:', queryError)
+          // If query fails due to missing index, try without status filter
+          if (queryError?.code === 'failed-precondition' || queryError?.message?.includes('index')) {
+            console.log('[BookingPage] Retrying query without status filter...')
+            const fallbackQuery = query(
+              collection(db, COLLECTIONS.SUBSCRIPTIONS),
+              where('teacherId', '==', teacherId)
+            )
+            subscriptionsSnapshot = await getDocs(fallbackQuery)
+            console.log('[BookingPage] Fallback query result:', subscriptionsSnapshot.size, 'subscriptions')
+            
+            // Filter by status in memory
+            const filteredDocs = subscriptionsSnapshot.docs.filter(doc => {
+              const data = doc.data()
+              return data.status === 'active'
+            })
+            
+            console.log('[BookingPage] Filtered active subscriptions:', filteredDocs.length)
+            
+            subscriptionsSnapshot = {
+              docs: filteredDocs,
+              size: filteredDocs.length,
+            } as any
+          } else {
+            // Silently fail - permissions issue
+            console.warn('[BookingPage] Could not fetch booked slots:', queryError.message)
+            console.warn('[BookingPage] Error code:', queryError?.code)
+            return
+          }
+        }
+        
+        const booked = new Set<string>()
+        
+        console.log('[BookingPage] Processing subscriptions...')
+        subscriptionsSnapshot.docs.forEach((doc, index) => {
+          const subscriptionData = doc.data()
+          const weeklySlots = subscriptionData.weeklySlots || []
+          
+          console.log(`[BookingPage] Subscription ${index + 1}:`, {
+            id: doc.id,
+            teacherId: subscriptionData.teacherId,
+            status: subscriptionData.status,
+            weeklySlotsCount: weeklySlots.length,
+            weeklySlots,
+          })
+          
+          weeklySlots.forEach((slot: { dayIndex: number; time: string }) => {
+            const key = `${slot.dayIndex}_${slot.time}`
+            booked.add(key)
+            console.log(`[BookingPage] Added booked slot: ${key} (dayIndex=${slot.dayIndex}, time=${slot.time})`)
+          })
+        })
+        
+        console.log('[BookingPage] Total booked slots:', booked.size)
+        console.log('[BookingPage] Booked slots:', Array.from(booked))
+        console.log('[BookingPage] ===== BOOKED SLOTS FETCH COMPLETED =====')
+        
+        setBookedSlotsSet(booked)
+      } catch (error) {
+        // Silently fail - permissions issue or other error
+        console.error('[BookingPage] ===== BOOKED SLOTS FETCH FAILED =====')
+        console.error('[BookingPage] Error fetching booked slots:', error)
+        console.error('[BookingPage] Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+        })
+      }
+    }
+
+    if (teacherData) {
+      fetchBookedSlots()
+    } else {
+      console.log('[BookingPage] No teacher data yet, waiting...')
+    }
+  }, [teacherData, id])
 
   // Subscription-like plans UI (step 1)
   const plans: {
@@ -549,10 +658,98 @@ export default function BookingPage() {
                         {['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'].map(
                           (dayLabel, availabilityDayIndex) => {
                             const daySchedule = teacherData.availability[availabilityDayIndex] || []
-                            const availableSlots = availabilityTimeSlots.filter(
-                              (_slot, idx) => daySchedule[idx] === 'available',
+                            
+                            // Log for first day only to avoid spam
+                            if (availabilityDayIndex === 0) {
+                              console.log('[BookingPage] ===== PROCESSING AVAILABILITY FOR DISPLAY =====')
+                              console.log('[BookingPage] Full availability array:', teacherData.availability)
+                              console.log('[BookingPage] Day schedule for', dayLabel, ':', daySchedule)
+                              console.log('[BookingPage] Day schedule details:', daySchedule.map((status, idx) => ({
+                                time: availabilityTimeSlots[idx],
+                                status,
+                                idx
+                              })))
+                              console.log('[BookingPage] Booked slots set size:', bookedSlotsSet.size)
+                              console.log('[BookingPage] Booked slots set:', Array.from(bookedSlotsSet))
+                            }
+                            
+                            // Get booked slots from availability schedule (primary source)
+                            // This should already include booked slots from subscriptions if they were merged
+                            const bookedSlotsFromSchedule = availabilityTimeSlots.filter(
+                              (_slot, idx) => daySchedule[idx] === 'booked',
                             )
-                            const hasSlots = availableSlots.length > 0
+                            
+                            // Get booked slots from subscriptions (secondary source - fallback)
+                            const bookedSlotsFromSubscriptions = availabilityTimeSlots.filter(
+                              (slot) => {
+                                const key = `${availabilityDayIndex}_${slot}`
+                                const isBooked = bookedSlotsSet.has(key)
+                                if (availabilityDayIndex === 0 && isBooked) {
+                                  console.log(`[BookingPage] Found booked slot from subscriptions: ${key}`)
+                                }
+                                return isBooked
+                              },
+                            )
+                            
+                            if (availabilityDayIndex === 0) {
+                              console.log('[BookingPage] Booked slots from schedule:', bookedSlotsFromSchedule)
+                              console.log('[BookingPage] Booked slots from subscriptions:', bookedSlotsFromSubscriptions)
+                              console.log('[BookingPage] Day schedule statuses:', daySchedule.map((status, idx) => ({
+                                time: availabilityTimeSlots[idx],
+                                status,
+                                idx
+                              })))
+                            }
+                            
+                            // Combine both sources and remove duplicates
+                            const allBookedSlots = Array.from(new Set([
+                              ...bookedSlotsFromSchedule,
+                              ...bookedSlotsFromSubscriptions,
+                            ]))
+                            
+                            if (availabilityDayIndex === 0) {
+                              console.log('[BookingPage] All booked slots (combined):', allBookedSlots)
+                            }
+                            
+                            // Available slots are those that are 'available' and not booked
+                            // Priority: if marked as 'booked' in schedule, it's booked
+                            // Otherwise, check subscriptions set
+                            const availableSlots = availabilityTimeSlots.filter(
+                              (slot) => {
+                                const idx = availabilityTimeSlots.indexOf(slot)
+                                const scheduleStatus = daySchedule[idx]
+                                
+                                // If explicitly marked as booked in schedule, it's booked
+                                if (scheduleStatus === 'booked') {
+                                  if (availabilityDayIndex === 0) {
+                                    console.log(`[BookingPage] Slot ${slot} is marked as booked in schedule`)
+                                  }
+                                  return false
+                                }
+                                
+                                // If marked as available, check if it's also in bookedSlotsSet
+                                if (scheduleStatus === 'available') {
+                                  const key = `${availabilityDayIndex}_${slot}`
+                                  const isNotBooked = !bookedSlotsSet.has(key)
+                                  
+                                  if (availabilityDayIndex === 0 && !isNotBooked) {
+                                    console.log(`[BookingPage] Slot ${slot} is available in schedule but booked in subscriptions (key: ${key})`)
+                                  }
+                                  
+                                  return isNotBooked
+                                }
+                                
+                                // If null or undefined, it's not available
+                                return false
+                              },
+                            )
+                            
+                            if (availabilityDayIndex === 0) {
+                              console.log('[BookingPage] Available slots:', availableSlots)
+                              console.log('[BookingPage] ===== AVAILABILITY PROCESSING COMPLETED =====')
+                            }
+                            
+                            const hasSlots = availableSlots.length > 0 || allBookedSlots.length > 0
                             return (
                               <div
                                 key={dayLabel}
@@ -562,6 +759,19 @@ export default function BookingPage() {
                                   {dayLabel}
                                 </div>
                                 <div className="space-y-2">
+                                  {/* Show booked slots as disabled */}
+                                  {allBookedSlots.map((slot) => (
+                                    <button
+                                      key={`booked-${slot}`}
+                                      type="button"
+                                      disabled={true}
+                                      className="w-full py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-800 line-through"
+                                      title="محجوز"
+                                    >
+                                      {slot}
+                                    </button>
+                                  ))}
+                                  {/* Show available slots */}
                                   {hasSlots ? (
                                     availableSlots.map((slot) => {
                                       const isSelected = selectedWeeklySlots.some(
@@ -631,13 +841,7 @@ export default function BookingPage() {
                                       )
                                     })
                                   ) : (
-                                    <button
-                                      type="button"
-                                      disabled
-                                      className="w-full py-2 px-3 border border-slate-200 dark:border-slate-700 rounded-lg text-sm opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800 text-slate-400"
-                                    >
-                                      محجوز
-                                    </button>
+                                    <></>
                                   )}
                                 </div>
                               </div>

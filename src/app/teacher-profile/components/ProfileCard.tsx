@@ -4,6 +4,7 @@
 
 import { PersonalInfoSection } from './PersonalInfoSection';
 import type { TeacherApplication, TeacherProfile } from '../../../shared/types/teacher.types';
+import React from 'react';
 
 interface ProfileCardProps {
   teacherName: string;
