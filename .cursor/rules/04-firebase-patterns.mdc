@@ -1,0 +1,251 @@
+---
+alwaysApply: true
+---
+
+# Firebase Patterns & Best Practices
+
+## Firebase Configuration
+
+Firebase is configured in [config/firebase.ts](mdc:src/config/firebase.ts). Always import from this file:
+
+```typescript
+// ✅ GOOD
+import { auth, db, googleProvider, appleProvider } from '@/config/firebase';
+
+// ❌ BAD
+import { auth } from 'firebase/auth'; // Don't import directly
+```
+
+## Collection Names
+
+**Always use constants** from [constants/firebaseCollections.ts](mdc:src/constants/firebaseCollections.ts):
+
+```typescript
+import { COLLECTIONS } from '@/constants/firebaseCollections';
+
+// ✅ GOOD
+const q = query(
+  collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
+  where('status', '==', 'approved')
+);
+
+// ❌ BAD - Never hardcode collection names
+const q = query(
+  collection(db, 'teacherApplications'), // Hardcoded string
+  where('status', '==', 'approved')
+);
+```
+
+## Repository Pattern (Required)
+
+**All Firebase operations MUST go through repositories**, never directly in components.
+
+### Repository Location
+- Repositories: `infrastructure/firebase/repositories/`
+- Example: [TeacherRepository](mdc:src/infrastructure/firebase/repositories/TeacherRepository.ts)
+
+### Repository Structure
+```typescript
+export class TeacherRepository {
+  async findApplicationByUserId(userId: string): Promise<TeacherApplication | null> {
+    const q = query(
+      collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
+      where('userId', '==', userId)
+    );
+    const snapshot = await getDocs(q);
+    // ... transform and return
+  }
+}
+```
+
+### Using Repositories
+```typescript
+// ✅ GOOD: Component uses service, service uses repository
+const teacherService = new TeacherService();
+const profile = await teacherService.getTeacherProfileData(userId);
+
+// ❌ BAD: Component directly queries Firebase
+const q = query(collection(db, 'users'), where('id', '==', userId));
+const snapshot = await getDocs(q);
+```
+
+## Service Layer Pattern
+
+Services orchestrate repositories and apply business logic:
+
+```typescript
+// ✅ GOOD: Service coordinates repositories
+export class TeacherService {
+  private repository: TeacherRepository;
+  
+  constructor() {
+    this.repository = new TeacherRepository();
+  }
+  
+  async getTeacherProfileData(userId: string): Promise<TeacherProfileData> {
+    const [application, profile, rating] = await Promise.all([
+      this.repository.findApplicationByUserId(userId),
+      this.repository.getUserProfile(userId),
+      this.repository.getTeacherRating(userId),
+    ]);
+    // Apply business logic, transform data
+    return { application, profile, rating };
+  }
+}
+```
+
+## Data Fetching Patterns
+
+### In Components (via Hooks)
+```typescript
+// ✅ GOOD: Use custom hooks
+export function useTeacherProfile(userId: string) {
+  const [profile, setProfile] = useState<TeacherProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const teacherService = new TeacherService();
+    teacherService.getTeacherProfileData(userId)
+      .then(setProfile)
+      .finally(() => setLoading(false));
+  }, [userId]);
+  
+  return { profile, loading };
+}
+```
+
+### Real-time Subscriptions
+```typescript
+// ✅ GOOD: Use onSnapshot in repositories
+export class TeacherRepository {
+  subscribeToProfile(userId: string, callback: (profile: TeacherProfile) => void) {
+    const docRef = doc(db, COLLECTIONS.USERS, userId);
+    return onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        callback(snapshot.data() as TeacherProfile);
+      }
+    });
+  }
+}
+```
+
+## Error Handling
+
+### Repository Error Handling
+```typescript
+// ✅ GOOD: Repositories handle Firebase errors
+async findApplicationByUserId(userId: string): Promise<TeacherApplication | null> {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.TEACHER_APPLICATIONS),
+      where('userId', '==', userId)
+    );
+    const snapshot = await getDocs(q);
+    // ... transform
+  } catch (error) {
+    console.error('Error finding teacher application:', error);
+    throw error; // Re-throw for service layer to handle
+  }
+}
+```
+
+### Service Error Handling
+```typescript
+// ✅ GOOD: Services handle business logic errors
+async getTeacherProfileData(userId: string): Promise<TeacherProfileData> {
+  try {
+    // ... repository calls
+  } catch (error) {
+    console.error('Error getting teacher profile data:', error);
+    throw error; // Or return default/fallback data
+  }
+}
+```
+
+## Query Patterns
+
+### Simple Queries
+```typescript
+// ✅ GOOD: Use repository methods
+const application = await repository.findApplicationByUserId(userId);
+```
+
+### Complex Queries
+```typescript
+// ✅ GOOD: Complex queries in repository
+async findApprovedTeachersWithRating(minRating: number) {
+  const applications = await this.findAllApproved();
+  const teachersWithRatings = await Promise.all(
+    applications.map(async (app) => {
+      const { rating } = await this.getTeacherRating(app.userId);
+      return { ...app, rating };
+    })
+  );
+  return teachersWithRatings.filter(t => t.rating >= minRating);
+}
+```
+
+## Data Transformation
+
+Transform Firebase data in repositories or services, not in components:
+
+```typescript
+// ✅ GOOD: Transform in repository
+async getUserProfile(userId: string): Promise<UserProfile | null> {
+  const docRef = doc(db, COLLECTIONS.USERS, userId);
+  const snapshot = await getDoc(docRef);
+  
+  if (!snapshot.exists()) return null;
+  
+  const data = snapshot.data();
+  return {
+    id: snapshot.id,
+    ...data,
+    createdAt: data.createdAt?.toDate(),
+    updatedAt: data.updatedAt?.toDate(),
+  } as UserProfile;
+}
+
+// ❌ BAD: Transform in component
+useEffect(() => {
+  getDoc(docRef).then(snapshot => {
+    const data = snapshot.data();
+    // Don't transform here
+    setProfile(data);
+  });
+}, []);
+```
+
+## Status Constants
+
+Use status constants from [constants/status.ts](mdc:src/constants/status.ts):
+
+```typescript
+import { TEACHER_APPLICATION_STATUS } from '@/constants/status';
+
+// ✅ GOOD
+where('status', '==', TEACHER_APPLICATION_STATUS.APPROVED)
+
+// ❌ BAD
+where('status', '==', 'approved') // Hardcoded string
+```
+
+## Anti-Patterns to Avoid
+
+1. ❌ **Direct Firebase imports in components** - Use repositories
+2. ❌ **Hardcoded collection names** - Use COLLECTIONS constants
+3. ❌ **Hardcoded status values** - Use status constants
+4. ❌ **Data transformation in components** - Do it in repositories/services
+5. ❌ **Multiple queries for same data** - Cache or use single query
+6. ❌ **Not handling errors** - Always wrap in try-catch
+7. ❌ **Not cleaning up subscriptions** - Return unsubscribe functions
+
+## Best Practices Summary
+
+1. ✅ Always use repositories for Firebase operations
+2. ✅ Use services for business logic orchestration
+3. ✅ Use constants for collection names and status values
+4. ✅ Transform data in repositories/services, not components
+5. ✅ Handle errors properly at each layer
+6. ✅ Use custom hooks for data fetching in components
+7. ✅ Clean up subscriptions in useEffect cleanup

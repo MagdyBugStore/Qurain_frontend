@@ -1,0 +1,134 @@
+---
+alwaysApply: true
+---
+
+# Routing Patterns & Navigation
+
+## Routing Framework
+
+This project uses **React Router v6** (not Next.js). The `app/` folder naming is just a convention.
+
+## Route Configuration
+
+Routes are defined in [App.tsx](mdc:src/App.tsx) using React Router's `<Routes>` and `<Route>` components.
+
+## Route Structure
+
+### Public Routes
+- `/` - Home page
+- `/programs` - Programs listing
+- `/teachers` - Teachers listing
+- `/teachers/:id` - Teacher detail page
+- `/eval` - Evaluation page
+
+### Protected Routes (Require Authentication)
+- `/personal-info` - Personal information form
+- `/profile/:id` - User profile page
+- `/teacher-profile` - Teacher profile (redirects to `/profile/:id`)
+- `/student-profile` - Student profile (redirects to `/profile/:id`)
+- `/admin` - Admin dashboard
+- `/wallet` - Wallet management
+- `/support` - Support tickets
+- `/booking/:id` - Booking flow
+- `/teacher-application` - Teacher application form
+
+## Route Patterns
+
+### Dynamic Routes
+```typescript
+// ✅ GOOD: Use params from useParams
+import { useParams } from 'react-router-dom';
+
+export function TeacherDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  // Use id to fetch teacher data
+}
+```
+
+### Route Parameters
+- Use `useParams()` hook to access route parameters
+- Always type the params: `useParams<{ id: string }>()`
+- Validate params before using them
+
+### Navigation
+```typescript
+// ✅ GOOD: Use useNavigate hook
+import { useNavigate } from 'react-router-dom';
+
+function MyComponent() {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    navigate('/teachers/123');
+    // Or with state
+    navigate('/profile', { state: { userId: '123' } });
+  };
+}
+```
+
+## Protected Routes
+
+### Authentication Check
+Authentication is handled by [AuthContext](mdc:src/contexts/AuthContext.tsx). The context automatically redirects unauthenticated users.
+
+### Profile Completion Check
+The AuthContext also checks for profile completion and redirects to `/personal-info` if incomplete.
+
+### Custom Protected Route Hook
+```typescript
+// ✅ GOOD: Use useRequireAuth hook if needed
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+
+export function ProtectedPage() {
+  const { user, loading } = useRequireAuth();
+  
+  if (loading) return <LoadingSpinner />;
+  if (!user) return null; // Will redirect
+  
+  return <div>Protected content</div>;
+}
+```
+
+## Route Organization
+
+### Page Components Location
+- Pages are in `app/[feature]/page.tsx`
+- Dynamic routes: `app/[feature]/[id]/page.tsx`
+- Nested routes: `app/[feature]/[id]/[subroute]/page.tsx`
+
+### Examples
+- `app/teachers/page.tsx` → `/teachers`
+- `app/teachers/[id]/page.tsx` → `/teachers/:id`
+- `app/booking/[id]/page.tsx` → `/booking/:id`
+- `app/booking/[id]/confirm/page.tsx` → `/booking/:id/confirm`
+
+## Route Redirects
+
+### Legacy Route Redirects
+Some legacy routes redirect to new routes:
+- `/student-profile` → `/profile/:id`
+- `/teacher-profile` → `/profile/:id`
+
+See [App.tsx](mdc:src/App.tsx) for redirect configuration.
+
+## SEO & Meta Tags
+
+SEO is handled by [SEOHead](mdc:src/components/seo/SEOHead.tsx) component. SEO configuration is defined in `App.tsx` based on the current route.
+
+## Route Best Practices
+
+1. ✅ **Use typed params** - Always type `useParams<{ id: string }>()`
+2. ✅ **Validate route params** - Check if params exist before using
+3. ✅ **Use navigate hook** - Don't use `window.location.href` for internal navigation
+4. ✅ **Handle loading states** - Show loading while fetching route data
+5. ✅ **Handle errors** - Show error UI if route data fails to load
+6. ✅ **Keep routes simple** - Avoid deeply nested routes
+7. ✅ **Use route state** - Pass data via `navigate(path, { state })` when appropriate
+
+## Anti-Patterns to Avoid
+
+1. ❌ **Direct window.location manipulation** - Use `useNavigate()`
+2. ❌ **Hardcoded route paths** - Consider route constants
+3. ❌ **Not handling missing params** - Always validate
+4. ❌ **Not cleaning up on unmount** - Cancel requests in useEffect cleanup
+5. ❌ **Redirect loops** - Be careful with auth redirects

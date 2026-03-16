@@ -1,0 +1,246 @@
+---
+alwaysApply: true
+---
+
+# Coding Conventions & Best Practices
+
+## File Naming Conventions
+
+### Components
+- **Format**: PascalCase
+- **Example**: `TeacherCard.tsx`, `BookingModal.tsx`
+- **Location**: `components/`, `features/[feature]/presentation/components/`
+
+### Hooks
+- **Format**: camelCase with `use` prefix
+- **Example**: `useTeacherDetail.ts`, `useSaveAvailability.ts`
+- **Location**: `hooks/`, `features/[feature]/presentation/hooks/`
+
+### Services/Use Cases
+- **Format**: PascalCase
+- **Example**: `TeacherService.ts`, `GetTeacherProfile.ts`
+- **Location**: `services/`, `features/[feature]/application/use-cases/`
+
+### Utilities
+- **Format**: camelCase
+- **Example**: `formatCurrency.ts`, `getTeacherDisplayName.ts`
+- **Location**: `shared/utils/`
+
+### Types/Interfaces
+- **Format**: PascalCase
+- **Interfaces**: PascalCase (no `I` prefix required, but can use for clarity)
+- **Example**: `TeacherProfile.ts`, `ITeacherRepository.ts`
+- **Location**: `shared/types/`, `features/[feature]/domain/entities/`
+
+### Folders
+- **Features**: kebab-case (`teacher-profile/`, `student-profile/`)
+- **Components**: PascalCase for feature components (`TeacherDetail/`)
+- **Shared**: kebab-case (`shared/components/`)
+
+## TypeScript Conventions
+
+### Type Definitions
+- Use `interface` for object shapes
+- Use `type` for unions, intersections, and aliases
+- Prefer explicit types over `any`
+- Use shared types from [shared/types/](mdc:src/shared/types/)
+
+### Example:
+```typescript
+// ✅ GOOD
+interface TeacherProfile {
+  id: string;
+  name: string;
+  email: string;
+}
+
+type Status = 'pending' | 'approved' | 'rejected';
+
+// ❌ BAD
+const profile: any = { ... };
+```
+
+## React Component Conventions
+
+### Component Structure
+```typescript
+// 1. Imports (external, then internal)
+import React from 'react';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+
+// 2. Types/Interfaces
+interface Props {
+  teacherId: string;
+  onSave?: () => void;
+}
+
+// 3. Component
+export function TeacherCard({ teacherId, onSave }: Props) {
+  // 4. Hooks
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  
+  // 5. Effects
+  useEffect(() => {
+    // ...
+  }, [teacherId]);
+  
+  // 6. Handlers
+  const handleSave = async () => {
+    // ...
+  };
+  
+  // 7. Render
+  return (
+    <div>
+      {/* JSX */}
+    </div>
+  );
+}
+```
+
+### Component Guidelines
+- Use functional components with hooks
+- Extract complex logic to custom hooks
+- Keep components focused (Single Responsibility)
+- Prefer composition over props drilling
+- Use TypeScript for all props
+
+## State Management Conventions
+
+### Loading States
+```typescript
+// ✅ GOOD: Consistent loading pattern
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+
+try {
+  setLoading(true);
+  const data = await fetchData();
+  // ...
+} catch (err) {
+  setError(err instanceof Error ? err.message : 'An error occurred');
+} finally {
+  setLoading(false);
+}
+```
+
+### Error Handling
+```typescript
+// ✅ GOOD: Consistent error handling
+try {
+  await operation();
+  addToast('Operation successful', 'success');
+} catch (error) {
+  console.error('Operation failed:', error);
+  addToast('Operation failed', 'error');
+  // Or set error state for UI
+}
+```
+
+## Firebase Conventions
+
+### Collection Names
+- **Always use constants** from [constants/firebaseCollections.ts](mdc:src/constants/firebaseCollections.ts)
+- **Never hardcode** collection names
+
+```typescript
+// ✅ GOOD
+import { COLLECTIONS } from '@/constants/firebaseCollections';
+const q = query(collection(db, COLLECTIONS.TEACHER_APPLICATIONS));
+
+// ❌ BAD
+const q = query(collection(db, 'teacherApplications'));
+```
+
+### Repository Pattern
+- All Firebase operations go through repositories
+- Repositories are in `infrastructure/firebase/repositories/`
+- Services use repositories, not direct Firebase calls
+
+## Styling Conventions
+
+### Tailwind CSS
+- Use Tailwind utility classes
+- RTL support via `tailwindcss-rtl` plugin
+- Custom colors defined in [tailwind.config.js](mdc:tailwind.config.js)
+- Use design tokens (colors, spacing) from config
+
+### Example:
+```tsx
+// ✅ GOOD: Use Tailwind classes
+<div className="bg-primary hover:bg-primary-hover p-4 rounded-lg">
+  <h2 className="text-text-main font-display">Title</h2>
+</div>
+
+// ❌ BAD: Inline styles (unless absolutely necessary)
+<div style={{ backgroundColor: '#f4c430', padding: '1rem' }}>
+```
+
+## Import Organization
+
+### Import Order
+1. React and React-related
+2. Third-party libraries
+3. Internal utilities/types
+4. Components
+5. Hooks
+6. Styles
+
+```typescript
+// ✅ GOOD: Organized imports
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { collection, query, where } from 'firebase/firestore';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { TeacherService } from '@/services/teacherService';
+import type { TeacherProfile } from '@/shared/types/teacher.types';
+import { formatCurrency } from '@/shared/utils/currency';
+
+import { TeacherCard } from './TeacherCard';
+import './styles.css';
+```
+
+## Comments & Documentation
+
+### Code Comments
+- Use comments for complex business logic
+- Explain "why", not "what"
+- Prefer self-documenting code over comments
+- Use JSDoc for public APIs
+
+### Example:
+```typescript
+/**
+ * Merges availability schedules intelligently.
+ * Preserves booked slots from database, allows changes to available/null slots.
+ * 
+ * @param currentSchedule - Current schedule from database
+ * @param newSchedule - New schedule from user edits
+ * @returns Merged schedule with booked slots preserved
+ */
+private mergeAvailabilitySchedules(
+  currentSchedule: (string | null)[][],
+  newSchedule: (string | null)[][]
+): (string | null)[][] {
+  // Implementation
+}
+```
+
+## File Size Guidelines
+
+- **Components**: Target <300 lines
+- **Services**: Target <500 lines
+- **Hooks**: Target <200 lines
+- **If file exceeds limits**: Split into smaller, focused files
+
+## Code Quality Rules
+
+1. **No console.log in production** - Use proper error handling/logging
+2. **No unused imports** - Remove them
+3. **No commented-out code** - Remove or explain why it's kept
+4. **Consistent formatting** - Use Prettier/ESLint
+5. **Type safety** - Avoid `any`, use proper types
+6. **DRY principle** - Don't repeat yourself, extract common code

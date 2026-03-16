@@ -68,6 +68,26 @@ export class AdminRepository {
   }
 
   /**
+   * Get all users with accountType 'student'
+   */
+  async getStudentUsers(): Promise<UserData[]> {
+    try {
+      const usersQuery = query(
+        collection(db, COLLECTIONS.USERS),
+        where('accountType', '==', 'student')
+      );
+      const usersSnapshot = await getDocs(usersQuery);
+      return usersSnapshot.docs.map(userDoc => ({
+        uid: userDoc.id,
+        ...userDoc.data(),
+      })) as UserData[];
+    } catch (error) {
+      console.error('Error fetching student users:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Update teacher application status
    */
   async updateApplicationStatus(

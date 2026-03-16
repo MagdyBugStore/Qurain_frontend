@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import Header from '../../components/layout/Header'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
@@ -13,6 +14,7 @@ import type { StudentSession, MemorizationLog } from '../../shared/types/student
 type TabType = 'overview' | 'schedule' | 'memorization' | 'achievements'
 
 export default function StudentProfilePage() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const { user, userProfile } = useAuth()
   const [studentService] = useState(() => new StudentService())
@@ -516,9 +518,7 @@ export default function StudentProfilePage() {
                         دخول الجلسة
                       </a>
                     ) : (
-                      <button className="w-full mt-6 py-2 border border-primary text-primary font-bold rounded-lg hover:bg-primary hover:text-background-dark transition-all">
-                        تفاصيل الجلسة
-                      </button>
+                      <></>
                     )}
                   </div>
                 ) : (
@@ -616,8 +616,11 @@ export default function StudentProfilePage() {
                             دخول الحلقة
                           </a>
                         ) : (
-                          <button className="bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">
-                            تفاصيل الحصة
+                          <button
+                            onClick={() => navigate(`/technical-check/${upcomingSession.id}`)}
+                            className="bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors"
+                          >
+                            الدخول للحصة
                           </button>
                         )}
                       </div>

@@ -1,0 +1,208 @@
+---
+alwaysApply: true
+---
+
+# State Management Patterns
+
+## State Management Strategy
+
+This project uses a **hybrid approach** with Zustand stores, React Context, and local component state.
+
+## Zustand Stores
+
+### Global App Store
+[useAppStore.ts](mdc:src/store/useAppStore.ts) - App-level UI state:
+- Modal states (login, booking, popups)
+- Toast notifications
+- Form data (multi-step forms)
+- UI state (current step, selected program)
+
+**When to use**: Global UI state that needs to be accessed across multiple features.
+
+### User Store
+[useUserStore.ts](mdc:src/store/useUserStore.ts) - User profile state:
+- User profile data
+- Profile fetching/subscription
+- Profile updates
+
+**When to use**: User data that needs to be accessed across features.
+
+### Usage Pattern
+```typescript
+// ✅ GOOD: Select specific state slices
+import { useAppStore } from '@/store/useAppStore';
+
+function MyComponent() {
+  const { isLoginModalOpen, openLoginModal, addToast } = useAppStore();
+  // Only re-renders when these specific values change
+}
+```
+
+## React Context
+
+### AuthContext
+[AuthContext.tsx](mdc:src/contexts/AuthContext.tsx) - Authentication state:
+- Current user (Firebase User)
+- User profile
+- Auth methods (signIn, signOut)
+- Loading state
+
+**When to use**: Authentication state that wraps the entire app.
+
+### Usage Pattern
+```typescript
+// ✅ GOOD: Use useAuth hook
+import { useAuth } from '@/contexts/AuthContext';
+
+function MyComponent() {
+  const { user, userProfile, loading, signOut } = useAuth();
+  
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <LoginPrompt />;
+  
+  return <div>Welcome, {userProfile?.name}</div>;
+}
+```
+
+## Local Component State
+
+**When to use**: Component-specific UI state:
+- Form inputs
+- UI toggles (dropdowns, modals)
+- Temporary state
+- Loading/error states for component-specific operations
+
+```typescript
+// ✅ GOOD: Local state for component-specific data
+function TeacherForm() {
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  
+  // Component-specific state
+}
+```
+
+## Custom Hooks for Data Fetching
+
+**When to use**: Feature-specific data fetching and state:
+- Teacher profile data
+- Student data
+- Booking data
+- Any data that needs to be fetched and cached
+
+```typescript
+// ✅ GOOD: Custom hook for data fetching
+export function useTeacherProfile(userId: string) {
+  const [profile, setProfile] = useState<TeacherProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const teacherService = new TeacherService();
+    teacherService.getTeacherProfileData(userId)
+      .then(setProfile)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [userId]);
+  
+  return { profile, loading, error };
+}
+```
+
+## State Management Decision Tree
+
+```
+Is it authentication state?
+├─ Yes → Use AuthContext (useAuth hook)
+└─ No
+   ├─ Is it global UI state (modals, toasts)?
+   │  ├─ Yes → Use useAppStore
+   │  └─ No
+   │     ├─ Is it user profile data?
+   │     │  ├─ Yes → Use useUserStore
+   │     │  └─ No
+   │     │     ├─ Is it feature-specific data?
+   │     │     │  ├─ Yes → Use custom hook (useTeacherProfile, etc.)
+   │     │     │  └─ No
+   │     │     │     └─ Use local useState
+```
+
+## Best Practices
+
+### 1. Minimize Re-renders
+```typescript
+// ✅ GOOD: Select specific slices
+const { isModalOpen } = useAppStore(state => ({
+  isModalOpen: state.isLoginModalOpen
+}));
+
+// ❌ BAD: Select entire store
+const appStore = useAppStore(); // Causes re-render on any store change
+```
+
+### 2. Derive State
+```typescript
+// ✅ GOOD: Derive computed values
+const isProfileComplete = useMemo(
+  () => userProfile && isProfileComplete(userProfile),
+  [userProfile]
+);
+
+// ❌ BAD: Store derived state
+const [isProfileComplete, setIsProfileComplete] = useState(false);
+```
+
+### 3. Async State Updates
+```typescript
+// ✅ GOOD: Proper async state handling
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+
+const handleSave = async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    await saveData();
+    addToast('Saved successfully', 'success');
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to save');
+    addToast('Failed to save', 'error');
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+### 4. State Updates in Effects
+```typescript
+// ✅ GOOD: Clean up subscriptions
+useEffect(() => {
+  const unsubscribe = subscribeToData((data) => {
+    setData(data);
+  });
+  
+  return () => unsubscribe(); // Cleanup
+}, []);
+```
+
+## Anti-Patterns to Avoid
+
+1. ❌ **Storing derived state** - Compute it instead
+2. ❌ **Not cleaning up subscriptions** - Always return cleanup function
+3. ❌ **Selecting entire store** - Select only what you need
+4. ❌ **State in wrong place** - Use appropriate state management solution
+5. ❌ **Not handling loading/error states** - Always handle async operations
+6. ❌ **Prop drilling** - Use context or store instead
+7. ❌ **Duplicating state** - Single source of truth
+
+## State Management Summary
+
+| State Type | Solution | Location |
+|------------|----------|----------|
+| Authentication | AuthContext | `contexts/AuthContext.tsx` |
+| Global UI (modals, toasts) | useAppStore | `store/useAppStore.ts` |
+| User Profile | useUserStore | `store/useUserStore.ts` |
+| Feature Data | Custom Hooks | `features/[feature]/presentation/hooks/` |
+| Component UI | useState | Local to component |
+| Form State | useState | Local to component |

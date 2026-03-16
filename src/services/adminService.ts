@@ -3,7 +3,7 @@
  * Business logic layer for admin operations
  */
 
-import { AdminRepository } from '../infrastructure/firebase/repositories/AdminRepository';
+import { AdminRepository, type UserData } from '../infrastructure/firebase/repositories/AdminRepository';
 import { TEACHER_APPLICATION_STATUS } from '../constants/status';
 import { ErrorHandler } from '../shared/utils/errorHandler';
 import type { TeacherApplication } from '../shared/types/teacher.types';
@@ -144,6 +144,18 @@ export class AdminService {
     } catch (error) {
       console.error('Error updating application status:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get all students
+   */
+  async getAllStudents(): Promise<UserData[]> {
+    try {
+      return await this.repository.getStudentUsers();
+    } catch (error) {
+      const appError = ErrorHandler.handleFirebaseError(error, 'AdminService.getAllStudents');
+      throw appError;
     }
   }
 }

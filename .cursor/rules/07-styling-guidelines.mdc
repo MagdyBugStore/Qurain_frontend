@@ -1,0 +1,204 @@
+---
+alwaysApply: true
+---
+
+# Styling Guidelines
+
+## Styling Framework
+
+This project uses **Tailwind CSS** with RTL (Right-to-Left) support via `tailwindcss-rtl` plugin.
+
+## Tailwind Configuration
+
+Configuration is in [tailwind.config.js](mdc:tailwind.config.js). Key settings:
+- RTL support enabled
+- Custom colors defined
+- Custom fonts (Cairo, Manrope)
+- Custom spacing and shadows
+
+## Design Tokens
+
+### Colors
+Use design tokens from Tailwind config:
+
+```tsx
+// ✅ GOOD: Use design tokens
+<div className="bg-primary text-text-main">
+  <button className="bg-primary hover:bg-primary-hover">
+    Click me
+  </button>
+</div>
+
+// ❌ BAD: Hardcoded colors
+<div style={{ backgroundColor: '#f4c430' }}>
+  <button style={{ backgroundColor: '#e0b320' }}>
+    Click me
+  </button>
+</div>
+```
+
+### Available Color Tokens
+- `primary` / `primary-hover` - Primary brand color
+- `background-light` / `background-dark` - Background colors
+- `text-main` / `text-muted` - Text colors
+- `bg-main` / `bg-card` - Background utilities
+
+## RTL Support
+
+The project supports Arabic (RTL) and English (LTR). Use RTL-aware utilities:
+
+```tsx
+// ✅ GOOD: RTL-aware classes
+<div className="text-right rtl:text-left">
+  {/* Automatically flips in RTL */}
+</div>
+
+// Or use logical properties
+<div className="ms-4 me-2">
+  {/* margin-start, margin-end - automatically RTL-aware */}
+</div>
+```
+
+## Component Styling Patterns
+
+### Utility-First Approach
+```tsx
+// ✅ GOOD: Use Tailwind utilities
+<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-soft">
+  <h2 className="text-xl font-display text-text-main">Title</h2>
+  <button className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover">
+    Action
+  </button>
+</div>
+```
+
+### Responsive Design
+```tsx
+// ✅ GOOD: Responsive utilities
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {/* Responsive grid */}
+</div>
+```
+
+### Dark Mode (if needed)
+```tsx
+// ✅ GOOD: Dark mode support
+<div className="bg-white dark:bg-surface-dark text-text-main dark:text-white">
+  {/* Dark mode styles */}
+</div>
+```
+
+## Typography
+
+### Font Families
+- Use `font-display` for headings
+- Use `font-body` or `font-sans` for body text
+- Fonts: Cairo, Manrope (from config)
+
+```tsx
+// ✅ GOOD: Use font utilities
+<h1 className="font-display text-3xl font-bold">Heading</h1>
+<p className="font-body text-base">Body text</p>
+```
+
+## Spacing
+
+Use Tailwind spacing scale:
+- `p-4` (padding), `m-4` (margin)
+- `gap-4` (gap in flex/grid)
+- `space-x-4` (horizontal spacing between children)
+
+## Common Patterns
+
+### Cards
+```tsx
+// ✅ GOOD: Card pattern
+<div className="bg-bg-card rounded-lg shadow-soft p-6">
+  <h3 className="text-lg font-display mb-4">Card Title</h3>
+  <p className="text-text-muted">Card content</p>
+</div>
+```
+
+### Buttons
+```tsx
+// ✅ GOOD: Button patterns
+<button className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors">
+  Primary Button
+</button>
+
+<button className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+  Secondary Button
+</button>
+```
+
+### Forms
+```tsx
+// ✅ GOOD: Form input styling
+<input 
+  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+  type="text"
+/>
+```
+
+## Custom CSS
+
+### When to Use Custom CSS
+- Complex animations
+- Third-party component overrides
+- Global styles
+- CSS that can't be expressed in Tailwind
+
+### File Location
+- Component-specific: `ComponentName.module.css` (if needed)
+- Global: `index.css` or `globals.css`
+
+## Styling Best Practices
+
+1. ✅ **Use Tailwind utilities first** - Prefer utilities over custom CSS
+2. ✅ **Use design tokens** - Use colors/spacing from config
+3. ✅ **RTL-aware** - Use logical properties or RTL utilities
+4. ✅ **Responsive** - Always consider mobile-first
+5. ✅ **Consistent spacing** - Use Tailwind spacing scale
+6. ✅ **Semantic classes** - Use meaningful class combinations
+7. ✅ **Avoid inline styles** - Use Tailwind classes instead
+
+## Anti-Patterns to Avoid
+
+1. ❌ **Hardcoded colors** - Use design tokens
+2. ❌ **Inline styles** - Use Tailwind classes
+3. ❌ **Not considering RTL** - Always test RTL layout
+4. ❌ **Inconsistent spacing** - Use Tailwind scale
+5. ❌ **Too many custom CSS files** - Prefer Tailwind utilities
+6. ❌ **Not responsive** - Always make responsive
+
+## Component Styling Example
+
+```tsx
+// ✅ GOOD: Complete component with proper styling
+export function TeacherCard({ teacher }: Props) {
+  return (
+    <div className="bg-bg-card rounded-lg shadow-soft p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-center gap-4 mb-4">
+        <img 
+          src={teacher.photo} 
+          alt={teacher.name}
+          className="w-16 h-16 rounded-full object-cover"
+        />
+        <div>
+          <h3 className="font-display text-lg text-text-main">{teacher.name}</h3>
+          <p className="text-sm text-text-muted">{teacher.specialization}</p>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between">
+        <span className="text-primary font-semibold">
+          {formatCurrency(teacher.hourlyRate, teacher.currency)}
+        </span>
+        <button className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover">
+          Book Session
+        </button>
+      </div>
+    </div>
+  );
+}
+```

@@ -1,0 +1,118 @@
+---
+alwaysApply: true
+---
+
+# Import Path Guidelines
+
+## Path Aliases Restriction
+
+**IMPORTANT: Do NOT use `@/` path alias in imports.**
+
+### Why?
+The project's `vite.config.js` does not define the `@` path alias. Using `@/` will cause build errors with Vite/Rolldown.
+
+### ❌ BAD - Don't use path alias
+```typescript
+import { RoomRepository } from '@/infrastructure/firebase/repositories/RoomRepository';
+import { db } from '@/config/firebase';
+import { COLLECTIONS } from '@/constants/firebaseCollections';
+```
+
+### ✅ GOOD - Use relative paths
+```typescript
+// From: src/features/room/presentation/hooks/useRoom.ts
+import { RoomRepository } from '../../../../infrastructure/firebase/repositories/RoomRepository';
+
+// From: src/infrastructure/firebase/repositories/RoomRepository.ts
+import { db } from '../../../config/firebase';
+import { COLLECTIONS } from '../../../constants/firebaseCollections';
+```
+
+## Relative Path Guidelines
+
+### Calculating Relative Paths
+Count the directory levels from your current file to the target:
+
+```
+src/
+├── features/
+│   └── room/
+│       └── presentation/
+│           └── hooks/
+│               └── useRoom.ts  ← Current file
+└── infrastructure/
+    └── firebase/
+        └── repositories/
+            └── RoomRepository.ts  ← Target file
+```
+
+Path: `../../../../infrastructure/firebase/repositories/RoomRepository`
+
+### Common Patterns
+
+**From feature hooks to infrastructure:**
+```typescript
+// src/features/[feature]/presentation/hooks/[hook].ts
+import { Repository } from '../../../../infrastructure/firebase/repositories/Repository';
+```
+
+**From infrastructure to config/constants:**
+```typescript
+// src/infrastructure/firebase/repositories/[Repository].ts
+import { db } from '../../../config/firebase';
+import { COLLECTIONS } from '../../../constants/firebaseCollections';
+```
+
+**From app pages to features:**
+```typescript
+// src/app/[feature]/[id]/page.tsx
+import { Hook } from '../../../features/[feature]/presentation/hooks/Hook';
+```
+
+**From services to infrastructure:**
+```typescript
+// src/services/[service].ts
+import { Repository } from '../infrastructure/firebase/repositories/Repository';
+```
+
+## Examples from Codebase
+
+### ✅ Correct Examples
+
+```typescript
+// src/features/teachers/presentation/hooks/useTeacherProfile.ts
+import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+
+// src/services/teacherService.ts
+import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
+
+// src/app/technical-check/[id]/page.tsx
+import { RoomRepository } from '../../../infrastructure/firebase/repositories/RoomRepository';
+```
+
+## Build Error Prevention
+
+If you see this error:
+```
+Error: [vite]: Rolldown failed to resolve import "@/infrastructure/..."
+```
+
+**Solution:** Replace `@/` with the correct relative path.
+
+## When to Use What
+
+- **Relative paths** (`../../`) - Always use for internal imports
+- **Absolute paths from src** - Not configured, don't use
+- **Path aliases** (`@/`) - Not configured, don't use
+
+## Quick Reference
+
+| From | To | Path Pattern |
+|------|-----|--------------|
+| `features/[feature]/presentation/hooks/` | `infrastructure/` | `../../../../infrastructure/` |
+| `features/[feature]/application/services/` | `infrastructure/` | `../../../../infrastructure/` |
+| `infrastructure/firebase/repositories/` | `config/` | `../../../config/` |
+| `infrastructure/firebase/repositories/` | `constants/` | `../../../constants/` |
+| `services/` | `infrastructure/` | `../infrastructure/` |
+| `app/[feature]/[id]/` | `features/` | `../../../features/` |
+| `app/[feature]/[id]/` | `infrastructure/` | `../../../infrastructure/` |

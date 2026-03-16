@@ -1,0 +1,336 @@
+---
+alwaysApply: true
+---
+
+# General Best Practices & Common Pitfalls
+
+## Code Quality Principles
+
+### 1. Single Responsibility Principle
+Each file/component/function should have one clear purpose.
+
+```typescript
+// ✅ GOOD: Single responsibility
+export function TeacherCard({ teacher }: Props) {
+  return <div>{/* Only renders teacher card */}</div>;
+}
+
+// ❌ BAD: Multiple responsibilities
+export function TeacherCard({ teacher }: Props) {
+  // Fetches data, transforms data, handles form, renders UI
+}
+```
+
+### 2. DRY (Don't Repeat Yourself)
+Extract common code to utilities, hooks, or services.
+
+```typescript
+// ✅ GOOD: Reusable utility
+export function formatCurrency(amount: number, currency: string): string {
+  // Centralized logic
+}
+
+// ❌ BAD: Duplicated logic
+// In component 1:
+const formatted = `${amount} ${currency === 'USD' ? '$' : 'SAR'}`;
+// In component 2:
+const formatted = `${amount} ${currency === 'USD' ? '$' : 'SAR'}`;
+```
+
+### 3. Separation of Concerns
+Keep UI, business logic, and data access separate.
+
+```typescript
+// ✅ GOOD: Separated concerns
+// Component (UI)
+export function TeacherProfile() {
+  const { profile, loading } = useTeacherProfile(userId);
+  return <div>{/* UI only */}</div>;
+}
+
+// Hook (Data fetching)
+export function useTeacherProfile(userId: string) {
+  // Data fetching logic
+}
+
+// Service (Business logic)
+export class TeacherService {
+  async getTeacherProfileData(userId: string) {
+    // Business logic
+  }
+}
+
+// ❌ BAD: All mixed together
+export function TeacherProfile() {
+  const [profile, setProfile] = useState(null);
+  useEffect(() => {
+    // Direct Firebase query
+    // Business logic
+    // Data transformation
+    // All in component
+  }, []);
+}
+```
+
+## File Size Guidelines
+
+### Target Sizes
+- **Components**: <300 lines
+- **Hooks**: <200 lines
+- **Services**: <500 lines
+- **Repositories**: <500 lines
+
+### If File Exceeds Limits
+1. Extract sub-components
+2. Extract custom hooks
+3. Split into smaller services
+4. Break into multiple files
+
+## Error Handling
+
+### Consistent Error Handling Pattern
+```typescript
+// ✅ GOOD: Consistent error handling
+try {
+  setLoading(true);
+  const result = await operation();
+  addToast('Success', 'success');
+  return result;
+} catch (error) {
+  console.error('Operation failed:', error);
+  const message = error instanceof Error ? error.message : 'An error occurred';
+  addToast(message, 'error');
+  setError(message);
+  throw error; // Re-throw if needed
+} finally {
+  setLoading(false);
+}
+```
+
+### Error Boundaries
+Consider adding error boundaries for better UX:
+```typescript
+// ✅ GOOD: Error boundary for component tree
+<ErrorBoundary fallback={<ErrorPage />}>
+  <FeatureComponent />
+</ErrorBoundary>
+```
+
+## Type Safety
+
+### Avoid `any` Type
+```typescript
+// ✅ GOOD: Proper typing
+interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+}
+
+function processTeacher(teacher: Teacher) {
+  // Type-safe
+}
+
+// ❌ BAD: Using any
+function processTeacher(teacher: any) {
+  // No type safety
+}
+```
+
+### Use Type Guards
+```typescript
+// ✅ GOOD: Type guards
+function isTeacher(obj: unknown): obj is Teacher {
+  return typeof obj === 'object' && 
+         obj !== null && 
+         'id' in obj && 
+         'name' in obj;
+}
+```
+
+## Performance Best Practices
+
+### 1. Memoization
+```typescript
+// ✅ GOOD: Memoize expensive computations
+const expensiveValue = useMemo(() => {
+  return computeExpensiveValue(data);
+}, [data]);
+
+// ✅ GOOD: Memoize callbacks
+const handleClick = useCallback(() => {
+  doSomething(id);
+}, [id]);
+```
+
+### 2. Lazy Loading
+```typescript
+// ✅ GOOD: Lazy load components
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+
+function App() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HeavyComponent />
+    </Suspense>
+  );
+}
+```
+
+### 3. Avoid Unnecessary Re-renders
+```typescript
+// ✅ GOOD: Select specific store slices
+const { isModalOpen } = useAppStore(state => ({
+  isModalOpen: state.isLoginModalOpen
+}));
+
+// ❌ BAD: Select entire store
+const appStore = useAppStore(); // Re-renders on any change
+```
+
+## Common Pitfalls to Avoid
+
+### 1. Direct Firebase Queries in Components
+```typescript
+// ❌ BAD: Direct Firebase in component
+useEffect(() => {
+  const q = query(collection(db, 'users'), where('id', '==', userId));
+  getDocs(q).then(/* ... */);
+}, [userId]);
+
+// ✅ GOOD: Use repository/service
+const { profile } = useTeacherProfile(userId);
+```
+
+### 2. Business Logic in Components
+```typescript
+// ❌ BAD: Business logic in component
+function Component() {
+  const [rating, setRating] = useState(0);
+  useEffect(() => {
+    // Complex rating calculation logic
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    setRating(avg);
+  }, [reviews]);
+}
+
+// ✅ GOOD: Business logic in service
+const { rating } = useTeacherRating(teacherId);
+```
+
+### 3. Not Cleaning Up Subscriptions
+```typescript
+// ❌ BAD: Memory leak
+useEffect(() => {
+  onSnapshot(docRef, (snapshot) => {
+    setData(snapshot.data());
+  });
+  // No cleanup!
+}, []);
+
+// ✅ GOOD: Cleanup subscription
+useEffect(() => {
+  const unsubscribe = onSnapshot(docRef, (snapshot) => {
+    setData(snapshot.data());
+  });
+  return () => unsubscribe(); // Cleanup
+}, []);
+```
+
+### 4. Hardcoded Values
+```typescript
+// ❌ BAD: Hardcoded strings
+where('status', '==', 'approved')
+collection(db, 'teacherApplications')
+
+// ✅ GOOD: Use constants
+where('status', '==', TEACHER_APPLICATION_STATUS.APPROVED)
+collection(db, COLLECTIONS.TEACHER_APPLICATIONS)
+```
+
+### 5. Not Handling Loading/Error States
+```typescript
+// ❌ BAD: No loading/error handling
+const [data, setData] = useState(null);
+useEffect(() => {
+  fetchData().then(setData);
+}, []);
+
+// ✅ GOOD: Proper state handling
+const [data, setData] = useState(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+
+useEffect(() => {
+  setLoading(true);
+  fetchData()
+    .then(setData)
+    .catch(err => setError(err.message))
+    .finally(() => setLoading(false));
+}, []);
+```
+
+### 6. Prop Drilling
+```typescript
+// ❌ BAD: Prop drilling
+function App() {
+  return <Parent user={user} />;
+}
+function Parent({ user }) {
+  return <Child user={user} />;
+}
+function Child({ user }) {
+  return <GrandChild user={user} />;
+}
+
+// ✅ GOOD: Use context or store
+function App() {
+  return <AuthProvider><Parent /></AuthProvider>;
+}
+function Child() {
+  const { user } = useAuth(); // Direct access
+}
+```
+
+## Code Review Checklist
+
+Before submitting code, check:
+
+- [ ] No direct Firebase queries in components
+- [ ] Business logic in services/use cases, not components
+- [ ] Proper error handling with try-catch
+- [ ] Loading and error states handled
+- [ ] No hardcoded strings (use constants)
+- [ ] Proper TypeScript types (no `any`)
+- [ ] Subscriptions cleaned up in useEffect
+- [ ] File size within limits (<300 lines for components)
+- [ ] No code duplication
+- [ ] Proper separation of concerns
+- [ ] RTL support considered (if UI)
+- [ ] Responsive design (if UI)
+
+## Quick Reference
+
+### Import Order
+1. React
+2. Third-party libraries
+3. Internal utilities/types
+4. Components
+5. Hooks
+6. Styles
+
+### Component Structure
+1. Imports
+2. Types/Interfaces
+3. Component function
+4. Hooks
+5. Effects
+6. Handlers
+7. Render
+
+### Naming Conventions
+- Components: `PascalCase.tsx`
+- Hooks: `useCamelCase.ts`
+- Services: `PascalCase.ts`
+- Utils: `camelCase.ts`
+- Types: `PascalCase.ts`

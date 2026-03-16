@@ -1,0 +1,156 @@
+---
+alwaysApply: true
+---
+
+# Design Patterns & Architecture
+
+## Architecture Pattern: Feature-Based Clean Architecture
+
+This project follows **Clean Architecture** principles with feature-based organization. The goal is to separate concerns into distinct layers.
+
+### Architecture Layers
+
+```
+┌─────────────────────────────────────────┐
+│   Presentation Layer                     │
+│   (Components, Hooks, Pages)            │
+│   - React components                     │
+│   - Custom hooks                         │
+│   - Page orchestrators                   │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
+│   Application Layer                      │
+│   (Services, Use Cases, Business Logic) │
+│   - Feature services                     │
+│   - Use cases                            │
+│   - Business rules                       │
+│   - Data transformation                  │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
+│   Domain Layer                            │
+│   (Types, Models, Interfaces)           │
+│   - Type definitions                     │
+│   - Domain models                        │
+│   - Repository interfaces                │
+│   - Value objects                        │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
+│   Infrastructure Layer                   │
+│   (Repositories, External APIs)         │
+│   - Firebase repositories                │
+│   - External service adapters            │
+└──────────────────────────────────────────┘
+```
+
+### Dependency Rule
+**Dependencies point inward**: UI → Use Cases → Domain → Infrastructure
+
+- Presentation layer depends on Application layer
+- Application layer depends on Domain layer
+- Infrastructure layer implements Domain interfaces
+- **Never** import from infrastructure in presentation layer
+
+## Feature Module Structure
+
+Each feature should follow this structure (see [features/teachers/](mdc:src/features/teachers/) as reference):
+
+```
+features/[feature-name]/
+├── domain/
+│   ├── entities/           # Domain entities (Teacher, Student, etc.)
+│   └── interfaces/         # Repository interfaces (ITeacherRepository)
+├── application/
+│   ├── use-cases/          # Use case classes (GetTeacherProfile, SaveAvailability)
+│   └── services/           # Business logic services (optional, if use cases aren't enough)
+├── presentation/
+│   ├── components/         # Feature-specific components
+│   ├── hooks/              # Feature-specific hooks
+│   └── pages/              # Feature pages
+└── index.ts                # Public API exports
+```
+
+## Design Patterns Used
+
+### 1. Repository Pattern
+- **Location**: `infrastructure/firebase/repositories/`
+- **Purpose**: Abstract data access layer
+- **Example**: [TeacherRepository](mdc:src/infrastructure/firebase/repositories/TeacherRepository.ts)
+- **Usage**: Always use repositories, never direct Firebase queries in components
+
+### 2. Service Layer Pattern
+- **Location**: `services/` and `features/[feature]/application/services/`
+- **Purpose**: Business logic and orchestration
+- **Example**: [teacherService.ts](mdc:src/services/teacherService.ts)
+- **Usage**: Services coordinate between repositories and apply business rules
+
+### 3. Use Case Pattern
+- **Location**: `features/[feature]/application/use-cases/`
+- **Purpose**: Single-purpose business operations
+- **Example**: `features/teachers/application/use-cases/GetTeacherProfile.ts`
+- **Usage**: One use case per business operation
+
+### 4. Custom Hooks Pattern
+- **Location**: `features/[feature]/presentation/hooks/` and `hooks/`
+- **Purpose**: Encapsulate data fetching and state management
+- **Example**: `features/teachers/presentation/hooks/useTeacherProfile.ts`
+- **Usage**: Extract data fetching logic from components
+
+### 5. State Management Strategy
+
+**When to use what:**
+
+- **Zustand Stores** (`store/`): 
+  - Global app state (modals, toasts, UI state)
+  - User profile state that needs to be accessed across features
+  - See [useAppStore.ts](mdc:src/store/useAppStore.ts) and [useUserStore.ts](mdc:src/store/useUserStore.ts)
+
+- **React Context** (`contexts/`):
+  - Authentication state (AuthContext)
+  - Provider-level state that wraps the app
+
+- **Local Component State**:
+  - Component-specific UI state
+  - Form state
+  - Temporary state
+
+- **Custom Hooks**:
+  - Feature-specific data fetching
+  - Derived state
+  - Reusable stateful logic
+
+## Data Flow Pattern
+
+**Preferred Pattern**: Component → Service → Repository → Firebase
+
+```typescript
+// ✅ GOOD: Component uses service
+const { profile, loading } = useTeacherProfile(userId);
+// Hook internally uses: Service → Repository → Firebase
+
+// ❌ BAD: Component directly queries Firebase
+const [profile, setProfile] = useState(null);
+useEffect(() => {
+  const q = query(collection(db, 'users'), where('id', '==', userId));
+  // ...
+}, [userId]);
+```
+
+## Code Organization Rules
+
+1. **One component per file** - No multiple components in one file
+2. **One use case per file** - Each use case is a separate class/file
+3. **One repository interface per domain** - Group related operations
+4. **Feature isolation** - Features should not depend on other features directly
+5. **Shared code in `shared/`** - Only truly shared utilities/types
+
+## Anti-Patterns to Avoid
+
+1. ❌ **Direct Firebase queries in components** - Use repositories
+2. ❌ **Business logic in UI components** - Move to services/use cases
+3. ❌ **Large monolithic files** - Target: <300 lines per file
+4. ❌ **Mixed concerns** - Separate data fetching, business logic, and UI
+5. ❌ **Magic strings** - Use constants from [constants/firebaseCollections.ts](mdc:src/constants/firebaseCollections.ts)
+6. ❌ **Duplicated code** - Extract to shared utilities or services

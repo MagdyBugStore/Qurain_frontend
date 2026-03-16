@@ -8,6 +8,7 @@ import { TEACHER_APPLICATION_STATUS } from '../../constants/status'
 import { StudentService } from '../../services/studentService'
 import { SubscriptionService, StudentSubscription } from '../../services/subscriptionService'
 import type { StudentSession } from '../../shared/types/student.types'
+import type { UserData } from '../../infrastructure/firebase/repositories/AdminRepository'
 
 interface TeacherApplication {
   id: string
@@ -42,6 +43,11 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
   const [subscriptions, setSubscriptions] = useState<StudentSubscription[]>([])
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(false)
   const [subscriptionFilter, setSubscriptionFilter] = useState<'all' | 'active' | 'pending' | 'cancelled'>('all')
+  
+  // Students state
+  const [students, setStudents] = useState<UserData[]>([])
+  const [studentsLoading, setStudentsLoading] = useState(false)
+  const [studentFilter, setStudentFilter] = useState<'all' | 'completed' | 'incomplete'>('all')
 
   // Check admin role
   useEffect(() => {
@@ -131,6 +137,31 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
       fetchSubscriptions()
     }
   }, [authLoading, activeTab, fetchSubscriptions])
+
+  // Fetch students
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (activeTab !== 'students') return
+      
+      setStudentsLoading(true)
+      try {
+        const adminService = new AdminService()
+        const allStudents = await adminService.getAllStudents()
+        setStudents(allStudents)
+      } catch (error) {
+        console.error('Error fetching students:', error)
+        if (addToast) {
+          addToast('Error fetching students', 'error')
+        }
+      } finally {
+        setStudentsLoading(false)
+      }
+    }
+
+    if (!authLoading && activeTab === 'students') {
+      fetchStudents()
+    }
+  }, [authLoading, activeTab, addToast])
 
   const handleStatusUpdate = async (appId: string, newStatus: 'approved' | 'rejected') => {
     try {
@@ -292,10 +323,28 @@ export default function AdminDashboard({ addToast }: AdminDashboardProps) {
             />
           )}
           {activeTab === "students" && (
-            <div className="p-8 text-center text-gray-500">
-              <h2>Student Management</h2>
-              <p>Coming soon...</p>
-            </div>
+            <StudentsTab
+              students={students}
+              loading={studentsLoading}
+              filter={studentFilter}
+              setFilter={setStudentFilter}
+              addToast={addToast}
+              onRefresh={async () => {
+                setStudentsLoading(true)
+                try {
+                  const adminService = new AdminService()
+                  const allStudents = await adminService.getAllStudents()
+                  setStudents(allStudents)
+                } catch (error) {
+                  console.error('Error fetching students:', error)
+                  if (addToast) {
+                    addToast('Error fetching students', 'error')
+                  }
+                } finally {
+                  setStudentsLoading(false)
+                }
+              }}
+            />
           )}
           {activeTab === "settings" && (
             <div className="p-8 text-center text-gray-500">
@@ -416,7 +465,7 @@ function TeachersTab({
       <div className="card-header flex flex-col gap-4">
         <div className="flex items-center justify-between w-full">
           <h3 className="card-title">Teacher Management</h3>
-        </div>
+        </div> 
         
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 w-full overflow-x-auto">
           {tabs.map((tab) => (
@@ -428,7 +477,7 @@ function TeachersTab({
                   ? 'border-primary text-primary'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
-            >
+            > 
               {tab.label}
             </button>
           ))}
@@ -916,6 +965,208 @@ function SubscriptionsTab({
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StudentsTab({
+  students,
+  loading,
+  filter,
+  setFilter,
+  addToast,
+  onRefresh,
+}: {
+  students: UserData[]
+  loading: boolean
+  filter: 'all' | 'completed' | 'incomplete'
+  setFilter: (filter: 'all' | 'completed' | 'incomplete') => void
+  addToast: (message: string, type: 'success' | 'error' | 'info') => void
+  onRefresh: () => void
+}) {
+  const tabs = [
+    { id: 'all', label: 'All' },
+    { id: 'completed', label: 'Completed Profile' },
+    { id: 'incomplete', label: 'Incomplete Profile' },
+  ] as const
+
+  const formatDate = (date?: any) => {
+    if (!date) return 'N/A'
+    try {
+      const d = date?.toDate ? date.toDate() : new Date(date)
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    } catch {
+      return 'N/A'
+    }
+  }
+
+  const getDisplayName = (student: UserData) => {
+    if (student.displayName) return student.displayName
+    if (student.firstName || student.lastName) {
+      return `${student.firstName || ''} ${student.lastName || ''}`.trim()
+    }
+    return 'Unknown'
+  }
+
+  const isProfileComplete = (student: UserData) => {
+    return !!(
+      student.firstName &&
+      student.lastName &&
+      student.email &&
+      (student as any).goals &&
+      Array.isArray((student as any).goals) &&
+      (student as any).goals.length > 0 &&
+      (student as any).ageGroup &&
+      (student as any).level
+    )
+  }
+
+  const filteredStudents = students.filter((student) => {
+    if (filter === 'all') return true
+    const complete = isProfileComplete(student)
+    return filter === 'completed' ? complete : !complete
+  })
+
+  return (
+    <div>
+      <div className="dash-welcome mb24">
+        <h2 className="dash-welcome-title">Students Management</h2>
+        <p className="dash-welcome-sub">View and manage all student accounts.</p>
+      </div>
+
+      <div className="card">
+        <div className="card-header flex flex-col gap-4">
+          <div className="flex items-center justify-between w-full">
+            <h3 className="card-title">All Students</h3>
+            <div className="text-sm text-gray-500">
+              Total: {filteredStudents.length}
+            </div>
+          </div>
+
+          <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 w-full overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  filter === tab.id
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Loading students...</p>
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="p-12 text-center">
+            <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600 mb-4">
+              school
+            </span>
+            <p className="text-gray-500 dark:text-gray-400 font-arabic text-lg">
+              No {filter === 'all' ? '' : filter} students found
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="sessions-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Level</th>
+                  <th>Age Group</th>
+                  <th>Profile Status</th>
+                  <th>Joined Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student) => {
+                  const complete = isProfileComplete(student)
+                  return (
+                    <tr key={student.uid}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          {(student as any).photoURL ? (
+                            <img
+                              src={(student as any).photoURL}
+                              alt={getDisplayName(student)}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 font-bold text-lg">
+                              {getDisplayName(student).charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-bold text-gray-900 dark:text-white">
+                              {getDisplayName(student)}
+                            </div>
+                            <div className="text-xs text-gray-500">ID: {student.uid.substring(0, 8)}...</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="text-sm">{student.email || 'N/A'}</div>
+                      </td>
+                      <td>
+                        <div className="text-sm">{student.phone || 'N/A'}</div>
+                      </td>
+                      <td>
+                        <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {(student as any).level || 'N/A'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="px-2 py-1 rounded text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                          {(student as any).ageGroup || 'N/A'}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            complete
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                          }`}
+                        >
+                          {complete ? 'Complete' : 'Incomplete'}
+                        </span>
+                      </td>
+                      <td>{formatDate(student.createdAt)}</td>
+                      <td>
+                        <button
+                          onClick={() => {
+                            window.open(`/profile/${student.uid}`, '_blank')
+                          }}
+                          className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded text-xs font-medium transition-colors"
+                          title="View Profile"
+                        >
+                          <span className="material-symbols-outlined text-sm">visibility</span>
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

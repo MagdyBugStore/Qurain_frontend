@@ -1,0 +1,89 @@
+---
+alwaysApply: true
+---
+
+# Application Structure
+
+## Project Overview
+This is a **React 19 + Vite** application for an online Quran learning platform. It uses **React Router v6** (not Next.js, despite the `app/` folder naming convention).
+
+## Technology Stack
+- **Frontend Framework**: React 19.2.0 with Vite
+- **Routing**: React Router DOM v6
+- **State Management**: Zustand (stores in [store/](mdc:src/store/))
+- **Backend**: Firebase (Firestore, Authentication)
+- **Styling**: Tailwind CSS with RTL support (tailwindcss-rtl)
+- **Internationalization**: i18next
+- **Type Safety**: TypeScript
+
+## Folder Structure
+
+```
+src/
+├── app/                    # Page components (Next.js-style naming, but React Router)
+│   ├── admin/              # Admin dashboard
+│   ├── booking/            # Booking flow pages
+│   ├── teachers/           # Teacher listing and detail pages
+│   ├── teacher-profile/    # Teacher profile management
+│   ├── student-profile/    # Student profile page
+│   ├── profile/            # Unified profile pages
+│   ├── wallet/             # Wallet management
+│   ├── support/            # Support tickets
+│   └── ...                 # Other feature pages
+│
+├── components/             # Shared UI components
+│   ├── auth/               # Authentication components
+│   ├── forms/               # Form components
+│   ├── layout/              # Layout components (Header, Footer, etc.)
+│   ├── modals/              # Modal components
+│   └── sections/            # Section components
+│
+├── features/               # Feature-based modules (Clean Architecture)
+│   └── teachers/            # Teachers feature module
+│       ├── application/     # Use cases
+│       ├── domain/           # Entities & interfaces
+│       ├── presentation/    # Hooks & components
+│       └── services/         # Business logic
+│
+├── contexts/               # React Context providers
+│   └── AuthContext.tsx      # Authentication context
+│
+├── store/                  # Zustand stores
+│   ├── useAppStore.ts       # App-level state (modals, toasts, etc.)
+│   └── useUserStore.ts      # User profile state
+│
+├── services/               # Service layer (business logic)
+│   ├── teacherService.ts
+│   ├── studentService.ts
+│   ├── bookingService.ts
+│   └── ...
+│
+├── infrastructure/         # External services & adapters
+│   └── firebase/            # Firebase repositories
+│       └── repositories/    # Repository implementations
+│
+├── shared/                 # Shared utilities and types
+│   ├── types/               # Shared TypeScript types
+│   └── utils/               # Utility functions
+│
+├── hooks/                  # Custom React hooks
+├── models/                  # Data models
+├── config/                  # Configuration files
+│   └── firebase.ts          # Firebase configuration
+├── constants/               # Constants
+│   ├── firebaseCollections.ts  # Firebase collection names
+│   └── status.ts            # Status constants
+└── legacy-pages/            # Legacy pages (technical debt)
+```
+
+## Key Files
+- **Entry Point**: [main.tsx](mdc:src/main.tsx)
+- **App Component**: [App.tsx](mdc:src/App.tsx) - Contains routing configuration
+- **Firebase Config**: [config/firebase.ts](mdc:src/config/firebase.ts)
+- **Collections**: [constants/firebaseCollections.ts](mdc:src/constants/firebaseCollections.ts)
+
+## Important Notes
+1. The `app/` folder uses Next.js-style naming but is actually React Router
+2. Features should follow Clean Architecture pattern (see `features/teachers/` as example)
+3. Avoid direct Firebase calls in components - use repositories/services instead
+4. Legacy pages exist in `legacy-pages/` - avoid adding new code there
