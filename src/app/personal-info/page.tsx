@@ -5,42 +5,45 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAppStore } from '../../store/useAppStore'
 import { isProfileComplete } from '../../models/UserModel'
-import AccountTypeSelection from '../../components/forms/AccountTypeSelection'
 import Step1Goals from '../../components/forms/Step1Goals'
 import Step2AgeGroup from '../../components/forms/Step2AgeGroup'
 import Step3Level from '../../components/forms/Step3Level'
-import Step4Budget from '../../components/forms/Step4Budget'
 
-type AccountType = 'student' | 'teacher' | null
-type Step = 'account-type' | 'step1' | 'step2' | 'step3' | 'step4'
+type Step = 'step1' | 'step2' | 'step3'
 
 export default function PersonalInfoPage() {
   const navigate = useNavigate()
   const { user, userProfile, saveUserProfile } = useAuth()
-  const { formData, updateFormData, resetFormData } = useAppStore()
-  const [accountType, setAccountType] = useState<AccountType>(null)
-  const [currentStep, setCurrentStep] = useState<Step>('account-type')
+  const { formData, resetFormData } = useAppStore()
+  const [currentStep, setCurrentStep] = useState<Step>('step1')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (!user) {
-      navigate('/login', { replace: true })
       return
     }
 
-    // If accountType is missing, stay on this page to let user select it
-    // إذا كان accountType مفقوداً، ابق في هذه الصفحة للسماح للمستخدم باختياره
+    // If accountType is missing, redirect to choose role page
     if (!userProfile?.accountType) {
+      navigate('/choose-role', { replace: true })
+      return
+    }
+
+    // If user is not a student, redirect to appropriate page
+    if (userProfile.accountType !== 'student') {
+      if (userProfile.accountType === 'teacher') {
+        navigate('/teacher-application', { replace: true })
+      } else {
+        navigate('/choose-role', { replace: true })
+      }
       return
     }
 
     // If profile is already complete, redirect to profile page
-    // إذا كان الملف مكتملاً بالفعل، إعادة التوجيه إلى صفحة الملف الشخصي
     if (userProfile && isProfileComplete(userProfile)) {
-      // Use setTimeout to avoid redirect loop
-      // استخدام setTimeout لتجنب حلقة إعادة التوجيه
       const timer = setTimeout(() => {
-        if (user?.uid) {
-          navigate(`/profile/${user.uid}`, { replace: true })
+        if (user?.id) {
+          navigate(`/profile/${user.id}`, { replace: true })
         } else {
           navigate('/profile', { replace: true })
         }
@@ -48,41 +51,8 @@ export default function PersonalInfoPage() {
       return () => clearTimeout(timer)
     }
 
-    // Check if user has already selected account type
-    // التحقق من أن المستخدم قد اختار نوع الحساب بالفعل
-    if (userProfile.accountType) {
-      setAccountType(userProfile.accountType as AccountType)
-      if (userProfile.accountType === 'student') {
-        setCurrentStep('step1')
-      } else {
-        // Teacher flow - redirect to teacher application
-        // تدفق المعلم - إعادة التوجيه إلى صفحة طلب المعلم
-        navigate('/teacher-application', { replace: true })
-      }
-    }
+    // Keep current step as-is; do not reset progress on auth/profile re-renders.
   }, [user, userProfile, navigate])
-
-  const handleAccountTypeSelect = async (type: AccountType) => {
-    setAccountType(type)
-    if (type === 'student') {
-      setCurrentStep('step1')
-      // Save account type and photo URL to profile
-      if (user) {
-        try {
-          await saveUserProfile({ 
-            accountType: type,
-            photoURL: user.photoURL || '', // Save image URL from user account
-            displayName: user.displayName || '', // Save display name as well
-          })
-        } catch (error) {
-          console.error('Error saving account type:', error)
-        }
-      }
-    } else {
-      // Teacher flow - navigate to teacher application
-      navigate('/teacher-application')
-    }
-  }
 
   const handleStep1Complete = () => {
     setCurrentStep('step2')
@@ -92,47 +62,60 @@ export default function PersonalInfoPage() {
     setCurrentStep('step3')
   }
 
-  const handleStep3Complete = () => {
-    setCurrentStep('step4')
-  }
+  const handleCompleteProfile = async () => {
+    if (isSubmitting) {
+      return
+    }
 
-  const handleStep4Complete = async () => {
     // Save all form data to user profile
     const profileData = {
       ...formData,
+      role: 'student' as const,
       accountType: 'student' as const,
       completed: true,
-      firstName: user?.displayName?.split(' ')[0] || '',
-      lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
+      profileCompletedAt: new Date().toISOString(),
+      fullName: user?.fullName || '',
+      firstName: user?.fullName?.split(' ')[0] || '',
+      lastName: user?.fullName?.split(' ').slice(1).join(' ') || '',
       email: user?.email || '',
-      photoURL: user?.photoURL || '', // Save image URL from user account
-      displayName: user?.displayName || '', // Save display name as well
+      photoURL: user?.avatar || '', // Save image URL from user account
+      displayName: user?.fullName || '', // Save display name as well
     }
-    
-    await saveUserProfile(profileData)
-    resetFormData()
-    
-    // Redirect to profile with user ID
-    if (user?.uid) {
-      navigate(`/profile/${user.uid}`)
-    } else {
-      navigate('/profile')
+
+    try {
+      setIsSubmitting(true)
+      await saveUserProfile(profileData)
+      resetFormData()
+
+      // Redirect to profile with user ID
+      if (user?.id) {
+        navigate(`/profile/${user.id}`)
+      } else {
+        navigate('/profile')
+      }
+    } catch (error) {
+      console.error('Failed to complete personal info:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
+  const handleStep3Complete = () => {
+    void handleCompleteProfile()
+  }
+
   const handleBack = () => {
-    if (currentStep === 'step4') {
-      setCurrentStep('step3')
-    } else if (currentStep === 'step3') {
+    if (currentStep === 'step3') {
       setCurrentStep('step2')
     } else if (currentStep === 'step2') {
       setCurrentStep('step1')
     } else if (currentStep === 'step1') {
-      setCurrentStep('account-type')
+      // Go back to choose role page
+      navigate('/choose-role')
     }
   }
 
-  if (!user) {
+  if (!user || !userProfile?.accountType || userProfile.accountType !== 'student') {
     return null
   }
 
@@ -140,22 +123,17 @@ export default function PersonalInfoPage() {
     if (currentStep === 'step1') return 1
     if (currentStep === 'step2') return 2
     if (currentStep === 'step3') return 3
-    if (currentStep === 'step4') return 4
     return 0
   }
 
   const getTotalSteps = () => {
-    return 4
+    return 3
   }
 
   const getProgressPercentage = () => {
     const step = getStepNumber()
     const total = getTotalSteps()
     return (step / total) * 100
-  }
-
-  if (currentStep === 'account-type') {
-    return <AccountTypeSelection onSelect={handleAccountTypeSelect} />
   }
 
   return (
@@ -226,10 +204,6 @@ export default function PersonalInfoPage() {
 
           {currentStep === 'step3' && (
             <Step3Level onNext={handleStep3Complete} onBack={handleBack} />
-          )}
-
-          {currentStep === 'step4' && (
-            <Step4Budget onComplete={handleStep4Complete} onBack={handleBack} />
           )}
         </div>
       </main>

@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+// Firestore removed - TeacherRepository deleted
 import { SubmitWithdrawal } from '../../application/use-cases/SubmitWithdrawal';
 import type { WithdrawalData } from '../../application/use-cases/SubmitWithdrawal';
 
@@ -17,9 +17,8 @@ export function useSubmitWithdrawal() {
       setSubmitting(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new SubmitWithdrawal(repository);
-      return await useCase.execute(data);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
     } catch (err) {
       console.error('Error submitting withdrawal:', err);
       setError(err instanceof Error ? err : new Error('Failed to submit withdrawal'));

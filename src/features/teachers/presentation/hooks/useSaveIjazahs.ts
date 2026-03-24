@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+// Firestore removed - TeacherRepository deleted
 import { SaveIjazahs } from '../../application/use-cases/SaveIjazahs';
 import type { Ijazah } from '../../domain/entities/Ijazah';
 
@@ -17,9 +17,8 @@ export function useSaveIjazahs() {
       setSaving(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new SaveIjazahs(repository);
-      await useCase.execute(teacherId, ijazahs);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
     } catch (err) {
       console.error('Error saving ijazahs:', err);
       setError(err instanceof Error ? err : new Error('Failed to save ijazahs'));

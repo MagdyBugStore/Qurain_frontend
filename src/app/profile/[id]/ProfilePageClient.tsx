@@ -1,51 +1,21 @@
 'use client'
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../../../contexts/AuthContext'
+import { useRequireAuth } from '../../../hooks/useRequireAuth'
+import { useRequireProfileComplete } from '../../../hooks/useRequireProfileComplete'
 import TeacherProfilePage from '../../teacher-profile/page'
 import StudentProfilePage from '../../student-profile/page'
 import TeacherDetailPageClient from '../../teachers/[id]/TeacherDetailPageClient'
 
 export default function ProfilePageClient() {
   const { id } = useParams<{ id: string }>()
-  const { user, userProfile, loading } = useAuth()
   const navigate = useNavigate()
+  const { user, userProfile, loading } = useRequireAuth()
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true })
-      return
-    }
-  }, [user, loading, navigate])
-
-  // Check if account type is missing and redirect
-  // التحقق من وجود accountType وإعادة التوجيه إذا لم يكن موجوداً
-  useEffect(() => {
-    // Wait for loading to complete
-    if (loading) return;
-    
-    // If no user, redirect already handled in first useEffect
-    if (!user) return;
-    
-    const targetUserId = id || user?.uid
-    const isCurrentUser = targetUserId === user?.uid
-    
-    // Only redirect if viewing own profile and accountType is missing
-    // إعادة التوجيه فقط إذا كان المستخدم يشاهد ملفه الشخصي و accountType غير موجود
-    if (isCurrentUser) {
-      // If userProfile exists but accountType is null/undefined, redirect
-      // إذا كان userProfile موجوداً ولكن accountType null أو undefined، إعادة التوجيه
-      if (userProfile && (userProfile.accountType === null || userProfile.accountType === undefined)) {
-        navigate('/personal-info', { replace: true })
-        return
-      }
-      
-      // If userProfile doesn't exist yet, wait for it to load
-      // إذا لم يكن userProfile موجوداً بعد، انتظر تحميله
-      // (This will be handled by the render logic below)
-    }
-  }, [user, userProfile, loading, id, navigate])
+  // Enforce profile completion only when viewing own profile
+  const isOwnProfile = !id || id === user?.id
+  useRequireProfileComplete({ enabled: !!user && isOwnProfile })
 
   // Show loading state
   if (loading) {
@@ -65,8 +35,8 @@ export default function ProfilePageClient() {
   }
 
   // If ID is provided and doesn't match current user, fetch that user's profile
-  const targetUserId = id || user?.uid
-  const isCurrentUser = targetUserId === user?.uid
+  const targetUserId = id || user.id
+  const isCurrentUser = targetUserId === user.id
 
 
   // If viewing own profile, check account type
@@ -90,12 +60,24 @@ export default function ProfilePageClient() {
   }
 
   // Fallback: show message if account type is unknown
+  const handleCompleteProfile = () => {
+    if (!userProfile?.accountType) {
+      navigate('/choose-role')
+    } else if (userProfile.accountType === 'student') {
+      navigate('/personal-info')
+    } else if (userProfile.accountType === 'teacher') {
+      navigate('/teacher-application')
+    } else {
+      navigate('/choose-role')
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
         <p className="text-slate-600 dark:text-slate-400">يرجى إكمال ملفك الشخصي أولاً</p>
         <button
-          onClick={() => navigate('/personal-info')}
+          onClick={handleCompleteProfile}
           className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
         >
           إكمال الملف الشخصي

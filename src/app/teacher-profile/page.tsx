@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useAppStore } from '../../store/useAppStore'
 import Header from '../../components/layout/Header'
 import { getTeacherDisplayName, getTeacherTitle, getTeacherImageUrl } from '../../shared/utils/teacher'
 import { getCurrencySymbol } from '../../shared/utils/currency'
@@ -11,7 +13,7 @@ import { TeacherService } from '../../services/teacherService'
 // Components
 import { LoadingSpinner } from './components/shared/LoadingSpinner'
 import { SaveMessageBanner } from './components/SaveMessageBanner'
-import { PendingBanner } from './components/PendingBanner'
+import { StatusBanner } from './components/StatusBanner'
 import { ProfileCard } from './components/ProfileCard'
 import { QuickLinks } from './components/QuickLinks'
 import { SubTabs } from './components/SubTabs'
@@ -20,6 +22,7 @@ import { BenefitsSection } from './components/sections/BenefitsSection'
 import { SessionContentSection } from './components/sections/SessionContentSection'
 import { QualificationsSection } from './components/sections/QualificationsSection'
 import { IjazahsSection } from './components/sections/IjazahsSection'
+import { CertificatesSection } from './components/sections/CertificatesSection'
 import { AvailabilitySection } from './components/sections/AvailabilitySection'
 import { ReviewsSection } from './components/sections/ReviewsSection'
 import { WalletSection } from './components/WalletSection'
@@ -40,7 +43,9 @@ import { usePersonalInfo } from './hooks/usePersonalInfo'
 import type { QuickTab, SubTab } from './types'
 
 export default function TeacherProfilePage() {
+  const navigate = useNavigate()
   const { user, userProfile } = useAuth()
+  const { addToast } = useAppStore()
   
   // Data fetching
   const {
@@ -57,7 +62,7 @@ export default function TeacherProfilePage() {
     personalInfo: initialPersonalInfo,
     loading,
     refetch: refetchData,
-  } = useTeacherProfileData(user?.uid)
+  } = useTeacherProfileData(user?.id)
 
   // UI state
   const { editingStates, toggleEdit } = useEditingStates()
@@ -68,6 +73,30 @@ export default function TeacherProfilePage() {
   // Computed values (needed for hooks)
   const isPending = teacherApplication?.status === TEACHER_APPLICATION_STATUS.PENDING
   const isApproved = teacherApplication?.status === TEACHER_APPLICATION_STATUS.APPROVED
+  const isRejected = teacherApplication?.status === TEACHER_APPLICATION_STATUS.REJECTED
+  // Check if application is incomplete (no application or status is not approved/pending)
+  const isIncomplete = !teacherApplication || 
+    (teacherApplication.status !== TEACHER_APPLICATION_STATUS.APPROVED && 
+     teacherApplication.status !== TEACHER_APPLICATION_STATUS.PENDING)
+
+  // Redirect if application is incomplete or not approved/pending
+  useEffect(() => {
+    if (!loading && user) {
+      // If status is rejected
+      if (isRejected) {
+        addToast('تم رفض طلبك. يرجى التواصل مع الإدارة', 'error')
+        navigate('/teacher-application', { replace: true })
+        return
+      }
+      
+      // If no application exists or status is incomplete (not approved/pending)
+      if (isIncomplete) {
+        addToast('يجب إكمال ملفك الشخصي أولاً', 'info')
+        navigate('/teacher-application', { replace: true })
+        return
+      }
+    }
+  }, [loading, user, teacherApplication, isIncomplete, isRejected, navigate, addToast])
 
   // Section hooks - initialize with data from useTeacherProfileData
   const benefitsHook = useBenefits(teacherApplication)
@@ -116,6 +145,7 @@ export default function TeacherProfilePage() {
       const currentSessionContent = teacherApplication.sessionContent || ''
 
       await teacherService.updatePersonalInfo(teacherApplication.id, {
+        bio: bio,
         teachingStyle: currentBenefits,
         sessionContent: currentSessionContent,
         introVideo: introVideo,
@@ -192,7 +222,13 @@ export default function TeacherProfilePage() {
     )
   }
 
+  // Show loading while checking access or redirecting
   if (loading) {
+    return <LoadingSpinner />
+  }
+
+  // Don't render content if redirecting (incomplete or rejected)
+  if (isIncomplete || isRejected) {
     return <LoadingSpinner />
   }
 
@@ -202,7 +238,10 @@ export default function TeacherProfilePage() {
       <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
         <main className="flex-1 px-4 sm:px-6 py-6 sm:py-8 lg:px-20">
           <SaveMessageBanner message={saveMessage} />
-          {isPending && <PendingBanner />}
+          <StatusBanner 
+            status={teacherApplication?.status || null} 
+            hasApplication={!!teacherApplication} 
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Sidebar Column */}
@@ -389,6 +428,8 @@ export default function TeacherProfilePage() {
                       saving={qualificationsHook.saving}
                     />
 
+                    <CertificatesSection isApproved={isApproved} isPending={isPending} />
+
                     <IjazahsSection
                       ijazahs={ijazahsHook.ijazahs}
                       isEditing={editingStates.ijazahs}
@@ -439,7 +480,7 @@ export default function TeacherProfilePage() {
                 {/* Support Tab */}
                 {activeQuickTab === 'support' && (
                   <SupportSection
-                    userId={user?.uid || null}
+                    userId={user?.id || null}
                     userName={userProfile?.displayName || user?.email || 'مستخدم'}
                     onSave={showMessage}
                   />

@@ -27,4 +27,4 @@ export { useDeviceCheck } from './presentation/hooks/useDeviceCheck';
 export { TechnicalCheck } from './presentation/components/TechnicalCheck/TechnicalCheck';
 
 // Infrastructure
-export { RoomRepository } from '../../infrastructure/firebase/repositories/RoomRepository';
+// NOTE: RoomRepository removed (Firestore removed)

@@ -5,6 +5,7 @@
 import { EditButton } from '../shared/EditButton';
 import { SaveCancelButtons } from '../shared/SaveCancelButtons';
 import type { SessionContentItem } from '../../types';
+import React from 'react';
 
 interface SessionContentSectionProps {
   items: SessionContentItem[];
@@ -54,11 +55,9 @@ export function SessionContentSection({
 
   return (
     <div className="relative bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm">
-      {isApproved && !isPending && (
-        <div className="absolute top-4 left-4">
-          <EditButton onClick={onToggleEdit} />
-        </div>
-      )}
+      <div className="absolute top-4 left-4 z-20">
+        <EditButton onClick={onToggleEdit} />
+      </div>
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">ماذا تتضمن الحصة؟</h2>
       {isEditing && !isPending ? (
         <div className="space-y-4">

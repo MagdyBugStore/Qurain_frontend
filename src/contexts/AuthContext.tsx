@@ -1,31 +1,33 @@
-import React from "react";
+import React from 'react';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { 
-  signInWithPopup, 
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  type User
-} from 'firebase/auth';
-import { auth, googleProvider, appleProvider } from '../config/firebase';
-import { TeacherService } from '../services/teacherService';
+import { authApi } from '../services/authApi';
+import { loadTokenFromStorage } from '../lib/apiClient';
+import { userApi } from '../services/userApi';
 import { useUserStore } from '../store/useUserStore';
 import type { UserProfile } from '../models/UserModel';
 import { isProfileComplete } from '../models/UserModel';
 
+interface BackendUser {
+  id: string;
+  email: string;
+  avatar: string;
+  role: 'student' | 'teacher' | 'admin';
+  fullName?: string;
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: BackendUser | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<User>;
-  signInWithApple: () => Promise<User>;
-  signOut: () => Promise<void>;
+  login: (emailOrPhone: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   saveUserProfile: (profile: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<BackendUser | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Use user store for profile management
@@ -37,150 +39,85 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearUserProfile 
   } = useUserStore();
 
+  // Initialize from stored JWT token and backend user
   useEffect(() => {
-    let unsubscribeProfile: (() => void) | null = null;
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
-      if (currentUser) {
-        // Subscribe to real-time profile updates
-        // الاشتراك في التحديثات الفورية للملف
-        unsubscribeProfile = subscribeToUserProfile(currentUser);
+    const init = async () => {
+      try {
+        const existingToken = loadTokenFromStorage();
         
-        // Also fetch profile once to ensure it's loaded
-        // أيضاً جلب الملف مرة واحدة للتأكد من تحميله
-        try {
-          await fetchUserProfile(currentUser);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
+        if (!existingToken) {
+          clearUserProfile();
+          setUser(null);
+          setLoading(false);
+          return;
         }
-      } else {
-        // Clear profile when user signs out
-        // مسح الملف عند تسجيل الخروج
-        if (unsubscribeProfile) {
-          unsubscribeProfile();
-          unsubscribeProfile = null;
-        }
-        clearUserProfile();
-      }
-      
-      setLoading(false);
-    });
 
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeProfile) {
-        unsubscribeProfile();
+        const backendUser = await userApi.getMe();
+        
+        setUser({
+          id: backendUser.id,
+          email: backendUser.email,
+          role: backendUser.role,
+          fullName: backendUser.fullName,
+          // avatar قد لا يكون معرفاً في نوع AuthUser، لذلك نستخدم any هنا لتفادي خطأ الـ type
+          avatar: (backendUser as any).avatar || '',
+        });
+        await fetchUserProfile();
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        
+        clearUserProfile();
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
-  }, [fetchUserProfile, subscribeToUserProfile, clearUserProfile]);
 
-  // Check if user has profile data and redirect if incomplete
-  // التحقق من وجود بيانات المستخدم وإعادة التوجيه إذا كانت غير مكتملة
-  useEffect(() => {
-    if (!user || loading) return;
+    void init();
+  }, [fetchUserProfile, clearUserProfile]);
 
-    // Check if user has profile data in Firebase
-    // التحقق من وجود بيانات المستخدم في Firebase
-    if (!userProfile || !isProfileComplete(userProfile)) {
-      // Get current path to avoid redirect loop
-      // الحصول على المسار الحالي لتجنب حلقة إعادة التوجيه
-      const currentPath = window.location.pathname;
+  // ملاحظة:
+  // منطق إعادة التوجيه في حالة عدم اكتمال الملف الشخصي تم نقله إلى الصفحات/الهوكس
+  // لتجنّب استخدام window.location المباشر داخل الـ Context
+
+  const login = async (emailOrPhone: string, password: string) => {
+    setLoading(true);
+    try {
+      const backendUser = await authApi.login(emailOrPhone, password);
       
-      // Only redirect if not already on personal-info, login, teacher-application, teachers, or profile pages
-      // إعادة التوجيه فقط إذا لم يكن المستخدم في صفحة personal-info أو login أو teacher-application أو صفحات المعلمين/البروفايل بالفعل
-      if (
-        currentPath !== '/personal-info' && 
-        currentPath !== '/login' && 
-        !currentPath.startsWith('/teacher-application') &&
-        !currentPath.startsWith('/student-profile') &&
-        !currentPath.startsWith('/teacher-profile') &&
-        !currentPath.startsWith('/profile') &&
-        // Allow public teachers listing and detail pages without forcing profile completion
-        !currentPath.startsWith('/teachers')
-      ) {
-        // Check if user is a teacher and has submitted application
-        // التحقق من أن المستخدم معلم وقد أرسل طلب
-        const checkTeacherApplication = async () => {
-          if (userProfile?.accountType === 'teacher') {
-            try {
-              // Check if user has submitted a teacher application
-              // التحقق من أن المستخدم قد أرسل طلب معلم
-              const teacherService = new TeacherService();
-              const application = await teacherService.getTeacherApplication(user.uid);
-              
-              if (!application) {
-                // No application found, redirect to teacher application
-                // لم يتم العثور على طلب، إعادة التوجيه إلى صفحة طلب المعلم
-                window.location.href = '/teacher-application';
-                return;
-              }
-            } catch (error) {
-              console.error('Error checking teacher application:', error);
-              // On error, still redirect to teacher application
-              // في حالة الخطأ، إعادة التوجيه إلى صفحة طلب المعلم
-              window.location.href = '/teacher-application';
-              return;
-            }
-          }
-          
-          // For students or if teacher has submitted application, redirect to personal-info
-          // للطلاب أو إذا كان المعلم قد أرسل الطلب، إعادة التوجيه إلى personal-info
-          window.location.href = '/personal-info';
-        };
-        
-        checkTeacherApplication();
-      }
-    }
-  }, [user, userProfile, loading]);
-
-  const signInWithGoogle = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      return result.user;
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      throw error;
+      setUser({
+        id: backendUser.id,
+        email: backendUser.email,
+        role: backendUser.role,
+        fullName: backendUser.fullName,
+        avatar: (backendUser as any).avatar || '',
+      });
+      await fetchUserProfile();
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signInWithApple = async () => {
-    try {
-      const result = await signInWithPopup(auth, appleProvider);
-      return result.user;
-    } catch (error) {
-      console.error('Apple sign-in error:', error);
-      throw error;
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-      clearUserProfile();
-    } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
-    }
+  const logout = async () => {
+    authApi.logout();
+    clearUserProfile();
+    setUser(null);
   };
 
   const saveUserProfile = async (profile: Partial<UserProfile>) => {
-    if (user) {
-      await saveProfileToStore(user, profile);
-    } else {
+    if (!user) {
       throw new Error('User must be authenticated to save profile');
     }
+    await saveProfileToStore(profile);
   };
 
   const value = {
     user,
     userProfile,
     loading,
-    signInWithGoogle,
-    signInWithApple,
-    signOut,
-    saveUserProfile
+    login,
+    logout,
+    saveUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -189,6 +126,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
+    // During Vite HMR, hooks can run in a brief window before providers remount.
+    // Return a safe fallback in dev to avoid crashing the app during refresh.
+    const isLikelyDevHost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1');
+
+    if (isLikelyDevHost) {
+      return {
+        user: null,
+        userProfile: null,
+        loading: true,
+        login: async () => {
+          throw new Error('AuthProvider not ready yet');
+        },
+        logout: async () => {
+          throw new Error('AuthProvider not ready yet');
+        },
+        saveUserProfile: async () => {
+          throw new Error('AuthProvider not ready yet');
+        },
+      } satisfies AuthContextType;
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

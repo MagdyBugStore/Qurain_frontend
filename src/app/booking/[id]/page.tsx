@@ -1,361 +1,69 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import React from "react";
+import { Link } from 'react-router-dom'
 import Header from '../../../components/layout/Header'
-import { useTeacherDetail } from '../../../features/teachers/hooks/useTeacherDetail'
-import { getTeacherDisplayName, getTeacherTitle, getTeacherImageUrl } from '../../../shared/utils/teacher'
-import { getCurrencySymbol } from '../../../shared/utils/currency'
-import { useAuth } from '../../../contexts/AuthContext'
 import { TeacherDetailHeader } from '../../../features/teachers/components/TeacherDetail/TeacherDetailHeader'
 import { TeacherAvailability } from '../../../features/teachers/components/TeacherDetail/TeacherAvailability'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../../../config/firebase'
-import { COLLECTIONS } from '../../../constants/firebaseCollections'
+import { useBookingFlow, availabilityTimeSlots } from '../../../features/booking/hooks/useBookingFlow'
 
 export default function BookingPage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const { data: teacherData, loading, error } = useTeacherDetail(id)
-  const { userProfile } = useAuth()
+  const {
+    state,
+    actions,
+  } = useBookingFlow()
 
-  // Booking flow steps
-  type PlanId = 'starter' | 'premium' | 'elite'
-  type WeeklySlot = {
-    dayIndex: number
-    time: string
-  }
+  const {
+    id,
+    teacherData,
+    loading,
+    error,
+    userProfile,
+    currentStep,
+    selectedPlan,
+    selectedDate,
+    selectedTime,
+    duration,
+    currentMonth,
+    selectedWeeklySlots,
+    bookedSlotsSet,
+    plans,
+    teacherName,
+    teacherTitle,
+    profileImage,
+    hourlyRate,
+    currency,
+    rating,
+    reviewsCount,
+    totalCost,
+    totalAvailableSlots,
+    availablePlans,
+    hasAvailableSlots,
+    timeSlots,
+    calendarDays,
+    selectedPlanConfig,
+    requiredWeeklySessions,
+    weeklySessionsCount,
+    hasValidWeeklySelection,
+  } = state
 
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1)
-  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null)
-
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedTime, setSelectedTime] = useState<string>('')
-  const [duration, setDuration] = useState<number>(30)
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-
-  // Get teacher data
-  const teacherName = teacherData ? getTeacherDisplayName(teacherData.profile, teacherData.application) : ''
-  const teacherTitle = teacherData ? getTeacherTitle(teacherData.application) : ''
-  const profileImage = teacherData ? getTeacherImageUrl(teacherData.profile) : '/no-image.png'
-  const hourlyRate = teacherData?.application.hourlyRate || 0
-  const currency = teacherData ? getCurrencySymbol(teacherData.application.currency) : 'ر.س'
-  const rating = teacherData?.rating || 0
-  const reviewsCount = teacherData?.reviewsCount || 0
-
-  const [selectedWeeklySlots, setSelectedWeeklySlots] = useState<WeeklySlot[]>([])
-  const [bookedSlotsSet, setBookedSlotsSet] = useState<Set<string>>(new Set())
-
-  // Fetch booked slots from subscriptions
-  useEffect(() => {
-    const fetchBookedSlots = async () => {
-      console.log('[BookingPage] ===== FETCHING BOOKED SLOTS =====')
-      console.log('[BookingPage] Teacher data:', teacherData)
-      console.log('[BookingPage] Teacher ID from params:', id)
-      
-      if (!teacherData?.application?.userId && !id) {
-        console.log('[BookingPage] No teacher data or ID, skipping fetch')
-        return
-      }
-
-      try {
-        const teacherId = teacherData?.application?.userId || id || ''
-        console.log('[BookingPage] Using teacher ID:', teacherId)
-        
-        const subscriptionsQuery = query(
-          collection(db, COLLECTIONS.SUBSCRIPTIONS),
-          where('teacherId', '==', teacherId),
-          where('status', '==', 'active')
-        )
-        
-        console.log('[BookingPage] Query created, fetching subscriptions...')
-        
-        let subscriptionsSnapshot
-        try {
-          subscriptionsSnapshot = await getDocs(subscriptionsQuery)
-          console.log('[BookingPage] Subscriptions fetched successfully:', subscriptionsSnapshot.size)
-        } catch (queryError: any) {
-          console.error('[BookingPage] Query error:', queryError)
-          // If query fails due to missing index, try without status filter
-          if (queryError?.code === 'failed-precondition' || queryError?.message?.includes('index')) {
-            console.log('[BookingPage] Retrying query without status filter...')
-            const fallbackQuery = query(
-              collection(db, COLLECTIONS.SUBSCRIPTIONS),
-              where('teacherId', '==', teacherId)
-            )
-            subscriptionsSnapshot = await getDocs(fallbackQuery)
-            console.log('[BookingPage] Fallback query result:', subscriptionsSnapshot.size, 'subscriptions')
-            
-            // Filter by status in memory
-            const filteredDocs = subscriptionsSnapshot.docs.filter(doc => {
-              const data = doc.data()
-              return data.status === 'active'
-            })
-            
-            console.log('[BookingPage] Filtered active subscriptions:', filteredDocs.length)
-            
-            subscriptionsSnapshot = {
-              docs: filteredDocs,
-              size: filteredDocs.length,
-            } as any
-          } else {
-            // Silently fail - permissions issue
-            console.warn('[BookingPage] Could not fetch booked slots:', queryError.message)
-            console.warn('[BookingPage] Error code:', queryError?.code)
-            return
-          }
-        }
-        
-        const booked = new Set<string>()
-        
-        console.log('[BookingPage] Processing subscriptions...')
-        subscriptionsSnapshot.docs.forEach((doc, index) => {
-          const subscriptionData = doc.data()
-          const weeklySlots = subscriptionData.weeklySlots || []
-          
-          console.log(`[BookingPage] Subscription ${index + 1}:`, {
-            id: doc.id,
-            teacherId: subscriptionData.teacherId,
-            status: subscriptionData.status,
-            weeklySlotsCount: weeklySlots.length,
-            weeklySlots,
-          })
-          
-          weeklySlots.forEach((slot: { dayIndex: number; time: string }) => {
-            const key = `${slot.dayIndex}_${slot.time}`
-            booked.add(key)
-            console.log(`[BookingPage] Added booked slot: ${key} (dayIndex=${slot.dayIndex}, time=${slot.time})`)
-          })
-        })
-        
-        console.log('[BookingPage] Total booked slots:', booked.size)
-        console.log('[BookingPage] Booked slots:', Array.from(booked))
-        console.log('[BookingPage] ===== BOOKED SLOTS FETCH COMPLETED =====')
-        
-        setBookedSlotsSet(booked)
-      } catch (error) {
-        // Silently fail - permissions issue or other error
-        console.error('[BookingPage] ===== BOOKED SLOTS FETCH FAILED =====')
-        console.error('[BookingPage] Error fetching booked slots:', error)
-        console.error('[BookingPage] Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined,
-        })
-      }
-    }
-
-    if (teacherData) {
-      fetchBookedSlots()
-    } else {
-      console.log('[BookingPage] No teacher data yet, waiting...')
-    }
-  }, [teacherData, id])
-
-  // Subscription-like plans UI (step 1)
-  const plans: {
-    id: PlanId
-    label: string
-    sessionsPerMonth: number
-    weeklyFrequency: string
-    durationMinutes: number
-    badge?: string
-  }[] = [
-    {
-      id: 'starter',
-      label: 'باقة الانطلاق',
-      sessionsPerMonth: 8,
-      weeklyFrequency: 'مرتين أسبوعياً',
-      durationMinutes: 60,
-    },
-    {
-      id: 'premium',
-      label: 'باقة التميز',
-      sessionsPerMonth: 12,
-      weeklyFrequency: '3 مرات أسبوعياً',
-      durationMinutes: 60,
-      badge: 'الاكثر شيوعاً',
-    },
-    {
-      id: 'elite',
-      label: 'باقة الإتقان',
-      sessionsPerMonth: 16,
-      weeklyFrequency: '4 مرات أسبوعياً',
-      durationMinutes: 60,
-    },
-  ]
-
-  const getPlanMonthlyPrice = (plan: { sessionsPerMonth: number; durationMinutes: number }) => {
-    if (!hourlyRate) return 0
-    const pricePerSession = (hourlyRate * plan.durationMinutes) / 60
-    return pricePerSession * plan.sessionsPerMonth
-  }
-
-  const handleSelectPlan = (planId: PlanId) => {
-    setSelectedPlan(planId)
-    // Keep 60 minutes by default to match UI reference
-    setDuration(60)
-    // Reset weekly selections when changing plan
-    setSelectedWeeklySlots([])
-    setSelectedTime('')
-    // Move directly to step 2 when a package is selected
-    setCurrentStep(2)
-  }
-
-  // Calculate total cost
-  const totalCost = (hourlyRate * duration) / 60
-
-  // Time slots mapping (12 slots per day) matching teacher availability schedule
-  const availabilityTimeSlots = [
-    '٠٨:٠٠ ص', '٠٩:٠٠ ص', '١٠:٠٠ ص', '١١:٠٠ ص',
-    '١٢:٠٠ م', '٠١:٠٠ م', '٠٢:٠٠ م', '٠٣:٠٠ م',
-    '٠٤:٠٠ م', '٠٥:٠٠ م', '٠٦:٠٠ م', '٠٧:٠٠ م',
-  ]
-
-  // Map JS day (0=Sunday) to our availability index (0=Saturday)
-  const getAvailabilityDayIndex = (date: Date): number => {
-    const jsDay = date.getDay() // 0=Sun ... 6=Sat
-    const map: { [key: number]: number } = {
-      0: 1, // Sunday -> index 1
-      1: 2, // Monday -> index 2
-      2: 3, // Tuesday -> index 3
-      3: 4, // Wednesday -> index 4
-      4: 5, // Thursday -> index 5
-      5: 6, // Friday -> index 6
-      6: 0, // Saturday -> index 0
-    }
-    return map[jsDay] ?? 0
-  }
-
-  // Map availability index (0=Saturday) back to JS day (0=Sunday)
-  const getJsDayFromAvailabilityIndex = (availabilityIndex: number): number => {
-    const map: { [key: number]: number } = {
-      0: 6, // Saturday
-      1: 0, // Sunday
-      2: 1, // Monday
-      3: 2, // Tuesday
-      4: 3, // Wednesday
-      5: 4, // Thursday
-      6: 5, // Friday
-    }
-    return map[availabilityIndex] ?? 0
-  }
-
-  // Given availability day index and slot, find next actual Date for that weekday
-  const getNextDateForAvailabilityDay = (availabilityDayIndex: number): Date => {
-    const today = new Date()
-    const jsTargetDay = getJsDayFromAvailabilityIndex(availabilityDayIndex)
-    const result = new Date(today)
-    let addDays = (jsTargetDay - today.getDay() + 7) % 7
-    if (addDays === 0) addDays = 7 // always next week if same day to avoid past ambiguity
-    result.setDate(today.getDate() + addDays)
-    return result
-  }
-
-  // Format date for display
-  const formatDate = (date: Date): string => {
-    const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
-  }
-
-  // Get available time slots for selected date based on teacher availability from Firestore
-  const getAvailableTimeSlots = (): string[] => {
-    if (!teacherData?.availability || teacherData.availability.length === 0) {
-      return []
-    }
-
-    const dayIndex = getAvailabilityDayIndex(selectedDate)
-    const daySchedule = teacherData.availability[dayIndex] || []
-
-    const slots: string[] = []
-    availabilityTimeSlots.forEach((timeLabel, idx) => {
-      if (daySchedule[idx] === 'available') {
-        slots.push(timeLabel)
-      }
-    })
-
-    return slots
-  }
-
-  // Generate calendar days
-  const getCalendarDays = (): (Date | null)[] => {
-    const year = currentMonth.getFullYear()
-    const month = currentMonth.getMonth()
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const daysInMonth = lastDay.getDate()
-    const startingDayOfWeek = firstDay.getDay()
-    
-    const days: (Date | null)[] = []
-    
-    // Add empty cells for days before month starts
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null)
-    }
-    
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new Date(year, month, day))
-    }
-    
-    return days
-  }
-
-  const handleConfirmBooking = () => {
-    if (!hasValidWeeklySelection) {
-      alert('يرجى اختيار المواعيد الأسبوعية المطلوبة')
-      return
-    }
-    if (!selectedPlan) {
-      alert('يرجى اختيار باقة')
-      return
-    }
-    
-    const planConfig = plans.find((p) => p.id === selectedPlan)
-    if (!planConfig) {
-      alert('خطأ في بيانات الباقة')
-      return
-    }
-
-    // Navigate to confirmation page with all subscription data
-    navigate(`/booking/${id}/confirm`, {
-      state: {
-        selectedPlan,
-        planConfig,
-        selectedWeeklySlots,
-        duration,
-        teacherData,
-        teacherName,
-        teacherTitle,
-        profileImage,
-        hourlyRate,
-        currency,
-        monthlyPrice: getPlanMonthlyPrice(planConfig),
-      }
-    })
-  }
-
-  const handlePrevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
-  }
-
-  const handleNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
-  }
-
-  const getMonthName = () => {
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-    return `${months[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`
-  }
-
-  const handleBackFromStep = () => {
-    if (currentStep === 2) {
-      setCurrentStep(1)
-      return
-    }
-    // Default back to teacher page
-    navigate(`/teachers/${id}`)
-  }
+  const {
+    setCurrentStep,
+    setSelectedDate,
+    setSelectedTime,
+    setDuration,
+    setSelectedWeeklySlots,
+    getPlanMonthlyPrice,
+    handleSelectPlan,
+    handleConfirmBooking,
+    handlePrevMonth,
+    handleNextMonth,
+    getMonthName,
+    handleBackFromStep,
+    getNextDateForAvailabilityDay,
+    isDateSelected,
+    formatDate,
+  } = actions
 
   if (loading) {
     return (
@@ -408,62 +116,6 @@ export default function BookingPage() {
         </div>
       </>
     )
-  }
-
-  // Calculate total available slots for the teacher
-  const calculateAvailableSlots = (): number => {
-    if (!teacherData?.availability || teacherData.availability.length === 0) {
-      return 0
-    }
-
-    let availableCount = 0
-    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-      const daySchedule = teacherData.availability[dayIndex] || []
-      for (let timeIndex = 0; timeIndex < 12; timeIndex++) {
-        const slotStatus = daySchedule[timeIndex]
-        // Check if slot is available and not booked
-        if (slotStatus === 'available') {
-          const slotTime = availabilityTimeSlots[timeIndex]
-          const key = `${dayIndex}_${slotTime}`
-          // Only count if not booked by subscriptions
-          if (!bookedSlotsSet.has(key)) {
-            availableCount++
-          }
-        }
-      }
-    }
-    return availableCount
-  }
-
-  const totalAvailableSlots = calculateAvailableSlots()
-  const availableWeeklySessions = totalAvailableSlots // Total available slots per week
-
-  // Filter plans based on available slots
-  const getAvailablePlans = () => {
-    return plans.filter((plan) => {
-      const requiredWeekly = Math.round(plan.sessionsPerMonth / 4)
-      return availableWeeklySessions >= requiredWeekly
-    })
-  }
-
-  const availablePlans = getAvailablePlans()
-  const hasAvailableSlots = totalAvailableSlots > 0
-
-  const timeSlots = getAvailableTimeSlots()
-  const calendarDays = getCalendarDays()
-  const selectedPlanConfig = selectedPlan ? plans.find((p) => p.id === selectedPlan) ?? null : null
-  const requiredWeeklySessions = selectedPlanConfig
-    ? Math.round(selectedPlanConfig.sessionsPerMonth / 4)
-    : 0
-  const weeklySessionsCount = selectedWeeklySlots.length
-  const hasValidWeeklySelection =
-    requiredWeeklySessions > 0
-      ? weeklySessionsCount === requiredWeeklySessions
-      : weeklySessionsCount > 0
-
-  const isDateSelected = (date: Date | null): boolean => {
-    if (!date) return false
-    return date.toDateString() === selectedDate.toDateString()
   }
 
   return (
@@ -733,20 +385,6 @@ export default function BookingPage() {
                           (dayLabel, availabilityDayIndex) => {
                             const daySchedule = teacherData.availability[availabilityDayIndex] || []
                             
-                            // Log for first day only to avoid spam
-                            if (availabilityDayIndex === 0) {
-                              console.log('[BookingPage] ===== PROCESSING AVAILABILITY FOR DISPLAY =====')
-                              console.log('[BookingPage] Full availability array:', teacherData.availability)
-                              console.log('[BookingPage] Day schedule for', dayLabel, ':', daySchedule)
-                              console.log('[BookingPage] Day schedule details:', daySchedule.map((status, idx) => ({
-                                time: availabilityTimeSlots[idx],
-                                status,
-                                idx
-                              })))
-                              console.log('[BookingPage] Booked slots set size:', bookedSlotsSet.size)
-                              console.log('[BookingPage] Booked slots set:', Array.from(bookedSlotsSet))
-                            }
-                            
                             // Get booked slots from availability schedule (primary source)
                             // This should already include booked slots from subscriptions if they were merged
                             const bookedSlotsFromSchedule = availabilityTimeSlots.filter(
@@ -757,33 +395,15 @@ export default function BookingPage() {
                             const bookedSlotsFromSubscriptions = availabilityTimeSlots.filter(
                               (slot) => {
                                 const key = `${availabilityDayIndex}_${slot}`
-                                const isBooked = bookedSlotsSet.has(key)
-                                if (availabilityDayIndex === 0 && isBooked) {
-                                  console.log(`[BookingPage] Found booked slot from subscriptions: ${key}`)
-                                }
-                                return isBooked
+                                return bookedSlotsSet.has(key)
                               },
                             )
-                            
-                            if (availabilityDayIndex === 0) {
-                              console.log('[BookingPage] Booked slots from schedule:', bookedSlotsFromSchedule)
-                              console.log('[BookingPage] Booked slots from subscriptions:', bookedSlotsFromSubscriptions)
-                              console.log('[BookingPage] Day schedule statuses:', daySchedule.map((status, idx) => ({
-                                time: availabilityTimeSlots[idx],
-                                status,
-                                idx
-                              })))
-                            }
                             
                             // Combine both sources and remove duplicates
                             const allBookedSlots = Array.from(new Set([
                               ...bookedSlotsFromSchedule,
                               ...bookedSlotsFromSubscriptions,
                             ]))
-                            
-                            if (availabilityDayIndex === 0) {
-                              console.log('[BookingPage] All booked slots (combined):', allBookedSlots)
-                            }
                             
                             // Available slots are those that are 'available' and not booked
                             // Priority: if marked as 'booked' in schedule, it's booked
@@ -795,34 +415,19 @@ export default function BookingPage() {
                                 
                                 // If explicitly marked as booked in schedule, it's booked
                                 if (scheduleStatus === 'booked') {
-                                  if (availabilityDayIndex === 0) {
-                                    console.log(`[BookingPage] Slot ${slot} is marked as booked in schedule`)
-                                  }
                                   return false
                                 }
                                 
                                 // If marked as available, check if it's also in bookedSlotsSet
                                 if (scheduleStatus === 'available') {
                                   const key = `${availabilityDayIndex}_${slot}`
-                                  const isNotBooked = !bookedSlotsSet.has(key)
-                                  
-                                  if (availabilityDayIndex === 0 && !isNotBooked) {
-                                    console.log(`[BookingPage] Slot ${slot} is available in schedule but booked in subscriptions (key: ${key})`)
-                                  }
-                                  
-                                  return isNotBooked
+                                  return !bookedSlotsSet.has(key)
                                 }
                                 
                                 // If null or undefined, it's not available
                                 return false
                               },
                             )
-                            
-                            if (availabilityDayIndex === 0) {
-                              console.log('[BookingPage] Available slots:', availableSlots)
-                              console.log('[BookingPage] ===== AVAILABILITY PROCESSING COMPLETED =====')
-                            }
-                            
                             const hasSlots = availableSlots.length > 0 || allBookedSlots.length > 0
                             return (
                               <div

@@ -8,10 +8,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useAppStore } from '../../../../store/useAppStore';
 import { getCurrencySymbol } from '../../../../shared/utils/currency';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../../config/firebase';
-import { COLLECTIONS } from '../../../../constants/firebaseCollections';
-import { TeacherService } from '../../services/teacherService';
+// Firestore removed
+import { TeacherService } from '../../../../services/teacherService';
 
 interface Teacher {
   id: string;
@@ -72,53 +70,8 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
         }
 
         // Fetch booked slots from subscriptions
+        // NOTE: Firestore removed - using empty set
         const bookedSlotsSet = new Set<string>();
-        try {
-          const subscriptionsQuery = query(
-            collection(db, COLLECTIONS.SUBSCRIPTIONS),
-            where('teacherId', '==', teacher.id),
-            where('status', '==', 'active')
-          );
-          
-          let subscriptionsSnapshot;
-          try {
-            subscriptionsSnapshot = await getDocs(subscriptionsQuery);
-          } catch (queryError: any) {
-            if (queryError?.code === 'failed-precondition' || queryError?.message?.includes('index')) {
-              const fallbackQuery = query(
-                collection(db, COLLECTIONS.SUBSCRIPTIONS),
-                where('teacherId', '==', teacher.id)
-              );
-              subscriptionsSnapshot = await getDocs(fallbackQuery);
-              
-              const filteredDocs = subscriptionsSnapshot.docs.filter(doc => {
-                const data = doc.data();
-                return data.status === 'active';
-              });
-              
-              subscriptionsSnapshot = {
-                docs: filteredDocs,
-                size: filteredDocs.length,
-              } as any;
-            } else {
-              // If we can't fetch subscriptions, assume no booked slots
-              subscriptionsSnapshot = { docs: [], size: 0 } as any;
-            }
-          }
-          
-          subscriptionsSnapshot.docs.forEach((doc) => {
-            const subscriptionData = doc.data();
-            const weeklySlots = subscriptionData.weeklySlots || [];
-            
-            weeklySlots.forEach((slot: { dayIndex: number; time: string }) => {
-              const key = `${slot.dayIndex}_${slot.time}`;
-              bookedSlotsSet.add(key);
-            });
-          });
-        } catch (error) {
-          console.error('Error fetching booked slots:', error);
-          // Continue with calculation even if subscriptions fetch fails
-        }
 
         // Calculate total available slots
         let availableCount = 0;

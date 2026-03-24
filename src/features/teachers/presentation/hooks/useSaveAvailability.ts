@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+// Firestore removed - TeacherRepository deleted
 import { SaveAvailability } from '../../application/use-cases/SaveAvailability';
 import type { Availability } from '../../domain/entities/Availability';
 
@@ -17,9 +17,8 @@ export function useSaveAvailability() {
       setSaving(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new SaveAvailability(repository);
-      await useCase.execute(availability);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
     } catch (err) {
       console.error('Error saving availability:', err);
       setError(err instanceof Error ? err : new Error('Failed to save availability'));

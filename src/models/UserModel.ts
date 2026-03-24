@@ -3,6 +3,8 @@
  * يحتوي على جميع الحقول المطلوبة لملف المستخدم
  */
 
+import type { TeacherApplication } from '../shared/types/teacher.types';
+
 export type AccountType = 'student' | 'teacher' | 'admin' | null;
 
 export interface UserProfile {
@@ -13,6 +15,8 @@ export interface UserProfile {
   lastName: string;
   displayName?: string;
   photoURL?: string;
+  // Backend role (student / teacher / admin) - دور المستخدم في نظام Qurain
+  role?: 'student' | 'teacher' | 'admin';
   
   // Account Type - نوع الحساب
   accountType: AccountType;
@@ -38,9 +42,18 @@ export interface UserProfile {
 /**
  * Helper function to check if user profile is complete
  * دالة مساعدة للتحقق من اكتمال ملف المستخدم
+ * 
+ * @param profile - User profile data
+ * @param teacherApplication - Optional teacher application data (required for teachers to be fully complete)
  */
-export function isProfileComplete(profile: UserProfile | null): boolean {
+export function isProfileComplete(
+  profile: UserProfile | null,
+  teacherApplication?: TeacherApplication | null
+): boolean {
   if (!profile) return false;
+
+  // Explicit completion flag should always short-circuit completion checks.
+  if (profile.completed === true) return true;
   
   // Check if required fields are filled
   // التحقق من وجود الحقول المطلوبة
@@ -57,11 +70,42 @@ export function isProfileComplete(profile: UserProfile | null): boolean {
   }
   
   if (profile.accountType === 'teacher') {
-    return !!(
+    // Basic profile fields
+    const hasBasicInfo = !!(
       profile.firstName &&
       profile.lastName &&
       profile.email
     );
+    
+    if (!hasBasicInfo) return false;
+    
+    // If teacherApplication is provided, check all required teacher fields
+    if (teacherApplication) {
+      return !!(
+        teacherApplication.fullName &&
+        teacherApplication.email &&
+        teacherApplication.phone &&
+        teacherApplication.countryCode &&
+        teacherApplication.gender &&
+        teacherApplication.nationality &&
+        teacherApplication.yearsOfExperience !== undefined &&
+        teacherApplication.yearsOfExperience >= 0 &&
+        teacherApplication.educationLevel &&
+        teacherApplication.bio &&
+        teacherApplication.bio.trim().length >= 30 && // Bio must be at least 30 characters
+        teacherApplication.subjects &&
+        teacherApplication.subjects.length > 0 &&
+        teacherApplication.hourlyRate &&
+        teacherApplication.hourlyRate > 0 &&
+        teacherApplication.currency &&
+        teacherApplication.languages &&
+        teacherApplication.languages.length > 0
+      );
+    }
+    
+    // If no teacherApplication provided, only check basic info
+    // This allows backward compatibility but is less strict
+    return hasBasicInfo;
   }
 
   if (profile.accountType === 'admin') {

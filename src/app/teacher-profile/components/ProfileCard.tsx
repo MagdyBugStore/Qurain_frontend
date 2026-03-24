@@ -70,11 +70,7 @@ export function ProfileCard({
       {/* Name & Verification */}
       <h1 className="text-2xl font-bold mb-1 flex items-center justify-center gap-2">
         {teacherName}
-        {isApproved && (
-          <svg className="w-6 h-6 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-          </svg>
-        )}
+
       </h1>
       <p className="text-gray-500 dark:text-slate-400 font-medium mb-4">{teacherTitle}</p>
 
@@ -104,10 +100,14 @@ export function ProfileCard({
 
       {/* Language & Location */}
       <div className="w-full space-y-3 mb-8 text-sm text-gray-600 dark:text-slate-400">
-        <div className="flex items-center justify-between border-b border-gray-50 dark:border-slate-700 pb-2">
-          <span className="font-medium text-gray-400 dark:text-slate-500">اللغات:</span>
-          <span className="font-semibold text-slate-900 dark:text-white">العربية، الإنجليزية</span>
-        </div>
+        {teacherApplication?.languages && teacherApplication.languages.length > 0 && (
+          <div className="flex items-center justify-between border-b border-gray-50 dark:border-slate-700 pb-2">
+            <span className="font-medium text-gray-400 dark:text-slate-500">اللغات:</span>
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {teacherApplication.languages.join('، ')}
+            </span>
+          </div>
+        )}
         {nationality && (
           <div className="flex items-center justify-between border-b border-gray-50 dark:border-slate-700 pb-2">
             <span className="font-medium text-gray-400 dark:text-slate-500">الموقع:</span>
@@ -137,17 +137,17 @@ export function ProfileCard({
       />
 
       {/* Action Button */}
-      {isApproved && !isPending && (
-        <button
-          onClick={onToggleEditPersonalInfo}
-          className="w-full bg-primary hover:bg-[#e0b320] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 mt-6"
-        >
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-          تعديل الملف العام
-        </button>
-      )}
+
+      <button
+        onClick={onToggleEditPersonalInfo}
+        className="w-full bg-primary hover:bg-[#e0b320] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-2 active:scale-95 mt-6"
+      >
+        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+        تعديل الملف العام
+      </button>
+
     </div>
   );
 }

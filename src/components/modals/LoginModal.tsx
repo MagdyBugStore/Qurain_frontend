@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useAppStore } from '../../store/useAppStore'
 import { signInWithPopup } from 'firebase/auth'
 import { auth, googleProvider } from '../../config/firebase'
+import { authApi } from '../../services/authApi'
 
 export default function LoginModal() {
   const isOpen = useAppStore((state) => state.isLoginModalOpen)
@@ -28,30 +29,44 @@ export default function LoginModal() {
         // Google authentication with Firebase
         const result = await signInWithPopup(auth, googleProvider)
         const user = result.user
-        
-        // Set authenticated state with real user data
-        setAuthenticated(true, {
-          email: user.email || '',
-          name: user.displayName || user.email?.split('@')[0] || 'User',
+
+        const email = user.email || ''
+        const name =
+          user.displayName || user.email?.split('@')[0] || 'User'
+        const photoURL = user.photoURL || null
+
+        // Call backend to create/update user and issue JWT
+        await authApi.loginWithGoogle({
+          email,
+          fullName: name,
+          photoURL,
         })
-        
-        // Show success toast
+
+        // Keep local UI auth state (for legacy parts of the app)
+        setAuthenticated(true, {
+          email,
+          name,
+        })
+
         addToast('تم تسجيل الدخول بنجاح! مرحباً بك', 'success')
-        
+
         closeModal()
+
+        // Ensure AuthContext picks up the new JWT and profile
+        window.location.reload()
       } else {
         // Simulate login API call for other providers (not yet implemented)
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        
+
         // Set authenticated state
         setAuthenticated(true, {
           email: `user@${provider}.com`,
           name: `User ${provider}`,
         })
-        
+
         // Show success toast
         addToast('تم تسجيل الدخول بنجاح! مرحباً بك', 'success')
-        
+
         closeModal()
       }
     } catch (error: any) {

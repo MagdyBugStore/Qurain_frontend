@@ -1,10 +1,12 @@
 /**
  * Teacher Service
  * Business logic layer for teacher operations
+ * Now uses backend API instead of Firestore
  */
 
-import { TeacherRepository } from '../infrastructure/firebase/repositories/TeacherRepository';
-import { TEACHER_APPLICATION_STATUS } from '../constants/status';
+import { apiClient } from '../lib/apiClient';
+import { teacherApplicationApi } from './teacherApplicationApi';
+import { TEACHER_APPLICATION_STATUS, type TeacherApplicationStatus } from '../constants/status';
 import type {
   TeacherApplication,
   TeacherProfile,
@@ -28,6 +30,7 @@ export interface TeacherProfileData {
 }
 
 export interface PersonalInfoData {
+  bio?: string;
   teachingStyle?: string;
   sessionContent?: string;
   introVideo?: string;
@@ -42,171 +45,478 @@ export interface CreateApplicationData {
   nationality?: string;
   yearsOfExperience?: number;
   educationLevel?: string;
+  certificatesCount?: number;
   bio?: string;
   subjects?: string[];
   hourlyRate?: number;
   currency?: string;
   userId: string;
   userEmail?: string;
+  languages?: string[];
+  title?: string;
 }
 
 export class TeacherService {
-  private repository: TeacherRepository;
+  private static readonly DEFAULT_CURRENCY = 'SAR';
 
   constructor() {
-    this.repository = new TeacherRepository();
+    // No longer using Firestore repository
+  }
+
+  private getDefaultCurrency(): string {
+    return TeacherService.DEFAULT_CURRENCY;
   }
 
   /**
    * Get complete teacher detail data by userId
+   * Uses backend API
    */
   async getTeacherDetailById(userId: string): Promise<TeacherDetailData | null> {
     try {
-      const application = await this.repository.findApprovedByUserId(userId);
+      // Use public endpoint to get teacher by ID
+      const response = await apiClient.get<{ teacher: any }>(`/teachers/${userId}`);
+      const teacher = response.teacher;
       
-      if (!application) {
+      if (!teacher) {
         return null;
       }
 
-      const profile = application.userId
-        ? await this.repository.getUserProfile(application.userId)
-        : null;
-
-      const teacherId = application.userId || application.id;
-      const { rating, count: reviewsCount } = await this.repository.getTeacherRating(teacherId);
-      const reviews = await this.repository.getTeacherReviews(teacherId);
-
+      const application = this.transformBackendTeacherToApplication(teacher);
+      const profile = this.transformProfileToFrontendFormat(teacher);
       const qualifications = getTeacherQualifications(application);
+      const teacherObjectId = teacher?._id?.toString?.() || '';
 
-      // Mock availability data - TODO: Fetch from actual availability collection
-      const availability: (string | null)[][] = [
-        ['available', 'available', 'booked', 'booked', 'available', 'available', null, null, 'available', 'available', 'booked', null],
-        ['booked', 'booked', 'available', 'available', 'booked', 'available', 'available', null, 'booked', 'available', 'available', 'available'],
-        [null, 'available', 'available', 'booked', 'available', 'available', 'available', 'available', null, 'booked', 'available', null],
-        ['available', 'available', 'booked', 'available', 'available', 'booked', 'available', null, 'available', 'available', 'booked', 'available'],
-        [null, null, 'available', 'available', 'booked', 'available', 'available', 'available', 'available', null, 'available', 'available'],
-        ['available', 'booked', 'available', 'available', 'available', 'booked', 'booked', 'available', 'available', 'available', null, null],
-        [null, null, null, null, null, null, null, null, null, null, null, null],
-      ];
+      const [reviewsResponse, availabilityResponse] = await Promise.all([
+        apiClient
+          .get<{ reviews: any[] }>(`/reviews/teachers/${teacherObjectId}/reviews`)
+          .catch(() => ({ reviews: [] })),
+        apiClient
+          .get<{ availability: { schedule?: (string | null)[][] } | null }>(`/teachers/${teacherObjectId}/availability`)
+          .catch(() => ({ availability: null })),
+      ]);
+
+      const reviews = this.transformBackendReviewsToFrontendFormat(reviewsResponse.reviews || []);
+      const availability = this.normalizeSchedule(availabilityResponse.availability?.schedule);
+      const rating = typeof teacher.rating === 'number' ? teacher.rating : teacher.ratingAvg || 0;
+      const reviewsCount = typeof teacher.reviewsCount === 'number' ? teacher.reviewsCount : teacher.ratingCount || reviews.length;
 
       return {
         application,
         profile: profile || {},
         rating,
         reviewsCount,
-        reviews: reviews.length > 0 ? reviews : this.getMockReviews(),
+        reviews,
         qualifications,
         availability,
       };
     } catch (error) {
       console.error('Error getting teacher detail:', error);
-      throw error;
+      return null;
     }
   }
 
   /**
+   * Transform backend teacher to frontend application format
+   */
+  private transformBackendTeacherToApplication(teacher: any): TeacherApplication {
+    const approvalStatus = teacher.approvalStatus || 'pending';
+    const sessionPrice = this.parsePrice(teacher.sessionPrice ?? teacher.hourlyRate);
+    const teachingStyle = this.normalizeTextOrJsonString(teacher.teachingStyle);
+    const sessionContent = this.normalizeTextOrJsonString(teacher.sessionContent);
+
+    return {
+      id: teacher._id || teacher.userId,
+      userId: teacher.userId?._id || teacher.userId,
+      status: this.mapProfileApprovalStatusToApplicationStatus(approvalStatus),
+      fullName: teacher.userId?.fullName || '',
+      email: teacher.userId?.email || '',
+      bio: teacher.bio || '',
+      yearsOfExperience: teacher.experienceYears || 0,
+      languages: teacher.languages || [],
+      hourlyRate: sessionPrice,
+      currency: teacher.currency || teacher.sessionCurrency || this.getDefaultCurrency(),
+      teachingStyle,
+      sessionContent,
+      introVideo: teacher.introVideo || '',
+    } as TeacherApplication;
+  }
+
+  /**
    * Get all approved teachers with their profiles
+   * Uses backend API
    */
   async getAllApprovedTeachers(): Promise<Array<TeacherApplication & { profile?: TeacherProfile }>> {
     try {
-      const applications = await this.repository.findAllApproved();
+      const response = await apiClient.get<{ teachers: any[] }>('/teachers');
+      const teachers = response.teachers || [];
       
-      const teachersWithProfiles = await Promise.all(
-        applications.map(async (app) => {
-          const profile = app.userId
-            ? await this.repository.getUserProfile(app.userId)
-            : null;
-          
-          return {
-            ...app,
-            profile: profile || undefined,
-          };
-        })
-      );
-
-      return teachersWithProfiles;
+      return teachers.map((teacher) => {
+        const application = this.transformBackendTeacherToApplication(teacher);
+        const profile = this.transformProfileToFrontendFormat(teacher);
+        
+        return {
+          ...application,
+          profile: profile || undefined,
+        };
+      });
     } catch (error) {
       console.error('Error getting all teachers:', error);
-      throw error;
+      return [];
     }
   }
 
   /**
    * Get teacher application by userId
+   * Uses backend API instead of Firestore
    */
   async getTeacherApplication(userId: string): Promise<TeacherApplication | null> {
     try {
-      return await this.repository.findApplicationByUserId(userId);
+      const application = await teacherApplicationApi.getMyApplication();
+      if (!application) {
+        return null;
+      }
+      // Transform backend application format to frontend format
+      return this.transformApplicationToFrontendFormat(application);
     } catch (error) {
       console.error('Error getting teacher application:', error);
-      throw error;
+      // Return null instead of throwing to handle gracefully
+      return null;
+    }
+  }
+
+  /**
+   * Transform backend application format to frontend TeacherApplication format
+   */
+  private transformApplicationToFrontendFormat(application: any): TeacherApplication {
+    return {
+      id: application._id || application.userId,
+      userId: application.userId,
+      status: this.mapApprovalStatusToApplicationStatus(application.currentStep),
+      fullName: application.step1?.fullName || '',
+      email: application.step1?.email || '',
+      phone: application.step1?.phone || '',
+      countryCode: application.step1?.countryCode || '',
+      gender: application.step1?.gender || '',
+      nationality: application.step1?.nationality || '',
+      yearsOfExperience: application.step1?.yearsOfExperience || 0,
+      languages: application.step1?.languages || [],
+      title: application.step1?.title || '',
+      educationLevel: application.step2?.educationLevel || '',
+      certificatesCount: application.step2?.certificatesCount || 0,
+      bio: application.step2?.bio || '',
+      introVideo: application.step2?.introVideo || '',
+      subjects: application.step2?.subjects || [],
+      hourlyRate: application.step2?.hourlyRate || 0,
+      currency: application.step2?.currency || this.getDefaultCurrency(),
+      teachingStyle: application.step2?.teachingStyle || '',
+      sessionContent: application.step2?.sessionContent || '',
+      ijazahs: Array.isArray(application.step2?.ijazahs) ? application.step2.ijazahs : [],
+      submittedAt: application.submittedAt ? new Date(application.submittedAt).toISOString() : undefined,
+    } as TeacherApplication;
+  }
+
+  /**
+   * Map backend application step to frontend application status
+   */
+  private mapApprovalStatusToApplicationStatus(step: string): TeacherApplicationStatus {
+    switch (step) {
+      case 'submitted':
+        return TEACHER_APPLICATION_STATUS.PENDING;
+      case 'step1':
+      case 'step2':
+      case 'review':
+        return TEACHER_APPLICATION_STATUS.INCOMPLETE;
+      default:
+        return TEACHER_APPLICATION_STATUS.PENDING;
+    }
+  }
+
+  /**
+   * Map backend approvalStatus to frontend application status
+   */
+  private mapProfileApprovalStatusToApplicationStatus(approvalStatus: string): TeacherApplicationStatus {
+    switch (approvalStatus?.toLowerCase()) {
+      case 'approved':
+        return TEACHER_APPLICATION_STATUS.APPROVED;
+      case 'pending':
+        return TEACHER_APPLICATION_STATUS.PENDING;
+      case 'rejected':
+        return TEACHER_APPLICATION_STATUS.REJECTED;
+      case 'incomplete':
+        return TEACHER_APPLICATION_STATUS.INCOMPLETE;
+      default:
+        return TEACHER_APPLICATION_STATUS.PENDING;
     }
   }
 
   /**
    * Get complete teacher profile data
+   * Uses backend API instead of Firestore
    */
   async getTeacherProfileData(userId: string): Promise<TeacherProfileData> {
     try {
-      const application = await this.repository.findApplicationByUserId(userId);
+      // Fetch application from backend API
+      const application = await this.getTeacherApplication(userId);
       
-      if (!application) {
-        const profile = await this.repository.getUserProfile(userId);
-        return {
-          application: null,
-          profile,
-          rating: 0,
-          reviewsCount: 0,
-          reviews: [],
-          qualifications: [],
-          ijazahs: [],
-          availability: null,
+      // Fetch profile, qualifications, ijazahs, and availability in parallel
+      const [
+        profileResponse,
+        qualificationsResponse,
+        ijazahsResponse,
+        availabilityResponse,
+      ] = await Promise.allSettled([
+        apiClient.get<{ profile: any }>('/teachers/me/profile').catch(() => null),
+        apiClient.get<{ qualifications: Qualification[] }>('/teachers/me/qualifications').catch(() => ({ qualifications: [] })),
+        apiClient.get<{ ijazahs: Ijazah[] }>('/teachers/me/ijazahs').catch(() => ({ ijazahs: [] })),
+        apiClient.get<{ availability: any }>('/teachers/me/availability').catch(() => ({ availability: null })),
+      ]);
+
+      // Extract data from responses
+      const profile = profileResponse.status === 'fulfilled' && profileResponse.value?.profile 
+        ? this.transformProfileToFrontendFormat(profileResponse.value.profile)
+        : null;
+      
+      const qualifications = qualificationsResponse.status === 'fulfilled' 
+        ? (qualificationsResponse.value?.qualifications || [])
+        : [];
+      
+      const ijazahs = ijazahsResponse.status === 'fulfilled'
+        ? (ijazahsResponse.value?.ijazahs || [])
+        : [];
+      
+      const availability = availabilityResponse.status === 'fulfilled'
+        ? this.transformAvailabilityToFrontendFormat(availabilityResponse.value?.availability)
+        : null;
+
+      // Get qualifications from application if available
+      const appQualifications = application ? getTeacherQualifications(application) : [];
+
+      // Extract rating from profile response (backend returns ratingAvg/ratingCount)
+      const profileData = profileResponse.status === 'fulfilled' && profileResponse.value?.profile 
+        ? profileResponse.value.profile 
+        : null;
+      const rating = (profileData as any)?.ratingAvg || 0;
+      const reviewsCount = (profileData as any)?.ratingCount || 0;
+
+      // Update application status from profile's approvalStatus if available
+      // This is the source of truth for approved/pending/rejected status
+      let finalApplication = application;
+      if (profileData && (profileData as any).approvalStatus && application) {
+        const approvalStatus = (profileData as any).approvalStatus;
+        const mappedStatus = this.mapProfileApprovalStatusToApplicationStatus(approvalStatus);
+        finalApplication = {
+          ...application,
+          status: mappedStatus,
         };
       }
 
-      const teacherId = application.userId || application.id;
-
-      const [
-        profile,
-        { rating, count: reviewsCount },
-        reviews,
-        qualifications,
-        ijazahs,
-        availability,
-      ] = await Promise.all([
-        this.repository.getUserProfile(teacherId),
-        this.repository.getTeacherRating(teacherId),
-        this.repository.getTeacherReviews(teacherId),
-        Promise.resolve(getTeacherQualifications(application)),
-        this.repository.getIjazahs(teacherId),
-        this.repository.getAvailability(teacherId),
-      ]);
-
       return {
-        application,
+        application: finalApplication,
         profile,
         rating,
         reviewsCount,
-        reviews,
-        qualifications,
-        ijazahs,
+        reviews: [], // Reviews not yet implemented in backend API
+        qualifications: qualifications.length > 0 ? qualifications : appQualifications,
+        ijazahs: ijazahs as Ijazah[],
         availability,
       };
     } catch (error) {
       console.error('Error getting teacher profile data:', error);
-      throw error;
+      // Return empty profile data instead of throwing
+      return {
+        application: null,
+        profile: null,
+        rating: 0,
+        reviewsCount: 0,
+        reviews: [],
+        qualifications: [],
+        ijazahs: [],
+        availability: null,
+      };
     }
   }
 
   /**
+   * Transform backend profile format to frontend TeacherProfile format
+   */
+  private transformProfileToFrontendFormat(profile: any): TeacherProfile {
+    // Extract avatar from userId if it's populated, otherwise use profile.avatar or profile.photoURL
+    const avatar = profile.userId?.avatar || profile.avatar || profile.photoURL || null;
+    
+    // Extract user info if userId is populated
+    const userIdValue = typeof profile.userId === 'object' && profile.userId?._id 
+      ? profile.userId._id 
+      : profile.userId;
+    
+    return {
+      ...profile,
+      id: profile._id || userIdValue,
+      userId: userIdValue,
+      photoURL: avatar || undefined,
+      displayName: profile.userId?.fullName || profile.displayName || profile.fullName,
+      firstName: profile.userId?.firstName || profile.firstName,
+      lastName: profile.userId?.lastName || profile.lastName,
+      email: profile.userId?.email || profile.email,
+    } as TeacherProfile;
+  }
+
+  /**
+   * Transform backend availability format to frontend Availability format
+   */
+  private transformAvailabilityToFrontendFormat(availability: any): Availability | null {
+    if (!availability) return null;
+
+    // Helper to extract teacherId as string
+    const extractTeacherId = (value: unknown): string | undefined => {
+      // Mongo ObjectId as object {_id: "..."} or populated teacher document {_id: "..."}
+      if (value && typeof value === 'object' && (value as any)._id) {
+        const id = (value as any)._id;
+        return typeof id === 'string' ? id : id?.toString?.();
+      }
+      return typeof value === 'string' ? value : undefined;
+    };
+
+    // Case 1: availability object with schedule array
+    if (availability.schedule && Array.isArray(availability.schedule)) {
+      return {
+        teacherId: extractTeacherId(availability.teacherId) || availability.teacherId,
+        schedule: this.normalizeSchedule(availability.schedule),
+        updatedAt: availability.updatedAt,
+      };
+    }
+
+    // Case 2: API might (in edge cases) return the schedule array directly
+    if (Array.isArray(availability)) {
+      return {
+        teacherId: undefined as unknown as string,
+        schedule: this.normalizeSchedule(availability),
+        updatedAt: undefined,
+      };
+    }
+
+    // Fallback: not a recognized shape
+    return null;
+  }
+
+  private normalizeSchedule(schedule: unknown): SlotStatus[][] {
+    const normalized: SlotStatus[][] = Array.from({ length: 7 }, () => Array(12).fill(null)) as SlotStatus[][];
+    if (!Array.isArray(schedule)) {
+      return normalized;
+    }
+
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const day = Array.isArray(schedule[dayIndex]) ? schedule[dayIndex] : [];
+      for (let slotIndex = 0; slotIndex < 12; slotIndex++) {
+        const slot = day[slotIndex];
+        const value: SlotStatus =
+          slot === 'available' || slot === 'booked' ? slot : null;
+        normalized[dayIndex][slotIndex] = value;
+      }
+    }
+
+    return normalized;
+  }
+
+  private transformBackendReviewsToFrontendFormat(reviews: any[]): Review[] {
+    return reviews.map((review) => {
+      const studentUser = review?.studentId?.userId || {};
+      return {
+        id: review?._id?.toString?.() || review?._id,
+        name: studentUser.fullName || 'طالب',
+        time: this.formatRelativeTime(review?.createdAt),
+        rating: Number(review?.stars) || 0,
+        comment: review?.comment || '',
+        avatar: studentUser.avatar || '',
+      };
+    });
+  }
+
+  private parsePrice(value: unknown): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    if (value && typeof value === 'object') {
+      const obj = value as { $numberDecimal?: string; toString?: () => string };
+      if (obj.$numberDecimal) {
+        const parsed = Number(obj.$numberDecimal);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      if (typeof obj.toString === 'function') {
+        const parsed = Number(obj.toString());
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+    }
+    return 0;
+  }
+
+  private normalizeTextOrJsonString(value: unknown): string {
+    // If backend already sends an array/object, stringify it so UI can parse
+    if (Array.isArray(value) || (value !== null && typeof value === 'object')) {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        // Fall through to empty string if stringify fails
+        return '';
+      }
+    }
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    // Keep valid JSON arrays/objects as-is because UI components parse them.
+    if (
+      (trimmed.startsWith('[') && trimmed.endsWith(']')) ||
+      (trimmed.startsWith('{') && trimmed.endsWith('}'))
+    ) {
+      try {
+        JSON.parse(trimmed);
+        return trimmed;
+      } catch {
+        // Fall back to plain text wrapper below.
+      }
+    }
+
+    // Wrap plain text as one display item so existing UI parsers can render it.
+    return JSON.stringify([{ title: trimmed, subject: trimmed }]);
+  }
+
+  private formatRelativeTime(value: string | Date | undefined): string {
+    if (!value) return 'حديثا';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'حديثا';
+    const diffMs = Date.now() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return 'اليوم';
+    if (diffDays === 1) return 'قبل يوم';
+    if (diffDays < 7) return `قبل ${diffDays} أيام`;
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks === 1) return 'قبل أسبوع';
+    if (diffWeeks < 5) return `قبل ${diffWeeks} أسابيع`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return 'قبل شهر';
+    return `قبل ${diffMonths} أشهر`;
+  }
+
+  /**
    * Create a new teacher application
+   * Uses backend API - applications are created via step1/step2 endpoints
    */
   async createApplication(data: CreateApplicationData): Promise<string> {
     try {
-      return await this.repository.createApplication({
-        ...data,
-        status: TEACHER_APPLICATION_STATUS.PENDING,
-      } as any);
+      await teacherApplicationApi.saveStep1({
+        fullName: data.fullName || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        countryCode: data.countryCode || '',
+        gender: data.gender || '',
+        nationality: data.nationality || '',
+        yearsOfExperience: data.yearsOfExperience || 0,
+        languages: data.languages || [],
+        title: data.title || '',
+      });
+      return 'application-created';
     } catch (error) {
       console.error('Error creating teacher application:', error);
       throw error;
@@ -215,10 +525,20 @@ export class TeacherService {
 
   /**
    * Update teacher application
+   * Uses backend API
    */
   async updateApplication(applicationId: string, data: Partial<TeacherApplication>): Promise<void> {
     try {
-      await this.repository.updateApplication(applicationId, data);
+      // Update via profile endpoint if it's profile-related data
+      if (data.bio || data.yearsOfExperience || data.teachingStyle || data.sessionContent || data.introVideo) {
+        await apiClient.patch('/teachers/me/profile', {
+          bio: data.bio,
+          experienceYears: data.yearsOfExperience, // Backend expects experienceYears
+          teachingStyle: data.teachingStyle,
+          sessionContent: data.sessionContent,
+          introVideo: data.introVideo,
+        });
+      }
     } catch (error) {
       console.error('Error updating teacher application:', error);
       throw error;
@@ -227,10 +547,12 @@ export class TeacherService {
 
   /**
    * Update personal info (teaching style, session content, intro video)
+   * Uses backend API
    */
   async updatePersonalInfo(applicationId: string, data: PersonalInfoData): Promise<void> {
     try {
-      await this.repository.updateApplication(applicationId, {
+      await apiClient.patch('/teachers/me/profile', {
+        bio: data.bio,
         teachingStyle: data.teachingStyle,
         sessionContent: data.sessionContent,
         introVideo: data.introVideo,
@@ -243,10 +565,11 @@ export class TeacherService {
 
   /**
    * Save qualifications
+   * Uses backend API
    */
   async saveQualifications(applicationId: string, qualifications: Qualification[]): Promise<void> {
     try {
-      await this.repository.saveQualifications(applicationId, qualifications);
+      await apiClient.post('/teachers/me/qualifications', { qualifications });
     } catch (error) {
       console.error('Error saving qualifications:', error);
       throw error;
@@ -255,22 +578,28 @@ export class TeacherService {
 
   /**
    * Get ijazahs
+   * Uses backend API
    */
   async getIjazahs(teacherId: string): Promise<Ijazah[]> {
     try {
-      return await this.repository.getIjazahs(teacherId);
+      const response = await apiClient.get<{ ijazahs: Ijazah[] }>('/teachers/me/ijazahs');
+      return response.ijazahs || [];
     } catch (error) {
       console.error('Error getting ijazahs:', error);
-      throw error;
+      return [];
     }
   }
 
   /**
    * Save ijazah
+   * Uses backend API
    */
   async saveIjazah(ijazah: Omit<Ijazah, 'id'>): Promise<string> {
     try {
-      return await this.repository.saveIjazah(ijazah);
+      const response = await apiClient.post<{ ijazah: Ijazah & { _id?: any } }>('/teachers/me/ijazahs', ijazah);
+      // Handle MongoDB _id format and convert to id
+      const savedIjazah = response.ijazah;
+      return savedIjazah._id?.toString() || savedIjazah.id || '';
     } catch (error) {
       console.error('Error saving ijazah:', error);
       throw error;
@@ -279,10 +608,11 @@ export class TeacherService {
 
   /**
    * Update ijazah
+   * Uses backend API
    */
   async updateIjazah(ijazahId: string, data: Partial<Ijazah>): Promise<void> {
     try {
-      await this.repository.updateIjazah(ijazahId, data);
+      await apiClient.patch(`/teachers/me/ijazahs/${ijazahId}`, data);
     } catch (error) {
       console.error('Error updating ijazah:', error);
       throw error;
@@ -291,10 +621,11 @@ export class TeacherService {
 
   /**
    * Delete ijazah
+   * Uses backend API
    */
   async deleteIjazah(ijazahId: string): Promise<void> {
     try {
-      await this.repository.deleteIjazah(ijazahId);
+      await apiClient.delete(`/teachers/me/ijazahs/${ijazahId}`);
     } catch (error) {
       console.error('Error deleting ijazah:', error);
       throw error;
@@ -303,39 +634,38 @@ export class TeacherService {
 
   /**
    * Get availability
+   * Uses backend API
    */
   async getAvailability(teacherId: string): Promise<Availability | null> {
     try {
-      return await this.repository.getAvailability(teacherId);
+      const response = await apiClient.get<{ availability: any }>('/teachers/me/availability');
+      return this.transformAvailabilityToFrontendFormat(response.availability);
     } catch (error) {
       console.error('Error getting availability:', error);
-      throw error;
+      return null;
     }
   }
 
   /**
    * Save availability with smart merging to preserve booked slots
    * This ensures that booked slots from student subscriptions are never overwritten
+   * Uses backend API
    */
   async saveAvailability(availability: Availability): Promise<void> {
     try {
       // Get current availability from database to preserve booked slots
-      const currentAvailability = await this.repository.getAvailability(availability.teacherId);
+      const currentAvailability = await this.getAvailability(availability.teacherId);
+      
+      let scheduleToSave = availability.schedule;
       
       if (currentAvailability) {
         // Merge: preserve booked slots, allow changes to available/null slots
-        const mergedSchedule = this.mergeAvailabilitySchedules(
+        scheduleToSave = this.mergeAvailabilitySchedules(
           currentAvailability.schedule,
           availability.schedule
-        );
-        
-        await this.repository.saveAvailability({
-          teacherId: availability.teacherId,
-          schedule: mergedSchedule as SlotStatus[][],
-          updatedAt: availability.updatedAt,
-        });
+        ) as SlotStatus[][];
       } else {
-        // No existing availability, save as is (but ensure all slots are explicitly set)
+        // No existing availability, ensure all slots are explicitly set
         const completeSchedule: (string | null)[][] = Array(7)
           .fill(null)
           .map(() => Array(12).fill(null));
@@ -347,12 +677,14 @@ export class TeacherService {
           }
         }
         
-        await this.repository.saveAvailability({
-          teacherId: availability.teacherId,
-          schedule: completeSchedule as SlotStatus[][],
-          updatedAt: availability.updatedAt,
-        });
+        scheduleToSave = completeSchedule as SlotStatus[][];
       }
+      
+      // Save via backend API
+      await apiClient.post('/teachers/me/availability', {
+        teacherId: availability.teacherId,
+        schedule: scheduleToSave,
+      });
     } catch (error) {
       console.error('[TeacherService] Error saving availability:', error);
       throw error;
@@ -411,54 +743,41 @@ export class TeacherService {
 
   /**
    * Get teacher rating
+   * Uses backend API
    */
   async getTeacherRating(teacherId: string): Promise<{ rating: number; count: number }> {
     try {
-      return await this.repository.getTeacherRating(teacherId);
+      if (!teacherId) {
+        return { rating: 0, count: 0 };
+      }
+      const response = await apiClient.get<{ teacher: { rating?: number; ratingAvg?: number; reviewsCount?: number; ratingCount?: number } }>(`/teachers/${teacherId}`);
+      return {
+        rating: response.teacher?.rating ?? response.teacher?.ratingAvg ?? 0,
+        count: response.teacher?.reviewsCount ?? response.teacher?.ratingCount ?? 0,
+      };
     } catch (error) {
       console.error('Error getting teacher rating:', error);
-      throw error;
+      return { rating: 0, count: 0 };
     }
   }
 
   /**
    * Get completed sessions count
+   * Uses backend API
    */
   async getCompletedSessionsCount(teacherId: string): Promise<number> {
     try {
-      return await this.repository.getCompletedSessionsCount(teacherId);
+      // Backend currently exposes completed sessions count only for the authenticated teacher.
+      // For public teacher cards, avoid calling a protected endpoint that returns 403.
+      if (!teacherId) {
+        const response = await apiClient.get<{ count: number }>('/teachers/me/sessions/completed-count');
+        return response.count || 0;
+      }
+      return 0;
     } catch (error) {
       console.error('Error getting completed sessions count:', error);
-      throw error;
+      return 0;
     }
   }
 
-  /**
-   * Get mock reviews for testing/fallback
-   */
-  private getMockReviews(): Review[] {
-    return [
-      {
-        name: 'محمد علي',
-        time: 'قبل يومين',
-        rating: 5,
-        comment: 'ما شاء الله تبارك الله، أسلوب الدكتور متميز جداً في تصحيح التلاوة. يهتم بدقائق التجويد ويربطها بمعاني الآيات. جزاكم الله خيراً.',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAqR32u1hY7LX4IdVqqSVCzRsckr5Tpd-ubbFOEahgGBpXlGZIiBBWdnToWsAS4Nj3xlGt3-0CIVInGch9IcZjnbHxwGPFw8mk1dAUjEX0tLEj_Yr3PT0kfhZV983nFSwVhpYjeSpNac94V0R0jXzPekFstM5xAE7hXW2qYSKT0bj-6ddD-xLqVvMC9K9CqhaoFOkGD0K6ziJ7oUWHpRcwO42GqjtoVVK6OdXzQaIcuPJq3AkygWhbBlEw7qSXlo5oxvM3lqU17YOCo',
-      },
-      {
-        name: 'عبد الله عمر',
-        time: 'قبل أسبوع',
-        rating: 5,
-        comment: 'استفدت كثيراً من دورة مخارج الحروف. الشرح وافي والتطبيق العملي مفيد جداً. أنصح بالدراسة معه لكل طالب علم.',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEimIImSLgw0XsDxrT1crt0NFg8Fs_vVPLV__RobSTEk8F9Vic0Vwokcx5p9d6e9n01WqncOetVqniX6pz5Ul97-Whs_0FlxHE_OwPFiWN7vZFQ_OsoBVgMCyJsLY_D52YxA1ZvmOLxge_AqBLu_eQ8IXrnj-G6jDUVOm9kRt8u5z4PzFeROve6MdrLRAtikMKP5Z6WfAgC4ISOMM12jPOjhJBwAYqFP11cKL-xYeoi_2ysCJjOFJSb5Ee8kUpuYYvIYiobfsLlwic',
-      },
-      {
-        name: 'فاطمة أحمد',
-        time: 'قبل أسبوعين',
-        rating: 5,
-        comment: 'معلمة ممتازة، صبورة جداً وتشرح بطريقة واضحة. ساعدتني في تحسين تلاوتي بشكل كبير. الله يبارك في جهودها.',
-        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaHCQpQDIhRCTg8znqGbspw1A1F6Zar1Syu1aLwWIQat1CNApShCs6EKLwGnERa9BLy_zwlwOAPw7sLW8qgsiPJIiXGWL4B0KMcMnHdJcvbOIrtiSKYYlhWoiyKFRz7ol7BumuHGknAqEeSUXxfrzxk6sHDfrepKu8GiXJcm8IJpTCYIlEKrMDSvQP_eE-ePAzmoROe-xBU2UtjrP8j93LQuthyn4pLtWeWolZnyevkFcf-cE_8Ugxc-6zr4dclaScsP8KvndSVtUa',
-      },
-    ];
-  }
 }

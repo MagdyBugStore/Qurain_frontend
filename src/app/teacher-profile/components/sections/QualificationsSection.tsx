@@ -3,7 +3,8 @@
  */
 
 import { EditButton } from '../shared/EditButton';
-import type { Qualification } from '../../../shared/types/teacher.types';
+import type { Qualification } from '../../../../shared/types/teacher.types';
+import React from 'react';
 
 interface QualificationsSectionProps {
   qualifications: Qualification[];
@@ -37,11 +38,9 @@ export function QualificationsSection({
 
   return (
     <div id="qualifications" className="relative bg-white dark:bg-background-dark rounded-xl p-4 sm:p-6 lg:p-8 border border-primary/10 shadow-sm">
-      {isApproved && !isPending && (
-        <div className="absolute top-4 left-4">
-          <EditButton onClick={onToggleEdit} />
-        </div>
-      )}
+      <div className="absolute top-4 left-4 z-20">
+        <EditButton onClick={onToggleEdit} />
+      </div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="material-symbols-outlined text-primary bg-primary/10 p-1.5 sm:p-2 rounded-lg text-lg sm:text-xl">school</span>

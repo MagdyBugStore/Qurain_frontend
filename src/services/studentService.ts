@@ -1,9 +1,10 @@
 /**
  * Student Service
  * Business logic layer for student operations
+ * Uses backend API
  */
 
-import { StudentRepository } from '../infrastructure/firebase/repositories/StudentRepository';
+import { apiClient } from '../lib/apiClient';
 import type {
   StudentTask,
   StudentSession,
@@ -13,45 +14,138 @@ import type {
 } from '../shared/types/student.types';
 
 export class StudentService {
-  private repository: StudentRepository;
+  constructor() {}
 
-  constructor() {
-    this.repository = new StudentRepository();
+  private mapTask(task: any): StudentTask {
+    const now = new Date().toISOString();
+    return {
+      id: task?._id?.toString?.() || task?.id || '',
+      studentId: task?.studentId?.toString?.() || task?.studentId || '',
+      title: task?.title || '',
+      description: task?.description || '',
+      status: (task?.status || 'pending') as TaskStatus,
+      dueDate: task?.dueDate || now,
+      completedAt: task?.completedAt || undefined,
+      teacherId: task?.teacherId?.toString?.() || task?.teacherId || undefined,
+      teacherName: task?.teacherName || undefined,
+      createdAt: task?.createdAt || now,
+      updatedAt: task?.updatedAt || now,
+    };
+  }
+
+  private mapSession(session: any): StudentSession {
+    const teacherUser = session?.teacherId?.userId || {};
+    const startDate = session?.scheduledStart || session?.scheduledDate || new Date().toISOString();
+    const endDate = session?.scheduledEnd || null;
+    const durationMinutes =
+      endDate && startDate
+        ? Math.max(
+            1,
+            Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 60000)
+          )
+        : session?.duration || 60;
+
+    const rawStatus = session?.status || 'scheduled';
+    const mappedStatus =
+      rawStatus === 'started'
+        ? 'in_progress'
+        : rawStatus === 'rescheduled' || rawStatus === 'no_show'
+          ? 'cancelled'
+          : rawStatus;
+
+    return {
+      id: session?._id?.toString?.() || session?.id || '',
+      studentId: session?.studentId?.toString?.() || session?.studentId || '',
+      teacherId: session?.teacherId?._id?.toString?.() || session?.teacherId?.toString?.() || '',
+      teacherName: teacherUser?.fullName || session?.teacherName || 'المعلم',
+      teacherPhoto: teacherUser?.avatar || '',
+      title: session?.title || 'جلسة قرآن',
+      description: session?.description || '',
+      scheduledDate: startDate,
+      duration: durationMinutes,
+      status: mappedStatus as StudentSession['status'],
+      sessionType: (session?.sessionType || 'memorization') as StudentSession['sessionType'],
+      subscriptionId: session?.subscriptionId?.toString?.() || session?.subscriptionId || undefined,
+      meetingLink: session?.videoJoinUrlStudent || session?.meetingLink || undefined,
+      notes: session?.notes || undefined,
+      createdAt: session?.createdAt || startDate,
+      updatedAt: session?.updatedAt || startDate,
+    };
+  }
+
+  private mapMemorizationLog(log: any): MemorizationLog {
+    const now = new Date().toISOString();
+    const verses = typeof log?.verses === 'string' ? log.verses : '';
+    const match = verses.match(/(\d+)\s*-\s*(\d+)/);
+    return {
+      id: log?._id?.toString?.() || log?.id || '',
+      studentId: log?.studentId?.toString?.() || log?.studentId || '',
+      surah: log?.surah || '',
+      description: log?.notes || '',
+      fromAyah: match ? Number(match[1]) : undefined,
+      toAyah: match ? Number(match[2]) : undefined,
+      juz: typeof log?.juz === 'number' ? log.juz : undefined,
+      grade: log?.grade || undefined,
+      teacherId: log?.teacherId?.toString?.() || undefined,
+      teacherName: log?.teacherName || undefined,
+      loggedDate: log?.loggedDate || now,
+      createdAt: log?.createdAt || now,
+    };
+  }
+
+  private mapActivity(activity: any): StudentActivity {
+    return {
+      id: activity?._id?.toString?.() || activity?.id || '',
+      studentId: activity?.studentId?.toString?.() || activity?.studentId || '',
+      type: (activity?.type || 'session_booked') as StudentActivity['type'],
+      title: activity?.title || '',
+      description: activity?.description || '',
+      metadata: activity?.metadata || {},
+      createdAt: activity?.createdAt || new Date().toISOString(),
+    };
   }
 
   /**
    * Get weekly tasks for student
    */
   async getWeeklyTasks(studentId: string): Promise<StudentTask[]> {
-    return this.repository.getWeeklyTasks(studentId);
+    if (!studentId) return [];
+    const data = await apiClient.get<{ tasks: any[] }>('/students/tasks/weekly');
+    return (data.tasks || []).map((task) => this.mapTask(task));
   }
 
   /**
    * Get all tasks for student
    */
   async getTasks(studentId: string, status?: TaskStatus): Promise<StudentTask[]> {
-    return this.repository.getStudentTasks(studentId, status);
+    if (!studentId) return [];
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+    const data = await apiClient.get<{ tasks: any[] }>(`/students/tasks${query}`);
+    return (data.tasks || []).map((task) => this.mapTask(task));
   }
 
   /**
    * Create a new task
    */
   async createTask(task: Omit<StudentTask, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    return this.repository.createTask(task);
+    throw new Error('StudentService.createTask: Firestore removed - use backend API instead');
   }
 
   /**
    * Update task status
    */
   async updateTaskStatus(taskId: string, status: TaskStatus): Promise<void> {
-    return this.repository.updateTaskStatus(taskId, status);
+    await apiClient.patch(`/students/tasks/${taskId}/status`, { status });
   }
 
   /**
    * Get upcoming session
    */
   async getUpcomingSession(studentId: string): Promise<StudentSession | null> {
-    return this.repository.getUpcomingSession(studentId);
+    if (!studentId) return null;
+    const data = await apiClient.get<{ session: any | null }>('/students/sessions/upcoming');
+    if (!data.session) return null;
+    return this.mapSession(data.session);
   }
 
   /**
@@ -61,7 +155,10 @@ export class StudentService {
     studentId: string,
     status?: 'scheduled' | 'completed' | 'cancelled'
   ): Promise<StudentSession[]> {
-    return this.repository.getStudentSessions(studentId, status);
+    if (!studentId) return [];
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+    const data = await apiClient.get<{ sessions: any[] }>(`/students/sessions${query}`);
+    return (data.sessions || []).map((session) => this.mapSession(session));
   }
 
   /**
@@ -75,21 +172,31 @@ export class StudentService {
     },
     limitCount?: number
   ): Promise<StudentSession[]> {
-    return this.repository.getAllSessions(filters, limitCount);
+    const params = new URLSearchParams();
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.teacherId) params.set('teacherId', filters.teacherId);
+    if (filters?.studentId) params.set('studentId', filters.studentId);
+    if (limitCount) params.set('limit', String(limitCount));
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const data = await apiClient.get<{ sessions: any[] }>(`/students/sessions${query}`);
+    return (data.sessions || []).map((session) => this.mapSession(session));
   }
 
   /**
    * Delete a session
    */
   async deleteSession(sessionId: string): Promise<void> {
-    return this.repository.deleteSession(sessionId);
+    throw new Error('StudentService.deleteSession: Firestore removed - use backend API instead');
   }
 
   /**
    * Get memorization logs
    */
   async getMemorizationLogs(studentId: string, limit?: number): Promise<MemorizationLog[]> {
-    return this.repository.getMemorizationLogs(studentId, limit);
+    if (!studentId) return [];
+    const query = limit ? `?limit=${encodeURIComponent(String(limit))}` : '';
+    const data = await apiClient.get<{ logs: any[] }>(`/students/memorization-logs${query}`);
+    return (data.logs || []).map((log) => this.mapMemorizationLog(log));
   }
 
   /**
@@ -98,21 +205,45 @@ export class StudentService {
   async createMemorizationLog(
     log: Omit<MemorizationLog, 'id' | 'createdAt'>
   ): Promise<string> {
-    return this.repository.createMemorizationLog(log);
+    throw new Error('StudentService.createMemorizationLog: Firestore removed - use backend API instead');
   }
 
   /**
    * Get recent activities
    */
   async getActivities(studentId: string, limit: number = 10): Promise<StudentActivity[]> {
-    return this.repository.getStudentActivities(studentId, limit);
+    if (!studentId) return [];
+    const data = await apiClient.get<{ activities: any[] }>(
+      `/students/activities?limit=${encodeURIComponent(String(limit))}`
+    );
+    return (data.activities || []).map((activity) => this.mapActivity(activity));
   }
 
   /**
    * Get student statistics
    */
   async getStats(studentId: string) {
-    return this.repository.getStudentStats(studentId);
+    if (!studentId) {
+      return {
+        totalSessions: 0,
+        completedSessions: 0,
+        upcomingSessions: 0,
+        memorizedParts: 0,
+        completedTasks: 0,
+        pendingTasks: 0,
+      };
+    }
+    const data = await apiClient.get<{
+      stats: {
+        totalSessions: number;
+        completedSessions: number;
+        upcomingSessions: number;
+        memorizedParts: number;
+        completedTasks: number;
+        pendingTasks: number;
+      };
+    }>('/students/stats');
+    return data.stats;
   }
 
   /**
@@ -122,7 +253,9 @@ export class StudentService {
     studentId: string,
     callback: (tasks: StudentTask[]) => void
   ) {
-    return this.repository.subscribeToStudentTasks(studentId, callback);
+    console.warn('StudentService.subscribeToWeeklyTasks: Firestore removed, returning no-op unsubscribe');
+    callback([]);
+    return () => {}; // No-op unsubscribe
   }
 
   /**
@@ -132,6 +265,8 @@ export class StudentService {
     studentId: string,
     callback: (session: StudentSession | null) => void
   ) {
-    return this.repository.subscribeToUpcomingSession(studentId, callback);
+    console.warn('StudentService.subscribeToUpcomingSession: Firestore removed, returning no-op unsubscribe');
+    callback(null);
+    return () => {}; // No-op unsubscribe
   }
 }

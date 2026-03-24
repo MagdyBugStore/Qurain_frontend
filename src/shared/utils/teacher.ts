@@ -32,6 +32,11 @@ export function getTeacherDisplayName(
  * Get teacher title based on experience
  */
 export function getTeacherTitle(application?: TeacherApplication | null): string {
+  // Use custom title if provided
+  if (application?.title && application.title.trim()) {
+    return application.title;
+  }
+  // Fallback to generated title based on experience
   if (application?.yearsOfExperience) {
     return `مدرس قرآن كريم وتجويد بخبرة ${application.yearsOfExperience} عاماً`;
   }
@@ -50,11 +55,25 @@ export function getTeacherSpecialization(application?: TeacherApplication | null
 
 /**
  * Get teacher profile image URL
+ * Checks multiple possible fields for the image URL
  */
-export function getTeacherImageUrl(profile?: TeacherProfile | null): string {
+export function getTeacherImageUrl(profile?: TeacherProfile | null | any): string {
+  // Check photoURL first (standard field)
   if (profile?.photoURL && profile.photoURL.trim() !== '') {
     return profile.photoURL;
   }
+  
+  // Check avatar field (from backend API)
+  if (profile?.avatar && profile.avatar.trim() !== '') {
+    return profile.avatar;
+  }
+  
+  // Check if userId is an object with avatar (populated user)
+  if (profile?.userId?.avatar && profile.userId.avatar.trim() !== '') {
+    return profile.userId.avatar;
+  }
+  
+  // Fallback to default no-image
   return '/no-image.png';
 }
 

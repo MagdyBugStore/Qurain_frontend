@@ -7,8 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { TechnicalCheck } from '../../../features/room/presentation/components/TechnicalCheck/TechnicalCheck'
 import { useDeviceCheck } from '../../../features/room/presentation/hooks/useDeviceCheck'
 import { useRoom } from '../../../features/room/presentation/hooks/useRoom'
-import { RoomService } from '../../../features/room/application/services/roomService'
-import { RoomRepository } from '../../../infrastructure/firebase/repositories/RoomRepository'
+// Firestore removed
 
 export default function TechnicalCheckPage() {
   const navigate = useNavigate()
@@ -24,11 +23,10 @@ export default function TechnicalCheckPage() {
   }, [id, result, runCheck])
 
   // Save check results when available
+  // NOTE: Firestore removed - use backend API instead
   useEffect(() => {
     if (result && id) {
-      const repository = new RoomRepository()
-      const service = new RoomService(repository)
-      service.saveTechnicalCheck(id, result).catch(console.error)
+      console.warn('TechnicalCheckPage: Firestore removed, cannot save technical check results');
     }
   }, [result, id])
 

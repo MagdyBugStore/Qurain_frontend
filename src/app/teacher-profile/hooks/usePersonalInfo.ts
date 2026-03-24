@@ -7,6 +7,7 @@ import { TeacherService } from '../../../services/teacherService';
 import type { TeacherApplication } from '../../../shared/types/teacher.types';
 
 export interface PersonalInfoData {
+  bio?: string;
   teachingStyle?: string;
   sessionContent?: string;
   introVideo?: string;
@@ -15,6 +16,7 @@ export interface PersonalInfoData {
 export function usePersonalInfo(application: TeacherApplication | null) {
   const [saving, setSaving] = useState(false);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfoData>({
+    bio: application?.bio || '',
     teachingStyle: application?.teachingStyle || '',
     sessionContent: application?.sessionContent || '',
     introVideo: application?.introVideo || '',

@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+// Firestore removed - TeacherRepository deleted
 import { CreateSupportTicket } from '../../application/use-cases/CreateSupportTicket';
 import { AddTicketReply } from '../../application/use-cases/AddTicketReply';
 import type { SupportTicketData } from '../../application/use-cases/CreateSupportTicket';
@@ -19,9 +19,8 @@ export function useSupportTickets() {
       setLoading(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new CreateSupportTicket(repository);
-      return await useCase.execute(data);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
     } catch (err) {
       console.error('Error creating support ticket:', err);
       setError(err instanceof Error ? err : new Error('Failed to create ticket'));
@@ -36,9 +35,8 @@ export function useSupportTickets() {
       setLoading(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new AddTicketReply(repository);
-      await useCase.execute(data);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
     } catch (err) {
       console.error('Error adding ticket reply:', err);
       setError(err instanceof Error ? err : new Error('Failed to add reply'));

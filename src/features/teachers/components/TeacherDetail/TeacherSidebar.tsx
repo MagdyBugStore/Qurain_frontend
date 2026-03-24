@@ -8,9 +8,7 @@ import { useAppStore } from '../../../../store/useAppStore';
 import { useAuth } from '../../../../contexts/AuthContext';
 import type { TeacherApplication } from '../../../../shared/types/teacher.types';
 import { getCurrencySymbol } from '../../../../shared/utils/currency';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../../config/firebase';
-import { COLLECTIONS } from '../../../../constants/firebaseCollections';
+// Firestore removed
 
 interface TeacherSidebarProps {
   application: TeacherApplication;
@@ -34,6 +32,35 @@ export function TeacherSidebar({
   const isTeacher = userProfile?.accountType === 'teacher';
   const [bookedSlotsSet, setBookedSlotsSet] = useState<Set<string>>(new Set());
 
+  const parseSessionContent = (rawValue?: string): Array<{ title: string; subject: string }> => {
+    if (!rawValue || typeof rawValue !== 'string') return [];
+
+    try {
+      const parsed = JSON.parse(rawValue);
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed
+        .map((item) => {
+          if (typeof item === 'string') {
+            const text = item.trim();
+            return text ? { title: text, subject: text } : null;
+          }
+          if (item && typeof item === 'object') {
+            const title = typeof (item as any).title === 'string' ? (item as any).title.trim() : '';
+            const subject = typeof (item as any).subject === 'string' ? (item as any).subject.trim() : '';
+            const text = subject || title;
+            if (!text) return null;
+            return { title: title || text, subject: subject || text };
+          }
+          return null;
+        })
+        .filter((item): item is { title: string; subject: string } => item !== null);
+    } catch {
+      const text = rawValue.trim();
+      return text ? [{ title: text, subject: text }] : [];
+    }
+  };
+
   // Time slots mapping (12 slots per day) matching teacher availability schedule
   const timeSlots = [
     '٠٨:٠٠ ص', '٠٩:٠٠ ص', '١٠:٠٠ ص', '١١:٠٠ ص',
@@ -42,63 +69,10 @@ export function TeacherSidebar({
   ];
 
   // Fetch booked slots from subscriptions
+  // NOTE: Firestore removed - using empty set
   useEffect(() => {
-    const fetchBookedSlots = async () => {
-      const teacherIdToUse = teacherId || application.userId;
-      if (!teacherIdToUse) return;
-
-      try {
-        const subscriptionsQuery = query(
-          collection(db, COLLECTIONS.SUBSCRIPTIONS),
-          where('teacherId', '==', teacherIdToUse),
-          where('status', '==', 'active')
-        );
-        
-        let subscriptionsSnapshot;
-        try {
-          subscriptionsSnapshot = await getDocs(subscriptionsQuery);
-        } catch (queryError: any) {
-          if (queryError?.code === 'failed-precondition' || queryError?.message?.includes('index')) {
-            const fallbackQuery = query(
-              collection(db, COLLECTIONS.SUBSCRIPTIONS),
-              where('teacherId', '==', teacherIdToUse)
-            );
-            subscriptionsSnapshot = await getDocs(fallbackQuery);
-            
-            const filteredDocs = subscriptionsSnapshot.docs.filter(doc => {
-              const data = doc.data();
-              return data.status === 'active';
-            });
-            
-            subscriptionsSnapshot = {
-              docs: filteredDocs,
-              size: filteredDocs.length,
-            } as any;
-          } else {
-            return;
-          }
-        }
-        
-        const booked = new Set<string>();
-        subscriptionsSnapshot.docs.forEach((doc) => {
-          const subscriptionData = doc.data();
-          const weeklySlots = subscriptionData.weeklySlots || [];
-          
-          weeklySlots.forEach((slot: { dayIndex: number; time: string }) => {
-            const key = `${slot.dayIndex}_${slot.time}`;
-            booked.add(key);
-          });
-        });
-        
-        setBookedSlotsSet(booked);
-      } catch (error) {
-        console.error('Error fetching booked slots:', error);
-      }
-    };
-
-    if (teacherId || application.userId) {
-      fetchBookedSlots();
-    }
+    console.warn('TeacherSidebar: Firestore removed, booked slots not available');
+    setBookedSlotsSet(new Set());
   }, [teacherId, application.userId]);
 
   // Calculate total available slots for the teacher
@@ -190,40 +164,13 @@ export function TeacherSidebar({
         <div className="p-6 bg-gray-50">
           <h4 className="text-text-dark font-bold mb-4 text-sm uppercase tracking-wider text-center">ماذا تتضمن الحصة؟</h4>
           {(() => {
-            // Parse sessionContent from JSON string
-            let sessionContent: Array<{ title: string; subject: string }> = [];
-            try {
-              if (application.sessionContent) {
-                const parsed = JSON.parse(application.sessionContent);
-                if (Array.isArray(parsed)) {
-                  sessionContent = parsed;
-                }
-              }
-            } catch (e) {
-              // If parsing fails, use default items
-            }
+            const sessionContent = parseSessionContent(application.sessionContent);
 
-            // If no session content, show default items
             if (sessionContent.length === 0) {
               return (
-                <ul className="space-y-0">
-                  <li className="flex items-start gap-3 text-text-light text-sm pb-3 border-b border-gray-200">
-                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                    <span>خطة دراسية مخصصة</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
-                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                    <span>مواد تعليمية مجانية</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-text-light text-sm py-3 border-b border-gray-200">
-                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                    <span>تسجيل صوتي للحصة للمراجعة</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-text-light text-sm pt-3">
-                    <span className="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
-                    <span>شهادة إتمام المستوى</span>
-                  </li>
-                </ul>
+                <div className="text-center text-sm text-text-light py-2">
+                  لا توجد تفاصيل للحصة بعد
+                </div>
               );
             }
 

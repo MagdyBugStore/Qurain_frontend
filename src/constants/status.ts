@@ -4,6 +4,7 @@
  */
 
 export const TEACHER_APPLICATION_STATUS = {
+  INCOMPLETE: 'incomplete',
   PENDING: 'pending',
   APPROVED: 'approved',
   REJECTED: 'rejected',

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { TeacherRepository } from '../../../../infrastructure/firebase/repositories/TeacherRepository';
+// Firestore removed - TeacherRepository deleted
 import { GetTeacherProfile } from '../../application/use-cases/GetTeacherProfile';
 import type { TeacherProfileData } from '../../application/use-cases/GetTeacherProfile';
 
@@ -24,9 +24,8 @@ export function useTeacherProfile(userId: string | undefined) {
         setLoading(true);
         setError(null);
         
-        const repository = new TeacherRepository();
-        const useCase = new GetTeacherProfile(repository);
-        const profileData = await useCase.execute(userId);
+        // Firestore removed - use backend API instead
+        throw new Error('TeacherRepository removed - use backend API instead');
         
         setData(profileData);
       } catch (err) {
@@ -47,9 +46,8 @@ export function useTeacherProfile(userId: string | undefined) {
       setLoading(true);
       setError(null);
       
-      const repository = new TeacherRepository();
-      const useCase = new GetTeacherProfile(repository);
-      const profileData = await useCase.execute(userId);
+      // Firestore removed - use backend API instead
+      throw new Error('TeacherRepository removed - use backend API instead');
       
       setData(profileData);
     } catch (err) {

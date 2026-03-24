@@ -66,8 +66,8 @@ export default function BookingConfirmPage() {
       nextRenewalDate.setDate(nextRenewalDate.getDate() + 30)
 
       const subscriptionId = await bookingService.createSubscription({
-        studentId: user.uid,
-        studentName: userProfile?.displayName || user.displayName || user.email || 'طالب',
+        studentId: user.id,
+        studentName: userProfile?.fullName || user.fullName || user.email || 'طالب',
         studentEmail: user.email || '',
         teacherId: id || '',
         teacherName: subscriptionData.teacherName,
@@ -135,10 +135,7 @@ export default function BookingConfirmPage() {
                 </p>
               </div>
               <div className="flex flex-col w-full gap-3 mt-4">
-                <button className="w-full bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[20px]">calendar_add_on</span>
-                  إضافة للتقويم
-                </button>
+                
                 <Link
                   to="/"
                   className="text-primary hover:text-primary/80 text-sm font-bold py-2 transition-colors"

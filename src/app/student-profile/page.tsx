@@ -48,15 +48,15 @@ export default function StudentProfilePage() {
     loading,
     error,
     updateTaskStatus,
-  } = useStudentProfile(user?.uid)
+  } = useStudentProfile(user?.id)
 
   // Fetch active subscription once user is available
   useEffect(() => {
     const fetchSubscription = async () => {
-      if (!user?.uid) return
+      if (!user?.id) return
       try {
         setSubscriptionLoading(true)
-        const sub = await subscriptionService.getActiveSubscriptionForStudent(user.uid)
+        const sub = await subscriptionService.getActiveSubscriptionForStudent(user.id)
         setActiveSubscription(sub)
       } catch (err) {
         console.error('Error fetching active subscription for student:', err)
@@ -66,13 +66,13 @@ export default function StudentProfilePage() {
     }
 
     fetchSubscription()
-  }, [user?.uid, subscriptionService])
+  }, [user?.id, subscriptionService])
 
   // Fetch all sessions when schedule tab is active
   useEffect(() => {
-    if (activeTab === 'schedule' && user?.uid) {
+    if (activeTab === 'schedule' && user?.id) {
       setSessionsLoading(true)
-      studentService.getSessions(user.uid)
+      studentService.getSessions(user.id)
         .then(sessions => {
           setAllSessions(sessions)
         })
@@ -83,13 +83,13 @@ export default function StudentProfilePage() {
           setSessionsLoading(false)
         })
     }
-  }, [activeTab, user?.uid, studentService])
+  }, [activeTab, user?.id, studentService])
 
   // Fetch all memorization logs when memorization tab is active
   useEffect(() => {
-    if (activeTab === 'memorization' && user?.uid) {
+    if (activeTab === 'memorization' && user?.id) {
       setAllLogsLoading(true)
-      studentService.getMemorizationLogs(user.uid)
+      studentService.getMemorizationLogs(user.id)
         .then(logs => {
           setAllMemorizationLogs(logs)
         })
@@ -100,7 +100,7 @@ export default function StudentProfilePage() {
           setAllLogsLoading(false)
         })
     }
-  }, [activeTab, user?.uid, studentService])
+  }, [activeTab, user?.id, studentService])
 
   // Calendar calculations
   const calendarDays = useMemo(() => {
@@ -215,9 +215,9 @@ export default function StudentProfilePage() {
   }, [])
 
   // Get student data from userProfile
-  const studentName = userProfile?.displayName ||
+  const studentName = userProfile?.fullName ||
     `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() ||
-    user?.displayName ||
+    user?.fullName ||
     'الطالب'
 
   // Map internal IDs from onboarding steps to human‑readable Arabic labels
@@ -248,7 +248,7 @@ export default function StudentProfilePage() {
 
   const studentLevel =
     (userProfile?.level && levelLabels[userProfile.level]) || 'غير محدد'
-  const studentPhoto = userProfile?.photoURL || user?.photoURL || ''
+  const studentPhoto = userProfile?.photoURL || user?.avatar || ''
 
   const ageGroup =
     (userProfile?.ageGroup && ageGroupLabels[userProfile.ageGroup]) || 'غير محدد'
@@ -371,7 +371,7 @@ export default function StudentProfilePage() {
                       <div>
                         <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-3">
                           <span className="material-symbols-outlined text-lg text-primary">school</span>
-                          <span className="font-medium">الهدف التعليمي</span>
+                          <span className="font-medium">الأهداف التعليمية التفصيلية</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {selectedLearningGoals.map((goal, index) => (
@@ -897,7 +897,7 @@ export default function StudentProfilePage() {
                             >
                               {day.dayOfMonth}
                             </span>
-                            <div className="mt-6 space-y-1">
+                            <div className="mt-6 h-[calc(100%-1.5rem)]">
                               {daySessions.slice(0, 2).map((session) => {
                                 const isCompleted = session.status === 'completed'
                                 const isScheduled = session.status === 'scheduled'
@@ -906,39 +906,37 @@ export default function StudentProfilePage() {
                                 return (
                                   <div
                                     key={session.id}
-                                    className={`p-2 rounded-lg cursor-pointer transition-all ${isTodaySession
+                                    className={`h-full w-full rounded-lg p-2 flex flex-col items-center justify-center text-center transition-all ${isTodaySession
                                         ? 'bg-primary border-r-4 border-background-dark shadow-md'
                                         : isCompleted
                                           ? 'bg-slate-100 dark:bg-slate-700 border-r-4 border-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
                                           : 'bg-primary/10 border-r-4 border-primary hover:bg-primary/20'
                                       }`}
                                   >
-                                    <div className="flex items-center gap-2 mb-1">
-                                      {session.teacherPhoto ? (
-                                        <img
-                                          className="size-6 rounded-full border border-primary/30"
-                                          alt="صورة المعلم"
-                                          src={session.teacherPhoto}
-                                        />
-                                      ) : (
-                                        <div className="size-6 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-                                          <span className="material-symbols-outlined text-xs">person</span>
-                                        </div>
-                                      )}
-                                      <p
-                                        className={`text-[10px] font-bold truncate ${isTodaySession ? 'text-background-dark' : ''
-                                          }`}
-                                      >
-                                        {session.teacherName}
-                                      </p>
-                                    </div>
+                                    {session.teacherPhoto ? (
+                                      <img
+                                        className="size-7 rounded-full border border-primary/30 mb-1"
+                                        alt="صورة المعلم"
+                                        src={session.teacherPhoto}
+                                      />
+                                    ) : (
+                                      <div className="size-7 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center mb-1">
+                                        <span className="material-symbols-outlined text-xs">person</span>
+                                      </div>
+                                    )}
+                                    <p
+                                      className={`text-[10px] font-bold truncate w-full ${isTodaySession ? 'text-background-dark' : ''
+                                        }`}
+                                    >
+                                      {session.teacherName}
+                                    </p>
                                     <p
                                       className={`text-[10px] ${isTodaySession
                                           ? 'text-background-dark/80 font-medium'
                                           : 'text-slate-600 dark:text-slate-300'
                                         }`}
                                     >
-                                      {getSessionTypeLabel(session.sessionType)} - {formatArabicTime(session.scheduledDate)}
+                                      {formatArabicTime(session.scheduledDate)}
                                     </p>
                                   </div>
                                 )

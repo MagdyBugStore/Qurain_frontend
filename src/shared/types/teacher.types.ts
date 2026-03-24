@@ -3,7 +3,7 @@
  * Centralized type definitions for teacher-related entities
  */
 
-export type TeacherStatus = 'pending' | 'approved' | 'rejected';
+export type TeacherStatus = 'incomplete' | 'pending' | 'approved' | 'rejected';
 
 export type Currency = 'SAR' | 'USD' | 'EGP';
 
@@ -30,6 +30,16 @@ export interface TeacherApplication {
   teachingStyle?: string;
   sessionContent?: string;
   introVideo?: string;
+  ijazahs?: Array<{
+    title: string;
+    description: string;
+    image: string;
+  }>;
+  // Admin dashboard specific fields (optional)
+  avatar?: string;
+  isIncomplete?: boolean;
+  languages?: string[];
+  title?: string;
 }
 
 export interface TeacherProfile {

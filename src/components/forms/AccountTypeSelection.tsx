@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useProfileManager } from '../../hooks/useProfileManager';
 
 interface AccountTypeSelectionProps {
   onSelect: (type: 'student' | 'teacher') => void
@@ -10,21 +11,30 @@ interface AccountTypeSelectionProps {
 
 export default function AccountTypeSelection({ onSelect }: AccountTypeSelectionProps) {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { logout, saveUserProfile } = useAuth();
+  const { updateAccountType } = useProfileManager();
   const [selectedType, setSelectedType] = useState<'student' | 'teacher' | null>(null);
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      await logout();
       navigate('');
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedType) {
-      onSelect(selectedType);
+      try {
+        // تحديث نوع الحساب في ملف المستخدم + role في الـ backend عبر مدير البروفايل
+        await updateAccountType(selectedType);
+
+        // الانتقال للخطوة التالية فقط بعد نجاح حفظ نوع الحساب
+        onSelect(selectedType);
+      } catch (error) {
+        console.error('Error updating account type:', error);
+      }
     }
   };
 

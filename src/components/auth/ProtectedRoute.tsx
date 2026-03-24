@@ -31,10 +31,10 @@ export default function ProtectedRoute({
     if (authLoading || profileLoading) {
       return;
     }
-    // If user is not authenticated, redirect to personal-info page
-    // إذا لم يكن المستخدم مسجلاً، إعادة التوجيه إلى صفحة المعلومات الشخصية
+    // If user is not authenticated, redirect to choose role page
+    // إذا لم يكن المستخدم مسجلاً، إعادة التوجيه إلى صفحة اختيار الدور
     if (!user) {
-      navigate('/personal-info', { 
+      navigate('/choose-role', { 
         state: { from: location.pathname },
         replace: true 
       });
@@ -44,15 +44,36 @@ export default function ProtectedRoute({
     // If profile completion is required, check and redirect
     // إذا كان اكتمال الملف مطلوباً، تحقق وأعد التوجيه
     if (requireProfileComplete) {
-      const profileIsComplete = checkProfileComplete();
-      
-      if (!profileIsComplete) {
-        // Redirect to personal info page to complete profile
-        // إعادة التوجيه إلى صفحة المعلومات الشخصية لإكمال الملف
-        navigate('/personal-info', { 
+      // First check if accountType is set
+      if (!userProfile?.accountType) {
+        navigate('/choose-role', { 
           state: { from: location.pathname },
           replace: true 
         });
+        return;
+      }
+
+      const profileIsComplete = checkProfileComplete();
+      
+      if (!profileIsComplete) {
+        // Redirect to appropriate page based on accountType
+        // إعادة التوجيه إلى الصفحة المناسبة حسب نوع الحساب
+        if (userProfile.accountType === 'student') {
+          navigate('/personal-info', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+        } else if (userProfile.accountType === 'teacher') {
+          navigate('/teacher-application', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+        } else {
+          navigate('/choose-role', { 
+            state: { from: location.pathname },
+            replace: true 
+          });
+        }
         return;
       }
     }

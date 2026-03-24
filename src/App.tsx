@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "./jannat-alquran.css";
 
@@ -27,6 +26,7 @@ import PostSessionPage from "./app/post-session/[id]/page";
 import RoadmapPage from "./app/roadmap/page";
 import SectionsPage from "./app/sections/page";
 import PersonalInfoPageNew from "./app/personal-info/page";
+import ChooseRolePage from "./app/choose-role/page";
 import TeacherApplicationPage from "./app/teacher-application/page";
 import TeacherApplicationReviewPage from "./app/teacher-application/review/page";
 import ProfilePage from "./app/profile/[id]/page";
@@ -34,19 +34,20 @@ import ProfileRedirect from "./app/profile/ProfileRedirect";
 import AdminDashboard from "./app/admin/page";
 import WalletPage from "./app/wallet/page";
 import SupportPage from "./app/support/page";
+import SettingsPage from "./app/settings/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
   const storeToasts = useAppStore((state) => state.toasts);
   const location = useLocation();
 
-  const addToast = (msg: string, type: string = "success") => {
+  const addToast = useCallback((msg: string, type: string = "success") => {
     const id = Date.now();
     setToasts((current) => [...current, { id, msg, type }]);
     setTimeout(() => {
       setToasts((current) => current.filter((t) => t.id !== id));
     }, 3500);
-  };
+  }, []);
   
   // Combine both toast systems (legacy and store-based)
   const allToasts = [...toasts, ...storeToasts];
@@ -113,6 +114,14 @@ function AppShell() {
           noindex: true,
           geoLocation
         };
+      case "/choose-role":
+        return {
+          title: "اختر نوع الحساب - منصة القرآن | Choose Account Type",
+          description: "اختر دورك للبدء في رحلتك التعليمية مع القرآن الكريم.",
+          type: "website",
+          noindex: true,
+          geoLocation
+        };
       case "/personal-info":
         return {
           title: "المعلومات الشخصية - منصة القرآن | Personal Information",
@@ -168,6 +177,7 @@ function AppShell() {
         {/* Legacy routes */}
         <Route path="/legacy" element={<LandingPage />} />
         <Route path="/eval" element={<EvalPage addToast={addToast} />} />
+        <Route path="/choose-role" element={<ChooseRolePage />} />
         <Route path="/personal-info" element={<PersonalInfoPageNew />} />
         <Route path="/personal-info-legacy" element={<PersonalInfoPage addToast={addToast} />} />
         <Route path="/dashboard" element={<DashboardPage addToast={addToast} />} />
@@ -198,6 +208,7 @@ function AppShell() {
         <Route path="/teacher-application/review" element={<TeacherApplicationReviewPage />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         
         {/* Fallback */}
         <Route path="*" element={<Home />} />

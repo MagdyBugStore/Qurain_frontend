@@ -1,9 +1,10 @@
 /**
  * Teacher Video Intro Component
- * Displays teacher introduction video from Firestore
+ * Displays teacher introduction video (from backend upload or external URLs)
  */
 
 import React from 'react';
+import { getVideoEmbedUrl, isBackendVideoUrl, getFullVideoUrl } from '../../../../app/teacher-profile/utils/videoEmbed';
 
 interface TeacherVideoIntroProps {
   introVideo?: string;
@@ -21,40 +22,37 @@ export function TeacherVideoIntro({ introVideo }: TeacherVideoIntroProps) {
     );
   }
 
-  // Check if it's YouTube
-  const isYouTube = introVideo.includes('youtube.com') || introVideo.includes('youtu.be');
-  // Check if it's Vimeo
-  const isVimeo = introVideo.includes('vimeo.com');
+  const embedUrl = getVideoEmbedUrl(introVideo);
+  const isBackendVideo = isBackendVideoUrl(introVideo);
+  const fullVideoUrl = isBackendVideo ? getFullVideoUrl(introVideo) : introVideo;
 
-  let embedUrl = '';
-  if (isYouTube) {
-    if (introVideo.includes('youtu.be')) {
-      embedUrl = `https://www.youtube.com/embed/${introVideo.split('/').pop()}`;
-    } else {
-      embedUrl = `https://www.youtube.com/embed/${introVideo.split('v=')[1]?.split('&')[0]}`;
-    }
-  } else if (isVimeo) {
-    embedUrl = `https://player.vimeo.com/video/${introVideo.split('/').pop()}`;
-  }
-
-  if (embedUrl) {
+  // Backend video - use video tag
+  if (isBackendVideo && embedUrl) {
     return (
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-gray-200">
-        {isYouTube ? (
-          <iframe
-            src={embedUrl}
-            className="absolute top-0 left-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <iframe
-            src={embedUrl}
-            className="absolute top-0 left-0 w-full h-full"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-          />
-        )}
+        <video
+          src={fullVideoUrl}
+          controls
+          className="w-full h-full object-contain"
+          preload="metadata"
+        >
+          متصفحك لا يدعم تشغيل الفيديو
+        </video>
+      </div>
+    );
+  }
+
+  // YouTube/Vimeo - use iframe
+  if (embedUrl && (embedUrl.includes('youtube.com') || embedUrl.includes('vimeo.com'))) {
+    const isYouTube = embedUrl.includes('youtube.com');
+    return (
+      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-gray-200">
+        <iframe
+          src={embedUrl}
+          className="absolute top-0 left-0 w-full h-full"
+          allow={isYouTube ? "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" : "autoplay; fullscreen; picture-in-picture"}
+          allowFullScreen
+        />
       </div>
     );
   }

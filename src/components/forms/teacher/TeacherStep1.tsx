@@ -13,6 +13,8 @@ interface TeacherStep1Props {
     gender: string
     nationality: string
     yearsOfExperience: number
+    languages: string[]
+    title: string
   }
   onNext: (data: Partial<TeacherStep1Props['formData']>) => void
   onBack: () => void
@@ -45,10 +47,21 @@ const countryCodes = [
   { value: '+86', label: '+86 (الصين)', flag: '🇨🇳' },
 ]
 
+const availableLanguages = [
+  { value: 'العربية', label: 'العربية' },
+  { value: 'الإنجليزية', label: 'الإنجليزية' },
+  { value: 'الفرنسية', label: 'الفرنسية' },
+  { value: 'الألمانية', label: 'الألمانية' },
+  { value: 'التركية', label: 'التركية' },
+  { value: 'الأردية', label: 'الأردية' },
+]
+
 export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1Props) {
   const [localData, setLocalData] = useState({
     ...formData,
-    countryCode: formData.countryCode || '+20'
+    countryCode: formData.countryCode || '+20',
+    languages: formData.languages || [],
+    title: formData.title || '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -96,6 +109,11 @@ export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1P
       newErrors.yearsOfExperience = 'سنوات الخبرة يجب أن تكون رقم موجب'
     }
 
+    // Validate languages
+    if (!localData.languages || localData.languages.length === 0) {
+      newErrors.languages = 'يرجى اختيار لغة واحدة على الأقل'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -107,7 +125,7 @@ export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1P
     }
   }
 
-  const handleChange = (field: keyof typeof localData, value: string | number) => {
+  const handleChange = (field: keyof typeof localData, value: string | number | string[]) => {
     setLocalData(prev => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field]) {
@@ -127,7 +145,7 @@ export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1P
           <div 
             className="w-24 h-24 rounded-full flex items-center justify-center"
             style={{
-              background: 'radial-gradient(closest-side, white 79%, transparent 80% 100%), conic-gradient(#d5aa2a 33%, #e4e2dc 0)'
+              background: 'radial-gradient(closest-side, white 79%, transparent 80% 100%), conic-gradient(#d5aa2a 33.33%, #e4e2dc 0)'
             }}
           >
             <span className="text-xl font-bold text-primary">1/3</span>
@@ -151,13 +169,13 @@ export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1P
               <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
                 2
               </div>
-              <span className="text-xs font-medium text-slate-500">المؤهلات</span>
+              <span className="text-xs font-medium text-slate-500">المؤهلات والتفاصيل</span>
             </div>
             <div className="relative z-10 flex flex-col items-center gap-2 flex-1">
               <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
                 3
               </div>
-              <span className="text-xs font-medium text-slate-500">النبذة التعريفية</span>
+              <span className="text-xs font-medium text-slate-500">العرض التعليمي</span>
             </div>
           </div>
         </div>
@@ -286,8 +304,73 @@ export default function TeacherStep1({ formData, onNext, onBack }: TeacherStep1P
         </div>
       </div>
 
+      {/* Form Section 3: Languages & Title */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-primary/5 overflow-hidden">
+        <div className="bg-primary/5 px-6 py-4 border-b border-primary/10">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">language</span>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">اللغات والعنوان المهني</h3>
+          </div>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="col-span-full">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+              اللغات التي تتحدث بها <span className="text-red-500">*</span>
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {availableLanguages.map((lang) => (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => {
+                    const newLanguages = localData.languages.includes(lang.value)
+                      ? localData.languages.filter(l => l !== lang.value)
+                      : [...localData.languages, lang.value];
+                    handleChange('languages', newLanguages);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-bold transition-all ${
+                    localData.languages.includes(lang.value)
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-primary/20 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-primary/50'
+                  }`}
+                >
+                  {localData.languages.includes(lang.value) && (
+                    <span className="material-symbols-outlined text-sm">check</span>
+                  )}
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+            {errors.languages && (
+              <p className="mt-1 text-xs text-red-500">{errors.languages}</p>
+            )}
+          </div>
+          <div className="col-span-full">
+            <Input
+              type="text"
+              label="العنوان المهني (اختياري)"
+              value={localData.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              placeholder="مثال: مدرس قرآن كريم وتجويد بخبرة 10 أعوام"
+              error={errors.title}
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              إذا تركت هذا الحقل فارغاً، سيتم إنشاء العنوان تلقائياً بناءً على سنوات الخبرة
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Action Footer */}
-      <div className="flex justify-end pt-4 mb-12">
+      <div className="flex justify-between pt-4 mb-12 gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-8 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined">arrow_forward</span>
+          رجوع
+        </button>
         <button
           onClick={handleSubmit}
           className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-12 rounded-xl flex items-center gap-2 transition-all"

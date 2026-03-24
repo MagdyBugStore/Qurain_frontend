@@ -12,7 +12,7 @@ export default function ProfileRedirect() {
     if (!loading) {
       if (user) {
         // Redirect to profile with user ID
-        navigate(`/profile/${user.uid}`, { replace: true })
+        navigate(`/profile/${user.id}`, { replace: true })
       } else {
         // Redirect to login if not authenticated
         navigate('/login', { replace: true })

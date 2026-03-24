@@ -5,15 +5,11 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuth } from '../../contexts/AuthContext'
-import { signOut } from 'firebase/auth'
-import { auth } from '../../config/firebase'
 
 export default function Header() {
   const openLoginModal = useAppStore((state) => state.openLoginModal)
-  const isAuthenticated = useAppStore((state) => state.isAuthenticated)
-  const user = useAppStore((state) => state.user)
-  const setAuthenticated = useAppStore((state) => state.setAuthenticated)
-  const { user: firebaseUser, signOut: authSignOut } = useAuth()
+  // نعتمد على AuthContext كمصدر الحقيقة لحالة تسجيل الدخول
+  const { user: authUser, userProfile, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
@@ -53,8 +49,7 @@ export default function Header() {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await authSignOut()
-      setAuthenticated(false)
+      await logout()
       setIsProfileDropdownOpen(false)
       setIsMobileProfileDropdownOpen(false)
       navigate('/')
@@ -65,16 +60,20 @@ export default function Header() {
 
   // Get user display info
   const getUserDisplayName = () => {
-    if (firebaseUser?.displayName) return firebaseUser.displayName
-    if (user?.name) return user.name
-    if (firebaseUser?.email) return firebaseUser.email.split('@')[0]
-    if (user?.email) return user.email.split('@')[0]
+    if (authUser?.fullName) return authUser.fullName
+    if (authUser?.email) return authUser.email.split('@')[0]
     return 'المستخدم'
   }
 
   const getUserPhoto = () => {
-    const photoURL = firebaseUser?.photoURL || null
-    return photoURL
+    // Try userProfile photoURL first, then fall back to authUser avatar
+    if (userProfile?.photoURL && userProfile.photoURL.trim() !== '') {
+      return userProfile.photoURL
+    }
+    if (authUser?.avatar && authUser.avatar.trim() !== '') {
+      return authUser.avatar
+    }
+    return null
   }
 
   const getUserInitials = () => {
@@ -87,8 +86,13 @@ export default function Header() {
   }
 
   const getProfileUrl = () => {
-    const userId = firebaseUser?.uid
-    return userId ? `/profile/${userId}` : '/profile'
+    // إذا لم يكن هناك ملف شخصي بعد، وجّه المستخدم إلى صفحة اختيار الدور
+    if (!userProfile || !userProfile.accountType) {
+      return '/choose-role'
+    }
+
+    const userId = authUser?.id
+    return userId ? `/profile/${userId}` : '/choose-role'
   }
 
   return (
@@ -134,7 +138,7 @@ export default function Header() {
 
           {/* Auth Buttons / Profile Dropdown */}
           <div className="flex items-center gap-2 lg:gap-3">
-            {isAuthenticated || firebaseUser ? (
+            {authUser ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
@@ -167,7 +171,7 @@ export default function Header() {
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-text-main">{getUserDisplayName()}</p>
                       <p className="text-xs text-text-muted mt-1">
-                        {firebaseUser?.email || user?.email}
+                        {authUser?.email}
                       </p>
                     </div>
                     <Link
@@ -211,7 +215,7 @@ export default function Header() {
 
           {/* Mobile menu button and profile */}
           <div className="hidden items-center gap-2">
-            {isAuthenticated || firebaseUser ? (
+            {authUser ? (
               <div className="relative" ref={mobileDropdownRef}>
                 <button
                   onClick={() => setIsMobileProfileDropdownOpen(!isMobileProfileDropdownOpen)}
@@ -241,7 +245,7 @@ export default function Header() {
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-text-main">{getUserDisplayName()}</p>
                       <p className="text-xs text-text-muted mt-1">
-                        {firebaseUser?.email || user?.email}
+                        {authUser?.email}
                       </p>
                     </div>
                     <Link
