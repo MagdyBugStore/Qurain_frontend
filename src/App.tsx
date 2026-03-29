@@ -21,6 +21,7 @@ import BookingPage from "./app/booking/[id]/page";
 import BookingConfirmPage from "./app/booking/[id]/confirm/page";
 import TechnicalCheckPage from "./app/technical-check/[id]/page";
 import WaitingRoomPage from "./app/waiting-room/[id]/page";
+import RoomCallPage from "./app/room-call/[id]/page";
 import LiveSessionPage from "./app/live-session/[id]/page";
 import PostSessionPage from "./app/post-session/[id]/page";
 import RoadmapPage from "./app/roadmap/page";
@@ -195,6 +196,7 @@ function AppShell() {
         <Route path="/booking/:id/confirm" element={<BookingConfirmPage />} />
         <Route path="/technical-check/:id" element={<TechnicalCheckPage />} />
         <Route path="/waiting-room/:id" element={<WaitingRoomPage />} />
+        <Route path="/room-call/:id" element={<RoomCallPage />} />
         <Route path="/live-session/:id" element={<LiveSessionPage />} />
         <Route path="/post-session/:id" element={<PostSessionPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />

@@ -13,6 +13,7 @@ export interface StudentSubscription {
   studentId: string;
   studentName: string;
   studentEmail: string;
+  studentAvatar?: string;
   teacherId: string;
   teacherName: string;
   planId: 'starter' | 'premium' | 'elite';
@@ -43,6 +44,51 @@ export class SubscriptionService {
       `/payments/subscriptions/teacher/${teacherId}/booked-slots`
     );
     return new Set(data.bookedSlots || []);
+  }
+
+  /**
+   * Get set of booked weekly slots for a teacher filtered by month (YYYY-MM)
+   * Falls back to general endpoint if backend doesn't support month filter.
+   */
+  async getBookedSlotsForTeacherByMonth(teacherId: string, monthISO: string): Promise<Set<string>> {
+    if (!teacherId) return new Set();
+    try {
+      const data = await apiClient.get<{ bookedSlots: string[] }>(
+        `/payments/subscriptions/teacher/${teacherId}/booked-slots?month=${encodeURIComponent(monthISO)}`
+      );
+      return new Set(data.bookedSlots || []);
+    } catch {
+      // Fallback: return all booked slots (no month filter)
+      return this.getBookedSlotsForTeacher(teacherId);
+    }
+  }
+
+  /**
+   * Get all active subscriptions for a specific teacher (includes studentName and weeklySlots)
+   */
+  async getSubscriptionsForTeacher(teacherId: string): Promise<StudentSubscription[]> {
+    if (!teacherId) return [];
+    const data = await apiClient.get<{ subscriptions: StudentSubscription[] }>(
+      `/payments/subscriptions/teacher/${teacherId}`
+    );
+    // Normalize fallback
+    return data.subscriptions || [];
+  }
+
+  /**
+   * Optionally filter subscriptions on server by month if supported.
+   * Falls back to getSubscriptionsForTeacher.
+   */
+  async getSubscriptionsForTeacherByMonth(teacherId: string, monthISO: string): Promise<StudentSubscription[]> {
+    if (!teacherId) return [];
+    try {
+      const data = await apiClient.get<{ subscriptions: StudentSubscription[] }>(
+        `/payments/subscriptions/teacher/${teacherId}?month=${encodeURIComponent(monthISO)}`
+      );
+      return data.subscriptions || [];
+    } catch {
+      return this.getSubscriptionsForTeacher(teacherId);
+    }
   }
 
   /**

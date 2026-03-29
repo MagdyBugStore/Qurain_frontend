@@ -41,6 +41,8 @@ import { usePersonalInfo } from './hooks/usePersonalInfo'
 
 // Types
 import type { QuickTab, SubTab } from './types'
+import { SubscriptionService, type StudentSubscription } from '../../services/subscriptionService'
+import { TIME_SLOTS } from './constants/schedule'
 
 export default function TeacherProfilePage() {
   const navigate = useNavigate()
@@ -134,6 +136,102 @@ export default function TeacherProfilePage() {
   const profileImage = getTeacherImageUrl(teacherProfile || userProfile)
   const sessionPrice = teacherApplication?.hourlyRate || 0
   const currency = getCurrencySymbol(teacherApplication?.currency)
+
+  // Booked users map: slotKey -> { name, avatar }
+  const [bookedUsersMap, setBookedUsersMap] = useState<Record<string, { name: string; avatar?: string }>>({})
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState<number>(new Date().getMonth())
+  const [bookedSlotsSet, setBookedSlotsSet] = useState<Set<string>>(new Set())
+
+  const monthIndexToISO = (monthIdx: number) => {
+    const y = new Date().getFullYear()
+    const m = String(monthIdx + 1).padStart(2, '0')
+    return `${y}-${m}`
+  }
+
+  // Normalize subscription time strings to canonical values used by TIME_SLOTS (e.g., '٠٨:٠٠ ص')
+  const normalizeTimeToCanonicalSlot = React.useCallback((rawTime: string): string | null => {
+    if (!rawTime) return null
+    const SLOTS = (TIME_SLOTS as unknown as string[])
+    if (SLOTS.includes(rawTime)) return rawTime
+    const arabicToAscii = (s: string) => s.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    const t = arabicToAscii(rawTime).trim()
+    const isAM = /(ص|AM)\b/i.test(t)
+    const isPM = /(م|PM)\b/i.test(t)
+    const hourMatch = t.match(/(\d{1,2})\s*:\s*\d{2}/) || t.match(/(\d{1,2})/)
+    if (!hourMatch) return null
+    let hour = parseInt(hourMatch[1], 10)
+    if (Number.isNaN(hour)) return null
+    if (isAM || isPM) {
+      if (isAM) {
+        if (hour === 12) hour = 0
+      } else if (isPM) {
+        if (hour !== 12) hour += 12
+      }
+    }
+    if (hour < 8 || hour > 19) return null
+    const idx = hour - 8
+    return SLOTS[idx] || null
+  }, [])
+
+  useEffect(() => {
+    const loadBookedNames = async () => {
+      try {
+        if (!teacherApplication?.userId && !teacherApplication?.id) {
+          setBookedUsersMap({})
+          return
+        }
+        const teacherId = teacherApplication.userId || teacherApplication.id
+        const subscriptionService = new SubscriptionService()
+        // Prefer month-filtered subscriptions if backend supports, else fallback
+        const monthISO = monthIndexToISO(selectedMonthIndex)
+        const subs: StudentSubscription[] = await subscriptionService.getSubscriptionsForTeacherByMonth(teacherId, monthISO)
+        const bookedSet = await subscriptionService.getBookedSlotsForTeacherByMonth(teacherId, monthISO)
+        const map: Record<string, { name: string; avatar?: string }> = {}
+        subs.forEach((sub) => {
+          sub.weeklySlots.forEach(({ dayIndex, time }) => {
+            const canonical = normalizeTimeToCanonicalSlot(time)
+            if (!canonical) return
+            const key = `${dayIndex}_${canonical}`
+            map[key] = { name: sub.studentName, avatar: sub.studentAvatar }
+          })
+        })
+        setBookedUsersMap(map)
+        setBookedSlotsSet(bookedSet)
+      } catch (e) {
+        // Fail silently for now; UI will still show 'محجوز'
+        setBookedUsersMap({})
+        setBookedSlotsSet(new Set())
+      }
+    }
+    loadBookedNames()
+  }, [teacherApplication?.userId, teacherApplication?.id, selectedMonthIndex, normalizeTimeToCanonicalSlot])
+
+  const handleAvailabilityMonthChange = (monthIdx: number) => {
+    setSelectedMonthIndex(monthIdx)
+  }
+
+  const handleJoinFromAvailability = (args: {
+    slotKey: string;
+    dayIndex: number;
+    timeIndex: number;
+    nextAt: Date | null;
+    counterpartName?: string;
+    counterpartAvatar?: string;
+  }) => {
+    // Placeholder integration: navigate to waiting room if there is an active/upcoming session id mapping.
+    // TODO: Map (dayIndex,time) + nextAt to specific sessionId via backend if needed.
+    // For now, open the waiting room with teacher id as room id fallback.
+    const roomId = teacherApplication?.userId || teacherApplication?.id
+    if (roomId) {
+      const params = new URLSearchParams()
+      if (args.nextAt) params.set('nextAt', args.nextAt.toISOString())
+      if (args.counterpartName) params.set('counterpartName', args.counterpartName)
+      if (args.counterpartAvatar) params.set('counterpartAvatar', args.counterpartAvatar)
+      const query = params.toString()
+      const url = `/technical-check/${encodeURIComponent(roomId)}${query ? `?${query}` : ''}`
+      window.open(url, '_blank')
+    }
+  }
 
   // Save handlers
   const handleSavePersonalInfo = async (bio: string, introVideo: string) => {
@@ -452,9 +550,14 @@ export default function TeacherProfilePage() {
                     isApproved={isApproved}
                     isPending={isPending}
                     onToggleSlot={availabilityHook.toggleSlot}
+                    onSetAvailability={availabilityHook.setAvailability}
                     onSave={handleSaveAvailability}
                     saving={availabilityHook.saving}
                     hasChanges={availabilityHook.hasChanges}
+                    bookedUsersMap={bookedUsersMap}
+                    bookedSlotsSet={bookedSlotsSet}
+                    onMonthChange={handleAvailabilityMonthChange}
+                    onJoinSession={handleJoinFromAvailability}
                   />
                 )}
 

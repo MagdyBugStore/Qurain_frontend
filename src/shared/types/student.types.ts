@@ -27,6 +27,8 @@ export interface StudentSession {
   teacherId: string;
   teacherName: string;
   teacherPhoto: string;
+  studentName?: string;
+  studentPhoto?: string;
   title: string;
   description?: string;
   scheduledDate: Date | string;

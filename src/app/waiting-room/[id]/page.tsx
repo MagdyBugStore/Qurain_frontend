@@ -2,14 +2,16 @@
 
 import React from "react";
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Header from '../../../components/layout/Header'
 import { useAuth } from '../../../contexts/AuthContext'
 import { StudentService } from '../../../services/studentService'
+import { SessionService } from '../../../services/sessionService'
 import type { StudentSession } from '../../../shared/types/student.types'
 
 export default function WaitingRoomPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
 
@@ -22,8 +24,18 @@ export default function WaitingRoomPage() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [lateCountdownSeconds, setLateCountdownSeconds] = useState(5 * 60)
 
-  const teacherName = session?.teacherName || 'المعلم'
-  const teacherPhoto = session?.teacherPhoto || ''
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const queryCounterpartName = queryParams.get('counterpartName') || ''
+  const queryCounterpartAvatar = queryParams.get('counterpartAvatar') || ''
+  const queryNextAt = queryParams.get('nextAt')
+  const counterpartName =
+    user?.role === 'teacher'
+      ? session?.studentName || queryCounterpartName
+      : session?.teacherName || queryCounterpartName
+  const counterpartPhoto =
+    user?.role === 'teacher'
+      ? session?.studentPhoto || queryCounterpartAvatar
+      : session?.teacherPhoto || queryCounterpartAvatar
   const meetingLink = session?.meetingLink
 
   useEffect(() => {
@@ -34,6 +46,7 @@ export default function WaitingRoomPage() {
     }
 
     const studentService = new StudentService()
+    const sessionService = new SessionService()
 
     const loadSession = async () => {
       try {
@@ -64,14 +77,47 @@ export default function WaitingRoomPage() {
       }
     }
 
-    void loadSession()
-  }, [id, user?.id])
+    // Try role-agnostic load by session ID first (both roles, backend-authorized)
+    (async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const direct = await sessionService.getSessionById(id)
+        if (direct) {
+          setSession(direct)
+          return
+        }
+        // Fallback: students use their endpoints
+        if (user?.role === 'student') {
+          await loadSession()
+          return
+        }
+        // Teachers: allow page without student APIs if direct not available yet
+        if (user?.role === 'teacher') {
+          setSession(null)
+          setError(null)
+          return
+        }
+        // Others: block access
+        setSession(null)
+        setError('هذه الصفحة خاصة بالطالب أو المعلم فقط.')
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [id, user?.id, user?.role])
 
   const sessionStartTime = useMemo(() => {
-    if (!session?.scheduledDate) return null
-    const date = new Date(session.scheduledDate)
-    return Number.isNaN(date.getTime()) ? null : date
-  }, [session])
+    if (session?.scheduledDate) {
+      const date = new Date(session.scheduledDate)
+      return Number.isNaN(date.getTime()) ? null : date
+    }
+    if (queryNextAt) {
+      const fallbackDate = new Date(queryNextAt)
+      return Number.isNaN(fallbackDate.getTime()) ? null : fallbackDate
+    }
+    return null
+  }, [session, queryNextAt])
 
   useEffect(() => {
     if (!sessionStartTime) return undefined
@@ -153,6 +199,19 @@ export default function WaitingRoomPage() {
     navigate('/student-profile')
   }
 
+  const handleJoinCall = async () => {
+    if (!id) return
+    const params = new URLSearchParams(location.search)
+    if (counterpartName && !params.get('counterpartName')) {
+      params.set('counterpartName', counterpartName)
+    }
+    if (counterpartPhoto && !params.get('counterpartAvatar')) {
+      params.set('counterpartAvatar', counterpartPhoto)
+    }
+    const query = params.toString()
+    navigate(`/room-call/${id}${query ? `?${query}` : ''}`)
+  }
+
   if (loading) {
     return (
       <>
@@ -167,7 +226,9 @@ export default function WaitingRoomPage() {
     )
   }
 
-  if (error || !session) {
+  // Do not block students/teachers with an error screen; proceed to main UI.
+  // Only block unknown roles.
+  if (error && user && user.role !== 'student' && user.role !== 'teacher') {
     return (
       <>
         <Header />
@@ -176,13 +237,13 @@ export default function WaitingRoomPage() {
             <span className="material-symbols-outlined text-5xl text-primary">error</span>
             <h1 className="mt-3 text-xl font-bold text-text-main dark:text-white">تعذر فتح غرفة الانتظار</h1>
             <p className="mt-2 text-text-muted dark:text-slate-400">
-              {error || 'الجلسة غير متاحة حالياً.'}
+              {error}
             </p>
             <button
-              onClick={() => navigate('/student-profile')}
+              onClick={() => navigate('/')}
               className="mt-6 px-5 py-2.5 rounded-lg bg-primary text-background-dark font-bold hover:bg-primary/90 transition-colors"
             >
-              العودة للملف الشخصي
+              العودة للرئيسية
             </button>
           </div>
         </main>
@@ -190,79 +251,7 @@ export default function WaitingRoomPage() {
     )
   }
 
-  if (isTutorLate) {
-    return (
-      <>
-        <Header />
-        <main className="flex-grow flex flex-col items-center justify-center px-4 py-8 relative bg-background-light dark:bg-background-dark">
-          <div className="w-full max-w-[640px] flex flex-col items-center gap-8 z-10">
-            {/* Notification Banner */}
-            <div className="w-full bg-primary/10 border border-primary/20 rounded-xl p-6 flex flex-col items-center justify-center text-center animate-pulse">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="material-symbols-outlined text-primary text-3xl">schedule</span>
-                <h3 className="text-primary text-2xl font-bold leading-tight">المعلم يتأخر قليلاً — انتظر 5 دقائق</h3>
-              </div>
-              <p className="text-text-muted dark:text-slate-300 text-base font-normal leading-normal">
-                نعتذر عن التأخير. سيقوم المعلم بالانضمام إلى الجلسة قريباً. يرجى البقاء في هذه الصفحة.
-              </p>
-            </div>
-
-            {/* Timer Section */}
-            <div className="grid grid-cols-3 gap-4 w-full max-w-md">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-full aspect-square flex items-center justify-center bg-white dark:bg-surface-dark border border-primary/10 rounded-xl shadow-lg">
-                  <span className="text-text-main dark:text-white text-4xl font-bold font-display">00</span>
-                </div>
-                <span className="text-text-muted dark:text-slate-300 text-sm font-medium">ساعة</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-full aspect-square flex items-center justify-center bg-white dark:bg-surface-dark border border-primary/10 rounded-xl shadow-lg relative overflow-hidden">
-                  <div className="absolute bottom-0 left-0 w-full h-1 bg-primary/20">
-                    <div
-                      className="h-full bg-primary"
-                      style={{ width: `${(lateCountdownSeconds / (5 * 60)) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-primary text-4xl font-bold font-display">
-                    {String(lateTimerParts.minutes).padStart(2, '0')}
-                  </span>
-                </div>
-                <span className="text-text-muted dark:text-slate-300 text-sm font-medium">دقيقة</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-full aspect-square flex items-center justify-center bg-white dark:bg-surface-dark border border-primary/10 rounded-xl shadow-lg">
-                  <span className="text-text-main dark:text-white text-4xl font-bold font-display">
-                    {String(lateTimerParts.seconds).padStart(2, '0')}
-                  </span>
-                </div>
-                <span className="text-text-muted dark:text-slate-300 text-sm font-medium">ثانية</span>
-              </div>
-            </div>
-
-            {/* Status Card */}
-            <div className="flex flex-col items-center gap-6 w-full mt-4">
-              <div className="relative w-full aspect-video max-w-[420px] rounded-xl overflow-hidden shadow-2xl border border-primary/10 bg-white dark:bg-surface-dark group">
-                <div className="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark via-transparent to-transparent"></div>
-                <div className="relative z-10 flex flex-col items-center justify-center h-full gap-4 p-6">
-                  <div className="size-16 rounded-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm flex items-center justify-center border border-primary/30">
-                    <span className="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-text-main dark:text-white text-lg font-bold mb-1">في انتظار المعلم</p>
-                    <p className="text-text-muted dark:text-slate-300 text-sm">جاري الاتصال...</p>
-                  </div>
-                </div>
-              </div>
-              <button className="flex w-full max-w-[300px] cursor-pointer items-center justify-center gap-2 rounded-lg h-12 px-6 bg-white dark:bg-surface-dark hover:bg-primary/10 border border-primary/20 transition-all text-text-main dark:text-white text-sm font-bold leading-normal tracking-[0.015em]">
-                <span className="material-symbols-outlined text-lg">chat</span>
-                <span>إرسال رسالة للمعلم</span>
-              </button>
-            </div>
-          </div>
-        </main>
-      </>
-    )
-  }
+  // Do not render a separate “late” screen; allow joining any time.
 
   return (
     <>
@@ -277,11 +266,11 @@ export default function WaitingRoomPage() {
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-primary/20 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative size-40 rounded-full border-4 border-primary/30 overflow-hidden bg-white dark:bg-surface-dark shadow-2xl">
-                {teacherPhoto ? (
+                {counterpartPhoto ? (
                   <img
-                    alt={`صورة ${teacherName}`}
+                    alt={`صورة ${counterpartName || 'الطرف المقابل'}`}
                     className="w-full h-full object-cover"
-                    src={teacherPhoto}
+                    src={counterpartPhoto}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -292,7 +281,9 @@ export default function WaitingRoomPage() {
               <div className="absolute bottom-2 right-2 bg-green-500 border-4 border-background-light dark:border-background-dark size-6 rounded-full"></div>
             </div>
             <div className="text-center space-y-2">
-              <h1 className="text-3xl md:text-4xl font-bold text-text-main dark:text-white tracking-tight">{teacherName}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-text-main dark:text-white tracking-tight">
+                {counterpartName || 'الطرف المقابل'}
+              </h1>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-surface-dark border border-primary/20">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -365,6 +356,14 @@ export default function WaitingRoomPage() {
             >
               <span className="material-symbols-outlined">logout</span>
               <span className="font-bold">مغادرة</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleJoinCall}
+              className="flex items-center gap-2 px-6 h-14 rounded-full border border-primary/40 text-primary hover:bg-primary/10 transition-all"
+            >
+              <span className="material-symbols-outlined">video_call</span>
+              <span className="font-bold">بدء الاتصال</span>
             </button>
           </div>
         </div>

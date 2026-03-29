@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect } from 'react'
 import Header from '../../../components/layout/Header'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { TechnicalCheck } from '../../../features/room/presentation/components/TechnicalCheck/TechnicalCheck'
 import { useDeviceCheck } from '../../../features/room/presentation/hooks/useDeviceCheck'
 import { useRoom } from '../../../features/room/presentation/hooks/useRoom'
@@ -11,6 +11,7 @@ import { useRoom } from '../../../features/room/presentation/hooks/useRoom'
 
 export default function TechnicalCheckPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams<{ id: string }>()
   const { room, updateStatus } = useRoom(id)
   const { checking, result, runCheck } = useDeviceCheck()
@@ -37,7 +38,7 @@ export default function TechnicalCheckPage() {
   const handleEnter = async () => {
     if (result?.allPassed && id) {
       await updateStatus('waiting')
-      navigate(`/waiting-room/${id}`)
+      navigate(`/waiting-room/${id}${location.search || ''}`)
     }
   }
 

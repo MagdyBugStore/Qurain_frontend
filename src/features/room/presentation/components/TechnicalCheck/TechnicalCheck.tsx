@@ -14,6 +14,9 @@ interface TechnicalCheckProps {
 }
 
 export function TechnicalCheck({ result, checking, onRetry, onEnter }: TechnicalCheckProps) {
+  const [isCameraOff, setIsCameraOff] = React.useState(false);
+  const [isMicMuted, setIsMicMuted] = React.useState(false);
+  const [isAudioMuted, setIsAudioMuted] = React.useState(false);
   if (!result) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -43,7 +46,7 @@ export function TechnicalCheck({ result, checking, onRetry, onEnter }: Technical
 
         {/* Checks List */}
         <div className="p-6 sm:p-8 flex flex-col gap-6">
-          {/* Camera Check */}
+          {/* Camera Check (camera-only controls) */}
           <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-[#fcfbf9] dark:bg-[#252115] border border-[#e6e3db] dark:border-[#3a3528]">
             <div className="relative w-32 h-24 sm:w-40 sm:h-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
               <div className="absolute inset-0 bg-cover bg-center bg-gray-300"></div>
@@ -62,13 +65,31 @@ export function TechnicalCheck({ result, checking, onRetry, onEnter }: Technical
                 {result.cameraDevice || 'Camera'}
               </p>
             </div>
-            <div className="flex-shrink-0 flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-              <span className="font-bold text-sm">جاهزة</span>
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                <span className="font-bold text-sm">جاهزة</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCameraOff((v) => !v)}
+                className={`inline-flex items-center gap-1.5 px-2 h-9 rounded-md border text-xs transition-colors ${
+                  isCameraOff
+                    ? 'border-red-300 text-red-600 bg-red-50 dark:bg-red-900/20'
+                    : 'border-green-300 text-green-700 bg-green-50 dark:bg-green-900/20'
+                }`}
+                aria-pressed={isCameraOff}
+                aria-label={isCameraOff ? 'فتح الكاميرا' : 'كتم الكاميرا'}
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {isCameraOff ? 'videocam_off' : 'videocam'}
+                </span>
+                <span className="font-bold">{isCameraOff ? 'فتح' : 'كام'}</span>
+              </button>
             </div>
           </div>
 
-          {/* Microphone Check */}
+          {/* Microphone Check (mic + audio controls) */}
           <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-[#fcfbf9] dark:bg-[#252115] border border-[#e6e3db] dark:border-[#3a3528]">
             <div className="w-32 h-24 sm:w-40 sm:h-28 flex-shrink-0 flex flex-col items-center justify-center rounded-lg bg-gray-100 dark:bg-[#1e1b12] border border-dashed border-[#d1cdc2] dark:border-[#4a4433]">
               <div className="flex items-end gap-1 h-12">
@@ -90,13 +111,49 @@ export function TechnicalCheck({ result, checking, onRetry, onEnter }: Technical
                 {result.microphoneDevice || 'Microphone'}
               </p>
             </div>
-            <div className="flex-shrink-0 flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-              <span className="font-bold text-sm">يعمل جيداً</span>
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                <span className="font-bold text-sm">يعمل جيداً</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMicMuted((v) => !v)}
+                  className={`inline-flex items-center gap-1.5 px-2 h-9 rounded-md border text-xs transition-colors ${
+                    isMicMuted
+                      ? 'border-red-300 text-red-600 bg-red-50 dark:bg-red-900/20'
+                      : 'border-green-300 text-green-700 bg-green-50 dark:bg-green-900/20'
+                  }`}
+                  aria-pressed={isMicMuted}
+                  aria-label={isMicMuted ? 'تشغيل الميكروفون' : 'كتم الميكروفون'}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {isMicMuted ? 'mic_off' : 'mic'}
+                  </span>
+                  <span className="font-bold">{isMicMuted ? 'كتم' : 'ميك'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAudioMuted((v) => !v)}
+                  className={`inline-flex items-center gap-1.5 px-2 h-9 rounded-md border text-xs transition-colors ${
+                    isAudioMuted
+                      ? 'border-amber-300 text-amber-700 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-blue-300 text-blue-700 bg-blue-50 dark:bg-blue-900/20'
+                  }`}
+                  aria-pressed={isAudioMuted}
+                  aria-label={isAudioMuted ? 'تشغيل الصوت' : 'كتم الصوت'}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {isAudioMuted ? 'volume_off' : 'volume_up'}
+                  </span>
+                  <span className="font-bold">{isAudioMuted ? 'كتم' : 'صوت'}</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Internet Speed Check */}
+          {/* Internet Speed Check (no extra controls) */}
           <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-[#fcfbf9] dark:bg-[#252115] border border-[#e6e3db] dark:border-[#3a3528]">
             <div className="w-32 h-24 sm:w-40 sm:h-28 flex-shrink-0 flex flex-col items-center justify-center rounded-lg bg-gray-100 dark:bg-[#1e1b12] border border-dashed border-[#d1cdc2] dark:border-[#4a4433]">
               <span className="material-symbols-outlined text-4xl text-primary mb-1">speed</span>
@@ -115,20 +172,25 @@ export function TechnicalCheck({ result, checking, onRetry, onEnter }: Technical
                 الاتصال مستقر ومناسب للفيديو
               </p>
             </div>
-            <div className="flex-shrink-0 flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-              <span className="font-bold text-sm">ممتاز</span>
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-full border border-green-100 dark:border-green-900/30">
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                <span className="font-bold text-sm">ممتاز</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 sm:p-8 bg-[#f8f8f5] dark:bg-[#221e10] border-t border-[#e6e3db] dark:border-[#3a3528] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-[#8a8060] dark:text-[#a39b80] text-sm">
-            <span className="material-symbols-outlined text-[18px]">info</span>
-            <span>إذا واجهت مشكلة، يرجى التواصل مع الدعم الفني</span>
+        <div className="p-6 sm:p-8 bg-[#f8f8f5] dark:bg-[#221e10] border-t border-[#e6e3db] dark:border-[#3a3528] flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-[#8a8060] dark:text-[#a39b80] text-sm">
+              <span className="material-symbols-outlined text-[18px]">info</span>
+              <span>إذا واجهت مشكلة، يرجى التواصل مع الدعم الفني</span>
+            </div>
+            
           </div>
-          <div className="flex gap-4 w-full sm:w-auto">
+          <div className="flex gap-4 w-full sm:w-auto justify-end">
             <button
               onClick={onRetry}
               disabled={checking}
@@ -205,10 +267,28 @@ export function TechnicalCheck({ result, checking, onRetry, onEnter }: Technical
               </p>
             </div>
           </div>
-          <div className={`shrink-0 ${result.camera === 'passed' ? 'text-success' : 'text-error'}`}>
-            <span className="material-symbols-outlined text-[32px]">
-              {result.camera === 'passed' ? 'check_circle' : 'cancel'}
-            </span>
+          <div className="shrink-0 flex items-center gap-2">
+            <div className={`${result.camera === 'passed' ? 'text-success' : 'text-error'}`}>
+              <span className="material-symbols-outlined text-[32px]">
+                {result.camera === 'passed' ? 'check_circle' : 'cancel'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCameraOff((v) => !v)}
+              className={`inline-flex items-center gap-1.5 px-2 h-9 rounded-md border text-xs transition-colors ${
+                isCameraOff
+                  ? 'border-red-300 text-red-600 bg-red-50 dark:bg-red-900/20'
+                  : 'border-green-300 text-green-700 bg-green-50 dark:bg-green-900/20'
+              }`}
+              aria-pressed={isCameraOff}
+              aria-label={isCameraOff ? 'فتح الكاميرا' : 'كتم الكاميرا'}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {isCameraOff ? 'videocam_off' : 'videocam'}
+              </span>
+              <span className="font-bold">{isCameraOff ? 'فتح' : 'كام'}</span>
+            </button>
           </div>
         </div>
 
