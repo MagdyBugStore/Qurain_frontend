@@ -12,6 +12,8 @@ export function useWebRTC(roomId: string | undefined, options: UseWebRTCOptions 
   const [hasRemoteParticipant, setHasRemoteParticipant] = useState(false);
   const [isMicOn, setIsMicOn] = useState(!!options.audio);
   const [isVideoOn, setIsVideoOn] = useState(!!options.video);
+  const [localStreamReady, setLocalStreamReady] = useState(false);
+  const [remoteStreamReady, setRemoteStreamReady] = useState(false);
 
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
@@ -34,6 +36,7 @@ export function useWebRTC(roomId: string | undefined, options: UseWebRTCOptions 
       localStreamRef.current = stream;
       setIsMicOn(!!options.audio);
       setIsVideoOn(!!options.video);
+      setLocalStreamReady(true);
       return stream;
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to access camera/microphone';
@@ -64,6 +67,7 @@ export function useWebRTC(roomId: string | undefined, options: UseWebRTCOptions 
         remoteStreamRef.current = new MediaStream();
       }
       remoteStreamRef.current.addTrack(event.track);
+      setRemoteStreamReady(true);
     };
     pcRef.current = pc;
     return pc;
@@ -179,6 +183,8 @@ export function useWebRTC(roomId: string | undefined, options: UseWebRTCOptions 
     remoteStreamRef.current = null;
     setIsConnected(false);
     setHasRemoteParticipant(false);
+    setLocalStreamReady(false);
+    setRemoteStreamReady(false);
     joinedRef.current = false;
     makingOfferRef.current = false;
     ignoreOfferRef.current = false;
@@ -212,6 +218,8 @@ export function useWebRTC(roomId: string | undefined, options: UseWebRTCOptions 
     hasRemoteParticipant,
     isMicOn,
     isVideoOn,
+    localStreamReady,
+    remoteStreamReady,
     localStream: localStreamRef,
     remoteStream: remoteStreamRef,
     join,

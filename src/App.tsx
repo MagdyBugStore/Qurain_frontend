@@ -36,6 +36,7 @@ import AdminDashboard from "./app/admin/page";
 import WalletPage from "./app/wallet/page";
 import SupportPage from "./app/support/page";
 import SettingsPage from "./app/settings/page";
+import TestRoomPage from "./app/test-room/[roomId]/page";
 
 function AppShell() {
   const [toasts, setToasts] = useState<{ id: number; msg: string; type: string }[]>([]);
@@ -211,7 +212,11 @@ function AppShell() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        
+
+        {/* WebRTC debug test room — no auth required */}
+        <Route path="/test-room" element={<TestRoomPage />} />
+        <Route path="/test-room/:roomId" element={<TestRoomPage />} />
+
         {/* Fallback */}
         <Route path="*" element={<Home />} />
       </Routes>

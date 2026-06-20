@@ -14,6 +14,8 @@ export function RoomCall({ roomId, counterpartName, counterpartAvatar }: Props) 
     hasRemoteParticipant,
     isMicOn,
     isVideoOn,
+    localStreamReady,
+    remoteStreamReady,
     localStream,
     remoteStream,
     join,
@@ -49,13 +51,13 @@ export function RoomCall({ roomId, counterpartName, counterpartAvatar }: Props) 
     if (localVideoRef.current && localStream.current) {
       localVideoRef.current.srcObject = localStream.current;
     }
-  }, [localStream]);
+  }, [localStreamReady, localStream]);
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream.current) {
       remoteVideoRef.current.srcObject = remoteStream.current;
     }
-  }, [remoteStream]);
+  }, [remoteStreamReady, remoteStream]);
 
   useEffect(() => {
     let cancelled = false;

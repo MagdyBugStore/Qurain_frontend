@@ -1,64 +1,41 @@
 'use client'
 
-import React from "react";
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAppStore } from '../../store/useAppStore'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function Header() {
-  const openLoginModal = useAppStore((state) => state.openLoginModal)
-  // نعتمد على AuthContext كمصدر الحقيقة لحالة تسجيل الدخول
   const { user: authUser, userProfile, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
-  const [isMobileProfileDropdownOpen, setIsMobileProfileDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const mobileDropdownRef = useRef<HTMLDivElement>(null)
 
-  const navItems = [
-    { to: '/teachers', label: 'المعلمين' },
-  ]
+  const isActive = (to: string) =>
+    to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
 
-  const isActive = (to: string) => {
-    if (to === '/') return location.pathname === '/'
-    return location.pathname === to || location.pathname.startsWith(`${to}/`)
-  }
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsProfileDropdownOpen(false)
       }
-      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target as Node)) {
-        setIsMobileProfileDropdownOpen(false)
-      }
     }
-
-    if (isProfileDropdownOpen || isMobileProfileDropdownOpen) {
+    if (isProfileDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside)
     }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isProfileDropdownOpen])
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isProfileDropdownOpen, isMobileProfileDropdownOpen])
-
-  // Handle logout
   const handleLogout = async () => {
     try {
       await logout()
       setIsProfileDropdownOpen(false)
-      setIsMobileProfileDropdownOpen(false)
       navigate('/')
     } catch (error) {
       console.error('Logout error:', error)
     }
   }
 
-  // Get user display info
   const getUserDisplayName = () => {
     if (authUser?.fullName) return authUser.fullName
     if (authUser?.email) return authUser.email.split('@')[0]
@@ -66,85 +43,56 @@ export default function Header() {
   }
 
   const getUserPhoto = () => {
-    // Try userProfile photoURL first, then fall back to authUser avatar
-    if (userProfile?.photoURL && userProfile.photoURL.trim() !== '') {
-      return userProfile.photoURL
-    }
-    if (authUser?.avatar && authUser.avatar.trim() !== '') {
-      return authUser.avatar
-    }
+    if (userProfile?.photoURL?.trim()) return userProfile.photoURL
+    if (authUser?.avatar?.trim()) return authUser.avatar
     return null
   }
 
   const getUserInitials = () => {
     const name = getUserDisplayName()
     const parts = name.split(' ')
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase()
-    }
-    return name.substring(0, 2).toUpperCase()
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase()
   }
 
   const getProfileUrl = () => {
-    // إذا لم يكن هناك ملف شخصي بعد، وجّه المستخدم إلى صفحة اختيار الدور
-    if (!userProfile || !userProfile.accountType) {
-      return '/choose-role'
-    }
-
-    const userId = authUser?.id
-    return userId ? `/profile/${userId}` : '/choose-role'
+    if (!userProfile?.accountType) return '/choose-role'
+    return authUser?.id ? `/profile/${authUser.id}` : '/choose-role'
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 sm:gap-3">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 text-primary flex-shrink-0">
-              <svg
-                className="w-full h-full"
-                fill="none"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+              <span
+                className="material-symbols-outlined text-text-main"
+                style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1" }}
               >
-                <path
-                  clipRule="evenodd"
-                  d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z"
-                  fill="currentColor"
-                  fillRule="evenodd"
-                />
-              </svg>
+                menu_book
+              </span>
             </div>
-            <span className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-text-main whitespace-nowrap">
-              القرآن أونلاين
+            <span
+              className="text-xl font-bold text-text-main"
+              style={{ fontFamily: 'Noto Serif, serif' }}
+            >
+              قرآن
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="flex items-center gap-6 lg:gap-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`text-sm lg:text-base font-medium transition-colors whitespace-nowrap ${
-                  isActive(item.to) ? 'text-primary' : 'hover:text-primary'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Auth Buttons / Profile Dropdown */}
-          <div className="flex items-center gap-2 lg:gap-3">
+          {/* Auth Area */}
+          <div className="flex items-center gap-3">
             {authUser ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden border-2 border-primary/30 bg-primary/10">
                     {getUserPhoto() ? (
                       <img
                         src={getUserPhoto()!}
@@ -160,136 +108,56 @@ export default function Header() {
                   <span className="text-sm font-medium text-text-main hidden lg:block">
                     {getUserDisplayName()}
                   </span>
-                  <span className="material-symbols-outlined text-lg text-text-muted">
+                  <span className="material-symbols-outlined text-text-muted" style={{ fontSize: '20px' }}>
                     {isProfileDropdownOpen ? 'expand_less' : 'expand_more'}
                   </span>
                 </button>
 
-                {/* Dropdown Menu */}
                 {isProfileDropdownOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                  <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-text-main">{getUserDisplayName()}</p>
-                      <p className="text-xs text-text-muted mt-1">
-                        {authUser?.email}
-                      </p>
+                      <p className="text-xs text-text-muted mt-0.5">{authUser?.email}</p>
                     </div>
                     <Link
                       to={getProfileUrl()}
                       onClick={() => setIsProfileDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-main hover:bg-gray-50 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-lg">person</span>
-                      <span>الملف الشخصي</span>
+                      <span className="material-symbols-outlined text-text-muted" style={{ fontSize: '20px' }}>person</span>
+                      الملف الشخصي
                     </Link>
                     <Link
                       to="/settings"
                       onClick={() => setIsProfileDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-main hover:bg-gray-50 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-lg">settings</span>
-                      <span>الإعدادات</span>
+                      <span className="material-symbols-outlined text-text-muted" style={{ fontSize: '20px' }}>settings</span>
+                      الإعدادات
                     </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
+                    <div className="border-t border-gray-100 my-1" />
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors text-right"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors text-right"
                     >
-                      <span className="material-symbols-outlined text-lg">logout</span>
-                      <span>تسجيل الخروج</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
+                      تسجيل الخروج
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <>
-                <button
-                  onClick={openLoginModal}
-                  className="bg-primary hover:bg-primary-dark text-white text-xs sm:text-sm font-bold px-3 lg:px-5 py-1.5 lg:py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap"
-                >
-                  تسجيل الدخول
-                  </button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile menu button and profile */}
-          <div className="hidden items-center gap-2">
-            {authUser ? (
-              <div className="relative" ref={mobileDropdownRef}>
-                <button
-                  onClick={() => setIsMobileProfileDropdownOpen(!isMobileProfileDropdownOpen)}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                    {getUserPhoto() ? (
-                      <img
-                        src={getUserPhoto()!}
-                        alt={getUserDisplayName()}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xs font-bold text-primary">
-                        {getUserInitials()}
-                      </span>
-                    )}
-                  </div>
-                  <span className="material-symbols-outlined text-lg text-text-muted">
-                    {isMobileProfileDropdownOpen ? 'expand_less' : 'expand_more'}
-                  </span>
-                </button>
-
-                {/* Mobile Dropdown Menu */}
-                {isMobileProfileDropdownOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-text-main">{getUserDisplayName()}</p>
-                      <p className="text-xs text-text-muted mt-1">
-                        {authUser?.email}
-                      </p>
-                    </div>
-                    <Link
-                      to={getProfileUrl()}
-                      onClick={() => setIsMobileProfileDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-lg">person</span>
-                      <span>الملف الشخصي</span>
-                    </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setIsMobileProfileDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-lg">settings</span>
-                      <span>الإعدادات</span>
-                    </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
-                    <button
-                      onClick={() => {
-                        setIsMobileProfileDropdownOpen(false)
-                        handleLogout()
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors text-right"
-                    >
-                      <span className="material-symbols-outlined text-lg">logout</span>
-                      <span>تسجيل الخروج</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={openLoginModal}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg text-text-main hover:bg-gray-50 transition-colors whitespace-nowrap"
+              <Link
+                to="/"
+                className="text-sm font-bold px-5 py-2 rounded-xl bg-primary text-text-main transition-all hover:bg-primary-hover shadow-sm"
               >
                 تسجيل الدخول
-              </button>
+              </Link>
             )}
           </div>
+
         </div>
       </div>
-
     </header>
   )
 }

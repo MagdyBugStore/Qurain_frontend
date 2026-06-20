@@ -57,7 +57,7 @@ export default function HeroSection() {
                   </span>
                 ))}
               </div>
-              <span className="text-sm text-gray-200">موثوق من قبل 2000+ طالب</span>
+              
             </div>
           </div>
         </div>

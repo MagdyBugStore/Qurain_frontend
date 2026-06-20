@@ -9,8 +9,8 @@ export default function SettingsPage() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-2xl font-bold mb-4 text-text-main">الإعدادات</h1>
-        <p className="text-text-secondary">
-          صفحة إعدادات مبدئية (Placeholder). يمكن تطويرها لاحقاً لإدارة تفضيلات الحساب، الإشعارات، وطريقة الدفع.
+        <p className="text-text-secondary text-lg">
+          قريبًا... صفحة الإعدادات ستكون متاحة بإذن الله.
         </p>
       </main>
     </>
