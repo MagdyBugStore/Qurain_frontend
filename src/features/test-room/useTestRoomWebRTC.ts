@@ -161,7 +161,15 @@ export function useTestRoomWebRTC(roomId: string) {
     if (joinedRef.current) return;
     log('Page loaded');
 
-    // 1. Get local media
+    // 1. Get local media — requires a secure context (HTTPS or localhost)
+    if (!navigator.mediaDevices?.getUserMedia) {
+      log(
+        'Camera/mic unavailable: browser requires HTTPS (or localhost) to access media devices. ' +
+        'This page is served over plain HTTP — set up HTTPS on your server.',
+        'error',
+      );
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
       localStreamRef.current = stream;
