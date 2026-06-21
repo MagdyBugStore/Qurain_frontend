@@ -22,6 +22,8 @@ export type PeerEntry = {
 
 type PeerInternal = PeerEntry & { pc: RTCPeerConnection };
 
+type CandidateCounts = { host: number; srflx: number; relay: number; prflx: number };
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const viteEnv: any = (import.meta as any).env || {};
 const TURN_SECRET = viteEnv.VITE_TURN_SECRET || '';
@@ -44,6 +46,51 @@ const ICE_SERVERS: RTCIceServer[] = [
 
 let _logId = 0;
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function candidateTypeLabel(type: string | null | undefined): string {
+  switch (type) {
+    case 'host':  return 'host (direct LAN)';
+    case 'srflx': return 'srflx (STUN/public IP)';
+    case 'relay': return 'relay (TURN)';
+    case 'prflx': return 'prflx (peer-reflexive)';
+    default:      return type ?? 'unknown';
+  }
+}
+
+function parseCandidateType(sdpLine: string): string {
+  const m = /\btyp\s+(\w+)/.exec(sdpLine);
+  return m ? m[1] : 'unknown';
+}
+
+async function detectConnectionPath(pc: RTCPeerConnection): Promise<string> {
+  try {
+    const stats = await pc.getStats();
+    for (const report of stats.values()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const r = report as any;
+      if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded') {
+        const local = stats.get(r.localCandidateId) as any;
+        const remote = stats.get(r.remoteCandidateId) as any;
+        const lt = local?.candidateType ?? '?';
+        const rt = remote?.candidateType ?? '?';
+        if (lt === 'relay' || rt === 'relay') {
+          return `relay / TURN  (local: ${lt} | remote: ${rt})`;
+        }
+        if (lt === 'srflx' || rt === 'srflx') {
+          return `STUN / public IP  (local: ${lt} | remote: ${rt})`;
+        }
+        return `direct / LAN  (local: ${lt} | remote: ${rt})`;
+      }
+    }
+  } catch {
+    // stats not available yet — non-fatal
+  }
+  return 'unknown';
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 export function useTestRoomWebRTC(roomId: string) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -54,6 +101,7 @@ export function useTestRoomWebRTC(roomId: string) {
 
   const localStreamRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, PeerInternal>>(new Map());
+  const candidateCountsRef = useRef<Map<string, CandidateCounts>>(new Map());
   const joinedRef = useRef(false);
 
   // ─── Logging ──────────────────────────────────────────────────────────────
@@ -65,14 +113,12 @@ export function useTestRoomWebRTC(roomId: string) {
       message,
     };
     console.log(`[TestRoom] [${level.toUpperCase()}] ${message}`);
-    setLogs((prev) => [...prev.slice(-199), entry]);
+    setLogs((prev) => [...prev.slice(-299), entry]);
   }, []);
 
   // ─── Sync peer list to state ───────────────────────────────────────────────
   const syncPeers = useCallback(() => {
-    setPeers(
-      [...peersRef.current.values()].map(({ pc: _pc, ...rest }) => rest),
-    );
+    setPeers([...peersRef.current.values()].map(({ pc: _pc, ...rest }) => rest));
   }, []);
 
   const updatePeerState = useCallback((peerId: string, pc: RTCPeerConnection) => {
@@ -94,39 +140,108 @@ export function useTestRoomWebRTC(roomId: string) {
     const remoteStream = new MediaStream();
     const short = peerId.slice(0, 8);
 
+    const hasTurn = TURN_SECRET.length > 0;
+    log(`Peer ${short} — setting up connection  [TURN ${hasTurn ? 'enabled ✓' : 'disabled ✗'}]`);
+
+    // Init candidate counter for this peer
+    candidateCountsRef.current.set(peerId, { host: 0, srflx: 0, relay: 0, prflx: 0 });
+
+    // ── ICE candidate generated (outgoing) ───────────────────────────────────
     pc.onicecandidate = (e) => {
       if (!e.candidate) return;
-      log(`ICE candidate generated for peer ${short}`);
+      const type = e.candidate.type ?? parseCandidateType(e.candidate.candidate);
+      const counts = candidateCountsRef.current.get(peerId)!;
+      if (type in counts) counts[type as keyof CandidateCounts]++;
+      const label = candidateTypeLabel(type);
+      log(`  → ICE candidate sent to ${short}: ${label}`);
       getTestSocket().emit('test-room:ice', { to: peerId, candidate: e.candidate });
     };
 
+    // ── ICE gathering ─────────────────────────────────────────────────────────
     pc.onicegatheringstatechange = () => {
-      log(`ICE gathering state [${short}]: ${pc.iceGatheringState}`);
-    };
-
-    pc.ontrack = (e) => {
-      remoteStream.addTrack(e.track);
-      log(`Remote stream attached from peer ${short}`, 'success');
-      syncPeers();
-    };
-
-    pc.onconnectionstatechange = () => {
-      log(`Connection state changed [${short}]: ${pc.connectionState}`);
-      updatePeerState(peerId, pc);
-      if (pc.connectionState === 'connected') {
-        log(`Peer connected: ${short}`, 'success');
-      } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-        log(`Peer disconnected: ${short}`, 'warn');
+      if (pc.iceGatheringState === 'gathering') {
+        log(`ICE gathering started for peer ${short}`);
+      } else if (pc.iceGatheringState === 'complete') {
+        const counts = candidateCountsRef.current.get(peerId) ?? { host: 0, srflx: 0, relay: 0, prflx: 0 };
+        const total = counts.host + counts.srflx + counts.relay + counts.prflx;
+        const turnLine = counts.relay > 0
+          ? `${counts.relay} relay (TURN) ✓`
+          : 'no TURN candidates ✗';
+        log(
+          `ICE gathering complete for peer ${short} — ` +
+          `${total} candidates: ${counts.host} host | ${counts.srflx} srflx | ${turnLine}`,
+          counts.relay > 0 ? 'success' : 'warn',
+        );
       }
     };
 
-    pc.oniceconnectionstatechange = () => {
-      log(`ICE connection state changed [${short}]: ${pc.iceConnectionState}`);
-      updatePeerState(peerId, pc);
+    // ── Remote track received ─────────────────────────────────────────────────
+    pc.ontrack = (e) => {
+      remoteStream.addTrack(e.track);
+      log(`Remote ${e.track.kind} track received from peer ${short}`, 'success');
+      syncPeers();
     };
 
+    // ── Connection state ──────────────────────────────────────────────────────
+    pc.onconnectionstatechange = () => {
+      updatePeerState(peerId, pc);
+      switch (pc.connectionState) {
+        case 'connecting':
+          log(`Connecting to peer ${short}…`);
+          break;
+        case 'connected':
+          detectConnectionPath(pc).then((path) => {
+            const isRelay = path.startsWith('relay');
+            log(
+              `Connected to peer ${short} — via ${path}`,
+              'success',
+            );
+            if (!isRelay) {
+              log(`  ℹ Direct path in use — TURN was not needed for ${short}`);
+            } else {
+              log(`  ✓ TURN relay is active for ${short} — mobile/symmetric NAT traversed`);
+            }
+          });
+          break;
+        case 'disconnected':
+          log(`Peer ${short} — connection dropped (network change or timeout)`, 'warn');
+          break;
+        case 'failed':
+          log(`Connection failed for peer ${short} — no viable ICE path found`, 'error');
+          if (!hasTurn) {
+            log(`  ✗ TURN is not configured — peers behind symmetric NAT will always fail`, 'error');
+          }
+          break;
+        case 'closed':
+          log(`Connection closed for peer ${short}`);
+          break;
+      }
+    };
+
+    // ── ICE connection state ──────────────────────────────────────────────────
+    pc.oniceconnectionstatechange = () => {
+      updatePeerState(peerId, pc);
+      switch (pc.iceConnectionState) {
+        case 'checking':
+          log(`ICE checking: testing candidate pairs for peer ${short}`);
+          break;
+        case 'connected':
+          log(`ICE connected for peer ${short}`);
+          break;
+        case 'completed':
+          log(`ICE completed for peer ${short} — best path locked in`, 'success');
+          break;
+        case 'disconnected':
+          log(`ICE disconnected for peer ${short} — may recover`, 'warn');
+          break;
+        case 'failed':
+          log(`ICE failed for peer ${short} — all candidate pairs exhausted`, 'error');
+          break;
+      }
+    };
+
+    // ── Signaling state ───────────────────────────────────────────────────────
     pc.onsignalingstatechange = () => {
-      log(`Signaling state [${short}]: ${pc.signalingState}`);
       updatePeerState(peerId, pc);
     };
 
@@ -149,14 +264,14 @@ export function useTestRoomWebRTC(roomId: string) {
     syncPeers();
 
     if (isInitiator) {
-      log(`Creating offer for peer ${short}`);
+      log(`Creating offer for peer ${short} (we are the initiator)`);
       pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
         .then((offer) => pc.setLocalDescription(offer).then(() => offer))
         .then((offer) => {
           getTestSocket().emit('test-room:offer', { to: peerId, sdp: offer });
           log(`Offer sent to peer ${short}`);
         })
-        .catch((e) => log(`Error creating offer for ${short}: ${e.message}`, 'error'));
+        .catch((e) => log(`Error creating offer for peer ${short}: ${(e as Error).message}`, 'error'));
     }
 
     return entry;
@@ -168,20 +283,26 @@ export function useTestRoomWebRTC(roomId: string) {
     if (!entry) return;
     entry.pc.close();
     peersRef.current.delete(peerId);
-    log(`Peer disconnected: ${peerId.slice(0, 8)}`, 'warn');
+    candidateCountsRef.current.delete(peerId);
+    log(`Peer ${peerId.slice(0, 8)} left — connection closed`, 'warn');
     syncPeers();
   }, [log, syncPeers]);
 
   // ─── Main join ────────────────────────────────────────────────────────────
   const join = useCallback(async () => {
     if (joinedRef.current) return;
-    log('Page loaded');
 
-    // 1. Get local media — requires a secure context (HTTPS or localhost)
+    // 1. Log TURN config status
+    if (TURN_SECRET) {
+      log('TURN server configured ✓ — relay candidates will be included');
+    } else {
+      log('TURN server NOT configured ✗ — connections behind symmetric NAT will fail', 'warn');
+    }
+
+    // 2. Get local media
     if (!navigator.mediaDevices?.getUserMedia) {
       log(
-        'Camera/mic unavailable: browser requires HTTPS (or localhost) to access media devices. ' +
-        'This page is served over plain HTTP — set up HTTPS on your server.',
+        'Camera/mic unavailable — browser requires HTTPS (or localhost) for media access',
         'error',
       );
       return;
@@ -192,106 +313,108 @@ export function useTestRoomWebRTC(roomId: string) {
       setLocalStreamReady(true);
       log('Local media acquired (camera + microphone)');
     } catch (e) {
-      log(`Error acquiring media: ${(e as Error).message}`, 'error');
+      log(`Failed to acquire camera/mic: ${(e as Error).message}`, 'error');
       return;
     }
 
-    // 2. Connect socket
+    // 3. Connect socket
     const socket = getTestSocket();
 
     socket.on('connect', () => {
-      log(`Socket connected: ${socket.id}`, 'success');
+      log(`Signaling socket connected (id: ${socket.id})`, 'success');
       setIsConnected(true);
-
-      // 3. Join the test room
       socket.emit('test-room:join', { roomId });
       log(`Joined room: ${roomId}`);
     });
 
     socket.on('disconnect', () => {
-      log('Socket disconnected', 'warn');
+      log('Signaling socket disconnected', 'warn');
       setIsConnected(false);
     });
 
     socket.on('connect_error', (e) => {
-      log(`Socket connection error: ${e.message}`, 'error');
+      log(`Signaling socket error: ${e.message}`, 'error');
     });
 
-    // 4. Receive existing participants — we initiate offers to each
+    // 4. Existing participants — we send offers
     socket.on('test-room:participants', ({ participants }: { participants: string[] }) => {
-      log(`Participants received: [${participants.map((p) => p.slice(0, 8)).join(', ')}] (${participants.length} peer${participants.length !== 1 ? 's' : ''})`);
-      participants.forEach((peerId) => {
-        log(`Creating offer for existing peer ${peerId.slice(0, 8)}`);
-        createPeer(peerId, true);
-      });
+      if (participants.length === 0) {
+        log('Room is empty — waiting for others to join');
+      } else {
+        log(`Room has ${participants.length} existing peer${participants.length > 1 ? 's' : ''}: [${participants.map((p) => p.slice(0, 8)).join(', ')}]`);
+        participants.forEach((peerId) => createPeer(peerId, true));
+      }
     });
 
-    // 5. New peer joined — they will initiate an offer to us
+    // 5. New peer joined — they will send us an offer
     socket.on('test-room:peer-joined', ({ peerId }: { peerId: string }) => {
-      log(`New peer joined: ${peerId.slice(0, 8)}`);
+      log(`New peer joined: ${peerId.slice(0, 8)} — waiting for their offer`);
       createPeer(peerId, false);
     });
 
-    // 6. Receive offer from a peer
+    // 6. Receive offer
     socket.on('test-room:offer', async ({ from, sdp }: { from: string; sdp: RTCSessionDescriptionInit }) => {
-      log(`Received offer from peer ${from.slice(0, 8)}`);
+      const short = from.slice(0, 8);
+      log(`Offer received from peer ${short} — starting answer`);
       let entry = peersRef.current.get(from);
-      if (!entry) {
-        entry = createPeer(from, false);
-      }
+      if (!entry) entry = createPeer(from, false);
       const { pc } = entry;
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         socket.emit('test-room:answer', { to: from, sdp: answer });
-        log(`Sending answer to peer ${from.slice(0, 8)}`);
+        log(`Answer sent to peer ${short}`);
       } catch (e) {
-        log(`Error handling offer from ${from.slice(0, 8)}: ${(e as Error).message}`, 'error');
+        log(`Error answering offer from peer ${short}: ${(e as Error).message}`, 'error');
       }
     });
 
-    // 7. Receive answer to our offer
+    // 7. Receive answer
     socket.on('test-room:answer', async ({ from, sdp }: { from: string; sdp: RTCSessionDescriptionInit }) => {
-      log(`Received answer from peer ${from.slice(0, 8)}`);
+      const short = from.slice(0, 8);
+      log(`Answer received from peer ${short}`);
       const entry = peersRef.current.get(from);
       if (!entry) {
-        log(`No peer entry for ${from.slice(0, 8)} when answer arrived`, 'warn');
+        log(`No peer entry for ${short} when answer arrived`, 'warn');
         return;
       }
       const { pc } = entry;
       if (pc.signalingState !== 'have-local-offer') {
-        log(`Ignoring stale answer from ${from.slice(0, 8)} (signalingState=${pc.signalingState})`, 'warn');
+        log(`Ignoring stale answer from peer ${short} (signaling: ${pc.signalingState})`, 'warn');
         return;
       }
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        log(`Signaling complete with peer ${short} — ICE negotiation in progress`);
       } catch (e) {
-        log(`Error handling answer from ${from.slice(0, 8)}: ${(e as Error).message}`, 'error');
+        log(`Error applying answer from peer ${short}: ${(e as Error).message}`, 'error');
       }
     });
 
     // 8. Receive ICE candidate
     socket.on('test-room:ice', async ({ from, candidate }: { from: string; candidate: RTCIceCandidateInit }) => {
-      log(`ICE candidate received from peer ${from.slice(0, 8)}`);
+      const short = from.slice(0, 8);
+      const type = parseCandidateType(candidate.candidate ?? '');
+      const label = candidateTypeLabel(type);
+      log(`  ← ICE candidate from ${short}: ${label}`);
       const entry = peersRef.current.get(from);
       if (!entry) return;
       try {
         await entry.pc.addIceCandidate(new RTCIceCandidate(candidate));
       } catch {
-        // occasional duplicate candidate — safe to ignore
+        // occasional duplicate — safe to ignore
       }
     });
 
     // 9. Peer left
     socket.on('test-room:peer-left', ({ peerId }: { peerId: string }) => {
-      log(`Peer left: ${peerId.slice(0, 8)}`, 'warn');
+      log(`Peer ${peerId.slice(0, 8)} disconnected from room`, 'warn');
       removePeer(peerId);
     });
 
     if (socket.connected) {
-      // Socket was already connected (re-join after hot reload etc.)
-      log(`Socket already connected: ${socket.id}`, 'success');
+      log(`Signaling socket already connected (id: ${socket.id})`, 'success');
       setIsConnected(true);
       socket.emit('test-room:join', { roomId });
       log(`Joined room: ${roomId}`);
@@ -308,6 +431,7 @@ export function useTestRoomWebRTC(roomId: string) {
   const leave = useCallback(() => {
     peersRef.current.forEach((entry) => entry.pc.close());
     peersRef.current.clear();
+    candidateCountsRef.current.clear();
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     disconnectTestSocket();
@@ -315,7 +439,7 @@ export function useTestRoomWebRTC(roomId: string) {
     setLocalStreamReady(false);
     joinedRef.current = false;
     setPeers([]);
-    log('Left room, all connections closed');
+    log('Left room — all connections closed');
   }, [log]);
 
   // ─── Media toggles ────────────────────────────────────────────────────────
