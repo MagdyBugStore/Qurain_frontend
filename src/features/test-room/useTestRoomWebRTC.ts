@@ -22,8 +22,24 @@ export type PeerEntry = {
 
 type PeerInternal = PeerEntry & { pc: RTCPeerConnection };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const viteEnv: any = (import.meta as any).env || {};
+const TURN_SECRET = viteEnv.VITE_TURN_SECRET || '';
+
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+  ...(TURN_SECRET
+    ? [
+        {
+          urls: [
+            'turn:209.38.135.65:3478?transport=udp',
+            'turn:209.38.135.65:3478?transport=tcp',
+          ],
+          username: 'qurain',
+          credential: TURN_SECRET,
+        },
+      ]
+    : []),
 ];
 
 let _logId = 0;
