@@ -22,7 +22,7 @@ export function getTestSocket(): Socket {
     testSocket.disconnect();
   }
   testSocket = io(getSocketUrl(), {
-    transports: ['websocket'],
+    transports: ['polling', 'websocket'],
     // No auth — test room is public
   });
   return testSocket;
