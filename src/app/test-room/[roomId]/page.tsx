@@ -31,7 +31,7 @@ function VideoTile({
     : 'bg-yellow-500';
 
   return (
-    <div className="relative rounded-xl overflow-hidden bg-gray-900 border border-white/10 aspect-video">
+    <div className="relative rounded-xl overflow-hidden bg-gray-900 border border-white/10 aspect-video w-full">
       <video ref={ref} autoPlay playsInline muted={muted} className="w-full h-full object-cover" />
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-full text-xs text-white">
         <span className={`size-2 rounded-full ${connColor}`} />
@@ -68,7 +68,7 @@ function LogPanel({ logs, onClear }: { logs: LogEntry[]; onClear: () => void }) 
     <div className="flex flex-col h-full bg-gray-950 rounded-xl border border-white/10 overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 shrink-0">
         <span className="text-xs font-mono text-gray-400 font-semibold">Debug Console</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -86,14 +86,14 @@ function LogPanel({ logs, onClear }: { logs: LogEntry[]; onClear: () => void }) 
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-2 font-mono text-[11px] space-y-0.5">
+      <div className="flex-1 overflow-y-auto p-2 font-mono text-[11px] space-y-0.5 overscroll-contain">
         {logs.length === 0 && (
           <div className="text-gray-600 italic p-2">No logs yet…</div>
         )}
         {logs.map((entry) => (
           <div key={entry.id} className={`flex gap-2 ${levelColor[entry.level]}`}>
             <span className="text-gray-600 shrink-0">{entry.time}</span>
-            <span>[TestRoom]</span>
+            <span className="shrink-0">[TestRoom]</span>
             <span className="break-all">{entry.message}</span>
           </div>
         ))}
@@ -125,9 +125,8 @@ export default function TestRoomPage() {
 
   const [displayLogs, setDisplayLogs] = useState<LogEntry[]>([]);
   const [hasJoined, setHasJoined] = useState(false);
-  const [showLogs, setShowLogs] = useState(true);
+  const [showLogs, setShowLogs] = useState(false);
 
-  // Mirror hook logs into local state (allows clear)
   useEffect(() => {
     setDisplayLogs(logs);
   }, [logs]);
@@ -142,60 +141,78 @@ export default function TestRoomPage() {
     navigate('/');
   };
 
+  const totalParticipants = peers.length + (localStreamReady ? 1 : 0);
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col" dir="ltr">
-      {/* Header */}
-      <header className="border-b border-white/10 px-4 py-3 flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-2">
+    <div className="h-screen max-h-screen bg-gray-950 text-white flex flex-col overflow-hidden" dir="ltr">
+
+      {/* ── Header ── */}
+      <header className="border-b border-white/10 px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+        {/* Status */}
+        <div className="flex items-center gap-2 shrink-0">
           <span className={`size-2.5 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-600'}`} />
-          <span className="text-sm font-semibold text-white">WebRTC Test Room</span>
+          <span className="text-sm font-semibold text-white hidden sm:inline">WebRTC Test Room</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-sm font-mono">
-          <span className="text-gray-400">room:</span>
-          <span className="text-green-400">{effectiveRoomId}</span>
+
+        {/* Room badge */}
+        <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs font-mono max-w-[140px] sm:max-w-none overflow-hidden">
+          <span className="text-gray-400 hidden sm:inline">room:</span>
+          <span className="text-green-400 truncate">{effectiveRoomId}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-sm text-gray-400">
-          <span className="text-gray-600">participants:</span>
-          <span className="text-white font-semibold">{peers.length + (localStreamReady ? 1 : 0)}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-sm text-gray-400">
-          <span className="text-gray-600">socket:</span>
-          <span className={isConnected ? 'text-green-400' : 'text-gray-600'}>
-            {isConnected ? 'connected' : 'disconnected'}
+
+        {/* Stats — hidden on small screens */}
+        <div className="hidden md:flex items-center gap-3 text-xs text-gray-400">
+          <span>
+            <span className="text-gray-600">peers: </span>
+            <span className="text-white font-semibold">{totalParticipants}</span>
+          </span>
+          <span>
+            <span className="text-gray-600">socket: </span>
+            <span className={isConnected ? 'text-green-400' : 'text-gray-500'}>
+              {isConnected ? 'connected' : 'disconnected'}
+            </span>
           </span>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Actions */}
+        <div className="ml-auto flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowLogs((v) => !v)}
-            className="px-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
+            className={`px-2.5 sm:px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+              showLogs
+                ? 'bg-indigo-600 border-indigo-500 text-white'
+                : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+            }`}
           >
-            {showLogs ? 'Hide Logs' : 'Show Logs'}
+            <span className="hidden sm:inline">{showLogs ? 'Hide' : 'Show'} </span>Logs
           </button>
           <a
             href={window.location.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
+            className="px-2.5 sm:px-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors text-gray-300"
           >
-            Open in new tab ↗
+            <span className="hidden sm:inline">New tab </span>↗
           </a>
         </div>
       </header>
 
-      {/* Body */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* ── Body ── */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+
         {/* Videos area */}
-        <div className="flex-1 flex flex-col p-4 gap-4 overflow-y-auto min-w-0">
+        <div className="flex-1 min-h-0 flex flex-col p-3 sm:p-4 gap-3 overflow-y-auto">
+
           {/* Join prompt */}
           {!hasJoined && (
-            <div className="flex flex-col items-center justify-center h-full gap-6">
-              <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold">WebRTC Debug Room</h1>
+            <div className="flex flex-col items-center justify-center h-full gap-6 py-8">
+              <div className="text-center space-y-2 px-4">
+                <h1 className="text-xl sm:text-2xl font-bold">WebRTC Debug Room</h1>
                 <p className="text-gray-400 text-sm max-w-md">
-                  Open this URL in multiple browser tabs or windows. All users who open the same URL will
-                  automatically connect to each other via WebRTC.
+                  Open this URL in multiple browser tabs or devices. Everyone who joins the same room
+                  will connect to each other via WebRTC.
                 </p>
-                <p className="text-gray-500 text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-3 py-2 mt-2 inline-block">
+                <p className="text-gray-500 text-xs font-mono bg-white/5 border border-white/10 rounded-lg px-3 py-2 mt-2 break-all">
                   {window.location.href}
                 </p>
               </div>
@@ -222,14 +239,7 @@ export default function TestRoomPage() {
                     : 'grid-cols-2 sm:grid-cols-3'
                 }`}
               >
-                {/* Local video */}
-                <VideoTile
-                  stream={localStream.current}
-                  label="You (local)"
-                  muted
-                />
-
-                {/* Remote peers */}
+                <VideoTile stream={localStream.current} label="You (local)" muted />
                 {peers.map((peer) => (
                   <VideoTile
                     key={peer.peerId}
@@ -241,26 +251,31 @@ export default function TestRoomPage() {
               </div>
 
               {peers.length === 0 && (
-                <div className="text-center py-6 text-gray-500 text-sm">
-                  Waiting for others to join… Share the URL above to invite participants.
-                </div>
+                <p className="text-center py-4 text-gray-500 text-sm">
+                  Waiting for others to join… Share the URL above.
+                </p>
               )}
             </>
           )}
         </div>
 
-        {/* Log panel */}
+        {/* ── Log panel ── */}
         {showLogs && (
-          <div className="w-80 xl:w-96 shrink-0 border-l border-white/10 p-3 flex flex-col overflow-hidden">
-            <LogPanel
-              logs={displayLogs}
-              onClear={() => setDisplayLogs([])}
-            />
+          <div
+            className="
+              shrink-0 flex flex-col overflow-hidden
+              /* Mobile: fixed-height drawer above controls */
+              h-52 sm:h-64 border-t border-white/10 p-3
+              /* Desktop: full-height side panel */
+              lg:h-auto lg:w-80 xl:lg:w-96 lg:border-t-0 lg:border-l
+            "
+          >
+            <LogPanel logs={displayLogs} onClear={() => setDisplayLogs([])} />
           </div>
         )}
       </div>
 
-      {/* Controls bar */}
+      {/* ── Controls bar ── */}
       {hasJoined && (
         <div className="border-t border-white/10 px-4 py-3 flex items-center justify-center gap-3 shrink-0">
           <button
